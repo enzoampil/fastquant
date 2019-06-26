@@ -11,6 +11,7 @@ from datetime import datetime
 import pandas as pd
 from string import digits
 import lxml.html as LH
+from bs4 import BeautifulSoup
 
 
 stock_table = pd.DataFrame(
@@ -103,7 +104,12 @@ def get_pse_data(symbol, start_date, end_date, stock_table=stock_table, disclosu
         return df, disclosures
     return df
 
-def get_company_disclosures(symbol, from_date, to_date):
+def get_company_disclosures(symbol, from_date='06-26-2017', to_date='06-26-2019'):
+    '''
+    symbol str - Ticker of the pse stock of choice
+    from_date date str %m-%d-%Y - Beginning date of the disclosure data pull
+    to_date date str %m-%d-%Y - Ending date of the disclosure data pull
+    '''
     cookies = {
         'BIGipServerPOOL_EDGE': '1427584378.20480.0000',
         'JSESSIONID': 'oAO1PNOZzGBoxIqtxy-32mVx.server-ep',
@@ -130,9 +136,26 @@ def get_company_disclosures(symbol, from_date, to_date):
     }
     
     response = requests.post('http://edge.pse.com.ph/announcements/search.ax', headers=headers, cookies=cookies, data=data)
-    return response
+    html = response.text
+    parsed_html = BeautifulSoup(html)
+    table = parsed_html.find('table', {'class': 'list'})
+    table_rows = table.find_all('tr')
+    l = []
+    for tr in table_rows:
+        td = tr.find_all('td')
+        row = [tr.text for tr in td]
+        l.append(row)
+        
+    columns = [el.text for el in table.find_all('th')]
+    
+    df = pd.DataFrame(l, columns=columns)
+    # Filter to rows where not all columns are null
+    df = df[df.isna().mean(axis=1) < 1]
+    df['Announce Date and Time'] = pd.to_datetime(df['Announce Date and Time'])
+    return df
 
 if __name__ == '__main__':
+    # Simple test
     SYMBOL = 'JFC'
     DATE_START = '2010-01-01'
     DATE_END = '2019-01-01'
@@ -142,3 +165,8 @@ if __name__ == '__main__':
     dfe = df_dict['E']
     print(dfd.head())
     print(dfe.head())
+    pse = get_pse_data(SYMBOL, DATE_START, DATE_END)
+    print(pse.head())
+    df_edge = get_company_disclosures('JFC')
+    print(df_edge.head())
+    print('All tests successful!')
