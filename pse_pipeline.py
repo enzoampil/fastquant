@@ -137,7 +137,8 @@ def get_company_disclosures(symbol, from_date='06-26-2017', to_date='06-26-2019'
     
     response = requests.post('http://edge.pse.com.ph/announcements/search.ax', headers=headers, cookies=cookies, data=data)
     html = response.text
-    parsed_html = BeautifulSoup(html)
+    # Indicating the parser (e.g.  lxml) removes the bs warning
+    parsed_html = BeautifulSoup(html, "lxml")
     table = parsed_html.find('table', {'class': 'list'})
     table_rows = table.find_all('tr')
     l = []
