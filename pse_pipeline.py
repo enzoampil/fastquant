@@ -12,6 +12,7 @@ import pandas as pd
 from string import digits
 import lxml.html as LH
 from bs4 import BeautifulSoup
+import tweepy
 
 
 stock_table = pd.DataFrame(
@@ -155,6 +156,20 @@ def get_company_disclosures(symbol, from_date='06-26-2017', to_date='06-26-2019'
     df['Announce Date and Time'] = pd.to_datetime(df['Announce Date and Time'])
     return df
 
+def tweepy_api(consumer_key, consumer_secret, access_token, access_secret):
+    '''
+    Returns authenticated tweepy.API object
+    
+    Sample methods:
+        user_timeline: returns recent tweets from a specified twitter user
+        - screen_name: username of account of interest
+        - count: number of most recent tweets to return
+    '''
+    auth = tweepy.OAuthHandler(consumer_key, consumer_secret)
+    auth.set_access_token(access_token, access_secret)
+    api = tweepy.API(auth)
+    return api
+    
 if __name__ == '__main__':
     # Simple test
     SYMBOL = 'JFC'
