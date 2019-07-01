@@ -38,6 +38,17 @@ for p in range(1,7):
     stock_table = stock_table.append(page_df)
     stock_table.to_csv('stock_table.csv', index=False)
     
+PSE_TWITTER_ACCOUNTS = [
+        'phstockexchange',
+        'colfinancial',
+        'firstmetrosec',
+        'BPItrade',
+        'Philstocks_',
+        'itradeph',
+        'UTradePH',
+        'wealthsec'
+        ]
+    
 def date_to_epoch(date):
     return int(datetime.strptime(date, '%Y-%m-%d').timestamp())
 
@@ -171,7 +182,7 @@ def tweepy_api(consumer_key, consumer_secret, access_token, access_secret):
     return api
     
 if __name__ == '__main__':
-    # Simple test
+    # Simple test for the functions above
     SYMBOL = 'JFC'
     DATE_START = '2010-01-01'
     DATE_END = '2019-01-01'
