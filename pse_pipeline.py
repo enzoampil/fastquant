@@ -6,6 +6,7 @@ Created on Tue Jun 25 19:48:03 2019
 @author: enzoampil
 """
 
+import os
 import requests
 from datetime import datetime
 import pandas as pd
@@ -13,30 +14,6 @@ from string import digits
 import lxml.html as LH
 from bs4 import BeautifulSoup
 import tweepy
-
-
-stock_table = pd.DataFrame(
-        columns=[
-        'Company Name', 'Stock Symbol', 'Sector', 'Subsector', 'Listing Date',
-        'company_id', 'security_id'
-        ]
-)
-
-for p in range(1,7):
-    print(str(p)+' out of '+str(7-1)+' pages', end='\r')
-
-    r = requests.post(url = 'http://edge.pse.com.ph/companyDirectory/search.ax', data = {'pageNo':p})
-    table = LH.fromstring(r.text)
-    page_df = (pd.concat([pd.read_html(r.text)[0], 
-               pd.DataFrame({'attr':table.xpath('//tr/td/a/@onclick')[::2]})], 
-              axis=1)
-     .assign(company_id = lambda x: x['attr'].apply(lambda s: s[s.index('(')+2:s.index(',')-1]))
-     .assign(security_id = lambda x: x['attr'].apply(lambda s: s[s.index(',')+2:s.index(')')-1]))
-     .drop(['attr'], axis=1)
-    )
-    
-    stock_table = stock_table.append(page_df)
-    stock_table.to_csv('stock_table.csv', index=False)
     
 PSE_TWITTER_ACCOUNTS = [
         'phstockexchange',
@@ -48,6 +25,34 @@ PSE_TWITTER_ACCOUNTS = [
         'UTradePH',
         'wealthsec'
         ]
+
+def get_stock_table(stock_table_fp='stock_table.csv'):
+    '''
+    Returns dataframe containing info about PSE listed stocks while also saving it
+    '''
+    stock_table = pd.DataFrame(
+            columns=[
+            'Company Name', 'Stock Symbol', 'Sector', 'Subsector', 'Listing Date',
+            'company_id', 'security_id'
+            ]
+    )
+    
+    for p in range(1,7):
+        print(str(p)+' out of '+str(7-1)+' pages', end='\r')
+    
+        r = requests.post(url = 'http://edge.pse.com.ph/companyDirectory/search.ax', data = {'pageNo':p})
+        table = LH.fromstring(r.text)
+        page_df = (pd.concat([pd.read_html(r.text)[0], 
+                   pd.DataFrame({'attr':table.xpath('//tr/td/a/@onclick')[::2]})], 
+                  axis=1)
+         .assign(company_id = lambda x: x['attr'].apply(lambda s: s[s.index('(')+2:s.index(',')-1]))
+         .assign(security_id = lambda x: x['attr'].apply(lambda s: s[s.index(',')+2:s.index(')')-1]))
+         .drop(['attr'], axis=1)
+        )
+        
+        stock_table = stock_table.append(page_df)
+        stock_table.to_csv(stock_table_fp, index=False)
+    return stock_table
     
 def date_to_epoch(date):
     return int(datetime.strptime(date, '%Y-%m-%d').timestamp())
@@ -101,10 +106,17 @@ def get_disclosures_df(symbol, from_date, to_date):
     disclosures_dfs = disclosures_json_to_df(disclosures)
     return disclosures_dfs
 
-def get_pse_data(symbol, start_date, end_date, stock_table=stock_table, disclosures=False):
+def get_pse_data(symbol, start_date, end_date, stock_table_fp='stock_table.csv', disclosures=False):
 
-    data = {'cmpy_id': stock_table['company_id'][stock_table['Stock Symbol'] == symbol].values[0], 
-            'security_id': stock_table['security_id'][stock_table['Stock Symbol'] == symbol].values[0], 
+    if os.path.isfile(stock_table_fp):
+        print('Stock table exists!')
+        print('Reading {} ...'.format(stock_table_fp))
+        stock_table = pd.read_csv(stock_table_fp)
+    else:
+        stock_table = get_stock_table(stock_table_fp=stock_table_fp)
+        
+    data = {'cmpy_id': int(stock_table['company_id'][stock_table['Stock Symbol'] == symbol].values[0]), 
+            'security_id': int(stock_table['security_id'][stock_table['Stock Symbol'] == symbol].values[0]), 
             'startDate': datetime.strptime(start_date, '%Y-%m-%d').strftime('%m-%d-%Y'), 
             'endDate': datetime.strptime(end_date, '%Y-%m-%d').strftime('%m-%d-%Y')}
 
