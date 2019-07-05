@@ -54,6 +54,18 @@ def get_stock_table(stock_table_fp='stock_table.csv'):
         stock_table.to_csv(stock_table_fp, index=False)
     return stock_table
     
+def fill_gaps(df):
+    """
+    Fills gaps of time series dataframe with NaN rows
+    """
+    idx = pd.period_range(df.index.min(), df.index.max(), freq='D')
+    #idx_forecast = pd.period_range(start_datetime, end_datetime, freq="H")
+    ts = pd.DataFrame({'empty':[0 for i in range(idx.shape[0])]}, index=idx)
+    ts = ts.to_timestamp()
+    df_filled = pd.concat([df, ts], axis=1)
+    del df_filled['empty']
+    return df_filled
+
 def date_to_epoch(date):
     return int(datetime.strptime(date, '%Y-%m-%d').timestamp())
 
@@ -131,9 +143,10 @@ def get_pse_data(symbol, start_date, end_date, stock_table_fp='stock_table.csv',
             'VALUE': 'value'
             }
     rename_list = ['dt', 'open', 'high', 'low', 'close', 'value']
-    df = df.rename(columns=rename_dict)[rename_list]
+    df = df.rename(columns=rename_dict)[rename_list].drop_duplicates()
     df = df.set_index('dt')
     df.index = pd.to_datetime(df.index)
+    
     if disclosures:
         disclosures = get_disclosures_df(symbol, start_date, end_date)
         return df, disclosures
