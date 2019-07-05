@@ -121,12 +121,33 @@ def get_pse_data(symbol, start_date, end_date, stock_table_fp='stock_table.csv',
             'endDate': datetime.strptime(end_date, '%Y-%m-%d').strftime('%m-%d-%Y')}
 
     r = requests.post(url = "http://edge.pse.com.ph/common/DisclosureCht.ax", json = data)
-    df = pd.DataFrame(r.json()['chartData']).set_index('CHART_DATE')
+    df = pd.DataFrame(r.json()['chartData'])
+    rename_dict = {
+            'CHART_DATE': 'dt',
+            'OPEN': 'open',
+            'HIGH': 'high',
+            'LOW': 'low',
+            'CLOSE': 'close',
+            'VALUE': 'value'
+            }
+    rename_list = ['dt', 'open', 'high', 'low', 'close', 'value']
+    df = df.rename(columns=rename_dict)[rename_list]
+    df = df.set_index('dt')
     df.index = pd.to_datetime(df.index)
     if disclosures:
         disclosures = get_disclosures_df(symbol, start_date, end_date)
         return df, disclosures
     return df
+
+def pse_data_to_csv(symbol, start_date, end_date, pse_dir='', stock_table_fp='stock_table.csv', disclosures=False):
+    pse = get_pse_data(symbol, start_date, end_date, stock_table_fp=stock_table_fp, disclosures=disclosures)
+    if isinstance(pse, pd.DataFrame):
+        pse.to_csv('{}{}_{}_{}_OHLCV.csv'.format(pse_dir, symbol, start_date, end_date))
+    else:
+        pse[0].to_csv('{}{}_{}_{}_OHLCV.csv'.format(pse_dir, symbol, start_date, end_date))
+        performance_dict = pse[1]
+        performance_dict['D'].to_csv('{}{}_{}_{}_D.csv'.format(pse_dir, symbol, start_date, end_date))
+        performance_dict['E'].to_csv('{}{}_{}_{}_E.csv'.format(pse_dir, symbol, start_date, end_date))
 
 def get_company_disclosures(symbol, from_date='06-26-2017', to_date='06-26-2019'):
     '''
@@ -208,4 +229,5 @@ if __name__ == '__main__':
     print(pse.head())
     df_edge = get_company_disclosures('JFC')
     print(df_edge.head())
+    pse_data_to_csv(SYMBOL, DATE_START, DATE_END, disclosures=True)
     print('All tests successful!')
