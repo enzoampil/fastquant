@@ -37,10 +37,22 @@ def get_stock_table(stock_table_fp='stock_table.csv'):
             ]
     )
     
+    data = {
+    'pageNo': '1',
+    'companyId': '',
+    'keyword': '',
+    'sortType': '',
+    'dateSortType': 'DESC',
+    'cmpySortType': 'ASC',
+    'symbolSortType': 'ASC',
+    'sector': 'ALL',
+    'subsector': 'ALL'
+    }
+
     for p in range(1,7):
         print(str(p)+' out of '+str(7-1)+' pages', end='\r')
-    
-        r = requests.post(url = 'http://edge.pse.com.ph/companyDirectory/search.ax', data = {'pageNo':p})
+        data['pageNo'] = str(p)
+        r = requests.post(url = 'https://edge.pse.com.ph/companyDirectory/search.ax', data = data)
         table = LH.fromstring(r.text)
         page_df = (pd.concat([pd.read_html(r.text)[0], 
                    pd.DataFrame({'attr':table.xpath('//tr/td/a/@onclick')[::2]})], 
@@ -51,7 +63,7 @@ def get_stock_table(stock_table_fp='stock_table.csv'):
         )
         
         stock_table = stock_table.append(page_df)
-        stock_table.to_csv(stock_table_fp, index=False)
+    stock_table.to_csv(stock_table_fp, index=False)
     return stock_table
     
 def fill_gaps(df):
@@ -132,7 +144,7 @@ def get_pse_data(symbol, start_date, end_date, stock_table_fp='stock_table.csv',
             'startDate': datetime.strptime(start_date, '%Y-%m-%d').strftime('%m-%d-%Y'), 
             'endDate': datetime.strptime(end_date, '%Y-%m-%d').strftime('%m-%d-%Y')}
 
-    r = requests.post(url = "http://edge.pse.com.ph/common/DisclosureCht.ax", json = data)
+    r = requests.post(url = "https://edge.pse.com.ph/common/DisclosureCht.ax", json = data)
     df = pd.DataFrame(r.json()['chartData'])
     rename_dict = {
             'CHART_DATE': 'dt',
@@ -174,13 +186,13 @@ def get_company_disclosures(symbol, from_date='06-26-2017', to_date='06-26-2019'
     }
     
     headers = {
-        'Origin': 'http://edge.pse.com.ph',
+        'Origin': 'https://edge.pse.com.ph',
         'Accept-Encoding': 'gzip, deflate',
         'Accept-Language': 'en-PH,en-US;q=0.9,en;q=0.8',
         'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36',
         'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
         'Accept': '*/*',
-        'Referer': 'http://edge.pse.com.ph/announcements/form.do',
+        'Referer': 'https://edge.pse.com.ph/announcements/form.do',
         'X-Requested-With': 'XMLHttpRequest',
         'Connection': 'keep-alive',
     }
@@ -193,7 +205,7 @@ def get_company_disclosures(symbol, from_date='06-26-2017', to_date='06-26-2019'
       'toDate': to_date
     }
     
-    response = requests.post('http://edge.pse.com.ph/announcements/search.ax', headers=headers, cookies=cookies, data=data)
+    response = requests.post('https://edge.pse.com.ph/announcements/search.ax', headers=headers, cookies=cookies, data=data)
     html = response.text
     # Indicating the parser (e.g.  lxml) removes the bs warning
     parsed_html = BeautifulSoup(html, "lxml")
