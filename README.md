@@ -1,6 +1,12 @@
 # pse-quant
 Framework for applying quantitative finance on PSE data with the goal of promoting data driven investments in the Philippines
 
+# Getting started
+```
+from pse_pipeline import get_pse_data
+df = get_pse_data("JFC", "2018-01-01", "2019-01-01")
+print(df.head())
+```
 # Setup
 ```
 git clone https://github.com/enzoampil/pse-quant.git
