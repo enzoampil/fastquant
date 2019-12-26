@@ -15,7 +15,10 @@ virtualenv env
 source env/bin/activate
 pip install -r requirements.txt
 ```
-
+# Run tests
+```
+pytest test_pse_pipeline.py
+```
 # Current features:
 ## Easy access to stock related data (OHLCV)
 1. Basic daily price features
