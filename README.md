@@ -1,4 +1,4 @@
-# pse-quant
+# psequant
 Framework for applying quantitative finance on PSE data with the goal of promoting data driven investments in the Philippines
 
 # Getting started
