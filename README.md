@@ -52,16 +52,21 @@ pytest test_pse_pipeline.py
     - Value
 2. Company disclosures (WIP)
 
+### Example notebooks for backtesting with different trading strategies
+1. Relative Strength Index (RSI)
+
 ## Future features
-### Processed text information with NLP
+### Processed text information with natural language processing (NLP)
 1. Disclosure reports summarized in structured tabular form
 2. Summary statistics from tweets
 3. Company related tweets (WIP)
 
 ### Easy to use API for back testing trading strategies
-1. Example scripts for backtesting on different companies with different trading strategies
-2. High level functions for simple backtesting
+1. High level functions for backtesting standard strading trategies
     - RSI
     - Support resistance
     - Bollinger bands
     - MACD
+2. Easy integration of custom trading strategies
+    - Combinations of standard trading strategies
+    - Application of trained machine learning and statistical models
