@@ -6,6 +6,14 @@ Framework for applying quantitative finance on PSE data with the goal of promoti
 from pse_pipeline import get_pse_data
 df = get_pse_data("JFC", "2018-01-01", "2019-01-01")
 print(df.head())
+
+#             open   high    low  close        value
+#dt                                                 
+#2018-01-03  253.4  256.8  253.0  255.4  190253754.0
+#2018-01-04  255.4  255.4  253.0  255.0  157152856.0
+#2018-01-05  255.6  257.4  255.0  255.0  242201952.0
+#2018-01-08  257.4  259.0  253.4  256.0  216069242.0
+#2018-01-09  256.0  258.0  255.0  255.8  250188588.0
 ```
 ## Setup
 ```
