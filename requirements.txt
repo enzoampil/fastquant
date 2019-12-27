@@ -1,4 +1,5 @@
 beautifulsoup4==4.8.2
+black==19.10b0
 bs4==0.0.1
 certifi==2019.11.28
 chardet==3.0.4
