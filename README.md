@@ -47,3 +47,7 @@ pytest test_pse_pipeline.py
 ### Easy to use API for back testing trading strategies
 1. Example scripts for backtesting on different companies with different trading strategies
 2. High level functions for simple backtesting
+    - RSI
+    - Support resistance
+    - Bollinger bands
+    - MACD
