@@ -72,6 +72,7 @@ pytest test_pse_pipeline.py
 
 ### Example notebooks for backtesting with different trading strategies
 1. Relative Strength Index (RSI)
+2. Min Max Support Resistance
 
 ## Future features
 ### Processed text information with natural language processing (NLP)
