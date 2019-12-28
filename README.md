@@ -48,7 +48,7 @@ python examples/jfc_rsi.py
 ```
 ![](examples/jfc_rsi.png)
 
-### Min Max Support Resistance Strategy (14 day window)
+### Min Max Support Resistance Strategy (30 day window)
 Daily Jollibee prices from 2017-01-01 to 2019-01-01
 ```
 python examples/jfc_support_resistance.py
