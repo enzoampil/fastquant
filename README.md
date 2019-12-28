@@ -81,7 +81,7 @@ pytest test_pse_pipeline.py
 3. Company related tweets (WIP)
 
 ### Easy to use API for back testing trading strategies
-1. High level functions for backtesting standard strading trategies
+1. High level functions and classes for backtesting standard strading trategies w/ PH context set as default
     - RSI
     - Support resistance
     - Bollinger bands
