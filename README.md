@@ -24,7 +24,7 @@ source env/bin/activate
 pip install -r requirements.txt
 ```
 
-## Getting started
+## Get stock data from PSE
 ```
 from pse_pipeline import get_pse_data
 df = get_pse_data("JFC", "2018-01-01", "2019-01-01")
