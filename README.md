@@ -39,16 +39,20 @@ print(df.head())
 #2018-01-09  256.0  258.0  255.0  255.8  250188588.0
 ```
 
-## Backtesting examples
+## Backtesting examples (using [backtrader](https://github.com/backtrader/backtrader))
 
 **Relative Strength Index Strategy (14 days)** with daily Jollibee prices from 2017-01-01 to 2019-01-01
 ```
 python examples/jfc_rsi.py
 ```
+**RSI Performance Chart**
+![](examples/jfc_rsi.png)
 **Min Max Support Resistance Strategy (14 days)** with daily Jollibee prices from 2017-01-01 to 2019-01-01
 ```
 python examples/jfc_support_resistance.py
 ```
+**Min Max Support Resistance Strategy Performance Chart**
+![](examples/jfc_support_resistance.png)
 ## Run tests
 ```
 pytest test_pse_pipeline.py
