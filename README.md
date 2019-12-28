@@ -41,14 +41,14 @@ print(df.head())
 
 ## Backtesting examples (using [backtrader](https://github.com/backtrader/backtrader))
 
-### Relative Strength Index Strategy (14 days)
+### Relative Strength Index Strategy (14 day window)
 Daily Jollibee prices from 2017-01-01 to 2019-01-01
 ```
 python examples/jfc_rsi.py
 ```
 ![](examples/jfc_rsi.png)
 
-### Min Max Support Resistance Strategy (14 days)
+### Min Max Support Resistance Strategy (14 day window)
 Daily Jollibee prices from 2017-01-01 to 2019-01-01
 ```
 python examples/jfc_support_resistance.py
