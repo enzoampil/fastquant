@@ -15,6 +15,15 @@ To  promote data driven investments in the Philippines
 
 2. To make it easy to backtest trading strategies
 
+## Setup
+```
+git clone https://github.com/enzoampil/psequant.git
+cd psequant
+virtualenv env
+source env/bin/activate
+pip install -r requirements.txt
+```
+
 ## Getting started
 ```
 from pse_pipeline import get_pse_data
@@ -39,14 +48,6 @@ python examples/jfc_rsi.py
 **Min Max Support Resistance Strategy (14 days)** with daily Jollibee prices from 2017-01-01 to 2019-01-01
 ```
 python examples/jfc_support_resistance.py
-```
-## Setup
-```
-git clone https://github.com/enzoampil/psequant.git
-cd psequant
-virtualenv env
-source env/bin/activate
-pip install -r requirements.txt
 ```
 ## Run tests
 ```
