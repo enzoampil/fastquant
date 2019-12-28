@@ -75,10 +75,6 @@ pytest test_pse_pipeline.py
 2. Min Max Support Resistance
 
 ## Future features
-### Processed text information with natural language processing (NLP)
-1. Disclosure reports summarized in structured tabular form
-2. Summary statistics from tweets
-3. Company related tweets (WIP)
 
 ### Easy to use API for back testing trading strategies
 1. High level functions and classes for backtesting standard strading trategies w/ PH context set as default
@@ -89,3 +85,8 @@ pytest test_pse_pipeline.py
 2. Easy integration of custom trading strategies
     - Combinations of standard trading strategies
     - Application of trained machine learning and statistical models
+    
+### Processed text information with natural language processing (NLP)
+1. Disclosure reports summarized in structured tabular form
+2. Summary statistics from tweets
+3. Company related tweets (WIP)
