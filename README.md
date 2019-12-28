@@ -29,6 +29,17 @@ print(df.head())
 #2018-01-08  257.4  259.0  253.4  256.0  216069242.0
 #2018-01-09  256.0  258.0  255.0  255.8  250188588.0
 ```
+
+## Backtesting examples
+
+### **Relative Strength Index Strategy (14 days)** with daily Jollibee prices from 2017-01-01 to 2019-01-01
+```
+python examples/jfc_rsi.py
+```
+### **Min Max Support Resistance Strategy (14 days)** with daily Jollibee prices from 2017-01-01 to 2019-01-01
+```
+python examples/jfc_support_resistance.py
+```
 ## Setup
 ```
 git clone https://github.com/enzoampil/psequant.git
