@@ -32,11 +32,11 @@ print(df.head())
 
 ## Backtesting examples
 
-### **Relative Strength Index Strategy (14 days)** with daily Jollibee prices from 2017-01-01 to 2019-01-01
+**Relative Strength Index Strategy (14 days)** with daily Jollibee prices from 2017-01-01 to 2019-01-01
 ```
 python examples/jfc_rsi.py
 ```
-### **Min Max Support Resistance Strategy (14 days)** with daily Jollibee prices from 2017-01-01 to 2019-01-01
+**Min Max Support Resistance Strategy (14 days)** with daily Jollibee prices from 2017-01-01 to 2019-01-01
 ```
 python examples/jfc_support_resistance.py
 ```
