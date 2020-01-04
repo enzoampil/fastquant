@@ -8,7 +8,7 @@ with open("requirements.txt", "r") as fh:
 setuptools.setup(
      name='psequant',  
      version='0.1.1',
-     scripts=['psequant'] ,
+     scripts=['psequant'],
      author="Lorenzo Ampil",
      author_email="lorenzo.ampil@gmail.com",
      description="The easiest way to access and analyze Philippine stock data",
