@@ -9,7 +9,7 @@ import backtrader.feeds as btfeed
 INIT_CASH = 100000
 BAND_PERIOD = 30
 COMMISSION_PER_TRANSACTION = 0.006
-DATA_FILE = "data/JFC_2010-01-01_2019-01-01_OHLCV.csv"
+DATA_FILE = "examples/data/JFC_2010-01-01_2019-01-01_OHLCV.csv"
 
 
 class MinMaxSupportResistance(bt.Strategy):
