@@ -5,14 +5,9 @@
 
 **Easiest way to access and analyze Philippine stock data**
 
-## Goal: 
-
-To  promote data driven investments in the Philippines
-
-## Objectives:
-
-1. To make it easy to access Philippine Stock Exchange (PSE) data (2 lines of code)
-2. To create reusable templates for backtesting trading strategies on Philippine stocks
+## Features
+1. Easy access to Philippine stock data from [PSE Edge](https://edge.pse.com.ph/) (2 lines of code)
+2. Templates for backtesting trading strategies on Philippine stocks
 
 ## Setup
 ```
@@ -24,7 +19,6 @@ pip install -r requirements.txt
 ```
 
 ## Get stock data from PSE
-Taken from [PSE Edge](https://edge.pse.com.ph/)
 ```
 from psequant import get_pse_data
 df = get_pse_data("JFC", "2018-01-01", "2019-01-01")

@@ -1,3 +1,12 @@
+## Goal: 
+
+To  promote data driven investments in the Philippines
+
+## Objectives:
+
+1. To make it easy to access Philippine Stock Exchange (PSE) data (2 lines of code)
+2. To create reusable templates for backtesting trading strategies on Philippine stocks
+
 ## Current features:
 ### Easy access to stock related data (OHLCV)
 1. Basic daily price features
