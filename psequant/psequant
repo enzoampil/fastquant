@@ -1,0 +1,2 @@
+#!/usr/bin/env python
+echo "hey there, this is my first pip package"
