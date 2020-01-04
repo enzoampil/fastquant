@@ -12,8 +12,7 @@ To  promote data driven investments in the Philippines
 ## Objectives:
 
 1. To make it easy to access Philippine Stock Exchange (PSE) data (2 lines of code)
-
-2. To create reusable templates for backtesting popular trading strategies on Philippine stocks
+2. To create reusable templates for backtesting trading strategies on Philippine stocks
 
 ## Setup
 ```
@@ -25,6 +24,7 @@ pip install -r requirements.txt
 ```
 
 ## Get stock data from PSE
+Taken from [PSE Edge](https://edge.pse.com.ph/)
 ```
 from psequant import get_pse_data
 df = get_pse_data("JFC", "2018-01-01", "2019-01-01")
@@ -38,6 +38,24 @@ print(df.head())
 #2018-01-08  257.4  259.0  253.4  256.0  216069242.0
 #2018-01-09  256.0  258.0  255.0  255.8  250188588.0
 ```
+
+## Plot data
+```
+from matplotlib import pyplot as plt
+df.close.plot(figsize=(10, 6))
+plt.title("Daily Closing Prices of JFC\nfrom 2018-01-01 to 2019-01-01", fontsize=20)
+```
+![](daily_closing.png)
+
+## Analyze with a Simple Moving Average Trading Strategy
+```
+ma30 = df.close.rolling(30).mean()
+close_ma30 = pd.concat([df.close, ma30], axis=1).dropna()
+close_ma30.columns = ['Closing Price', 'Simple Moving Average (30 day)']
+close_ma30.plot(figsize=(10, 6))
+plt.title("Daily Closing Prices vs 30 day SMA of JFC\nfrom 2018-01-01 to 2019-01-01", fontsize=20)
+```
+![](daily_closing_sma30.png)
 
 ## Backtesting templates
 Using the [backtrader](https://github.com/backtrader/backtrader) framework
