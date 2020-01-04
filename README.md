@@ -31,7 +31,7 @@ print(df.head())
 #2018-01-09  256.0  258.0  255.0  255.8  250188588.0
 ```
 
-## Plot data
+## Plot daily closing prices
 ```
 from matplotlib import pyplot as plt
 
@@ -40,7 +40,7 @@ plt.title("Daily Closing Prices of JFC\nfrom 2018-01-01 to 2019-01-01", fontsize
 ```
 ![](daily_closing.png)
 
-## Analyze with a Simple Moving Average Trading Strategy
+## Analyze with a simple moving average (SMA) trading strategy
 ```
 ma30 = df.close.rolling(30).mean()
 close_ma30 = pd.concat([df.close, ma30], axis=1).dropna()
@@ -54,14 +54,14 @@ plt.title("Daily Closing Prices vs 30 day SMA of JFC\nfrom 2018-01-01 to 2019-01
 ## Backtesting templates
 Using the [backtrader](https://github.com/backtrader/backtrader) framework
 
-### Relative Strength Index Strategy (14 day window)
+### Relative strength index (RSI) trading strategy (14 day window)
 Daily Jollibee prices from 2017-01-01 to 2019-01-01
 ```
 python examples/jfc_rsi.py
 ```
 ![](examples/jfc_rsi.png)
 
-### Min Max Support Resistance Strategy (30 day window)
+### Min max support resistance trading strategy (30 day window)
 Daily Jollibee prices from 2017-01-01 to 2019-01-01
 ```
 python examples/jfc_support_resistance.py
