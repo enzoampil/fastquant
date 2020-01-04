@@ -42,6 +42,7 @@ print(df.head())
 ## Plot data
 ```
 from matplotlib import pyplot as plt
+
 df.close.plot(figsize=(10, 6))
 plt.title("Daily Closing Prices of JFC\nfrom 2018-01-01 to 2019-01-01", fontsize=20)
 ```
@@ -52,6 +53,7 @@ plt.title("Daily Closing Prices of JFC\nfrom 2018-01-01 to 2019-01-01", fontsize
 ma30 = df.close.rolling(30).mean()
 close_ma30 = pd.concat([df.close, ma30], axis=1).dropna()
 close_ma30.columns = ['Closing Price', 'Simple Moving Average (30 day)']
+
 close_ma30.plot(figsize=(10, 6))
 plt.title("Daily Closing Prices vs 30 day SMA of JFC\nfrom 2018-01-01 to 2019-01-01", fontsize=20)
 ```
