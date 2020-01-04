@@ -11,9 +11,9 @@ To  promote data driven investments in the Philippines
 
 ## Objectives:
 
-1. To democratize access to PSE data
+1. To make it easy to access Philippine Stock Exchange (PSE) data (2 lines of code)
 
-2. To make it easy to backtest trading strategies
+2. To create reusable templates for backtesting popular trading strategies on Philippine stocks
 
 ## Setup
 ```
@@ -26,7 +26,7 @@ pip install -r requirements.txt
 
 ## Get stock data from PSE
 ```
-from pse_pipeline import get_pse_data
+from psequant import get_pse_data
 df = get_pse_data("JFC", "2018-01-01", "2019-01-01")
 print(df.head())
 
@@ -39,7 +39,8 @@ print(df.head())
 #2018-01-09  256.0  258.0  255.0  255.8  250188588.0
 ```
 
-## Backtesting examples (using [backtrader](https://github.com/backtrader/backtrader))
+## Backtesting templates
+Using the [backtrader](https://github.com/backtrader/backtrader) framework
 
 ### Relative Strength Index Strategy (14 day window)
 Daily Jollibee prices from 2017-01-01 to 2019-01-01
@@ -57,5 +58,5 @@ python examples/jfc_support_resistance.py
 
 ## Run tests
 ```
-pytest test_pse_pipeline.py
+pytest test_psequant.py
 ```
