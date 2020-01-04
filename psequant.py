@@ -192,24 +192,24 @@ def get_pse_data(
     symbol, start_date, end_date, stock_table_fp="stock_table.csv", disclosures=False
 ):
 
-"""Returns pricing data for a specified stock.
+    """Returns pricing data for a specified stock.
 
-Parameters
-----------
-symbol : str
-    Symbol of the stock in the PSE. You can refer to this link: https://www.pesobility.com/stock.
-start_date : str
-    Starting date (YYYY-MM-DD) of the period that you want to get data on
-end_date : str
-    Ending date (YYYY-MM-DD) of the period you want to get data on
-stock_table_fp : str
-    File path of an existing stock table or where a newly downloaded table should be saved
+    Parameters
+    ----------
+    symbol : str
+        Symbol of the stock in the PSE. You can refer to this link: https://www.pesobility.com/stock.
+    start_date : str
+        Starting date (YYYY-MM-DD) of the period that you want to get data on
+    end_date : str
+        Ending date (YYYY-MM-DD) of the period you want to get data on
+    stock_table_fp : str
+        File path of an existing stock table or where a newly downloaded table should be saved
 
-Returns
--------
-pandas.DataFrame
-    Stock data (in OHLCV format) for the specified company and date range
-"""
+    Returns
+    -------
+    pandas.DataFrame
+        Stock data (in OHLCV format) for the specified company and date range
+    """
 
     if os.path.isfile(stock_table_fp):
         print("Stock table exists!")
