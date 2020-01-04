@@ -1,1 +1,1 @@
-from psequant import *
+from .psequant import *
