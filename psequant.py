@@ -204,8 +204,6 @@ end_date : str
     Ending date (YYYY-MM-DD) of the period you want to get data on
 stock_table_fp : str
     File path of an existing stock table or where a newly downloaded table should be saved
-disclosures : bool
-    Whether to return disclosure data as a second object
 
 Returns
 -------
@@ -246,9 +244,6 @@ pandas.DataFrame
     df = df.set_index("dt")
     df.index = pd.to_datetime(df.index)
 
-    if disclosures:
-        disclosures = get_disclosures_df(symbol, start_date, end_date)
-        return df, disclosures
     return df
 
 
