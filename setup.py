@@ -7,7 +7,7 @@ with open("requirements.txt", "r") as fh:
 
 setuptools.setup(
      name='psequant',  
-     version='0.1.1',
+     version='0.1.2',
      scripts=['psequant'],
      author="Lorenzo Ampil",
      author_email="lorenzo.ampil@gmail.com",
