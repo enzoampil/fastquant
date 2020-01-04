@@ -11,13 +11,9 @@
 1. Easy access to Philippine stock data
 2. Templates for backtesting trading strategies on Philippine stocks
 
-## Setup
+## Installation
 ```
-git clone https://github.com/enzoampil/psequant.git
-cd psequant
-virtualenv env
-source env/bin/activate
-pip install -r requirements.txt
+pip install psequant
 ```
 
 ## Get stock data from PSE
@@ -71,8 +67,3 @@ Daily Jollibee prices from 2017-01-01 to 2019-01-01
 python examples/jfc_support_resistance.py
 ```
 ![](examples/jfc_support_resistance.png)
-
-## Run tests
-```
-pytest test_psequant.py
-```
