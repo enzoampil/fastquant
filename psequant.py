@@ -347,22 +347,3 @@ def tweepy_api(consumer_key, consumer_secret, access_token, access_secret):
     auth.set_access_token(access_token, access_secret)
     api = tweepy.API(auth)
     return api
-
-
-if __name__ == "__main__":
-    # Simple test for the functions above
-    SYMBOL = "JFC"
-    DATE_START = "2010-01-01"
-    DATE_END = "2019-01-01"
-    print("Testing", SYMBOL, "from", DATE_START, "to", DATE_END, "...")
-    df_dict = get_disclosures_df(SYMBOL, DATE_START, DATE_END)
-    dfd = df_dict["D"]
-    dfe = df_dict["E"]
-    print(dfd.head())
-    print(dfe.head())
-    pse = get_pse_data(SYMBOL, DATE_START, DATE_END)
-    print(pse.head())
-    df_edge = get_company_disclosures("JFC")
-    print(df_edge.head())
-    pse_data_to_csv(SYMBOL, DATE_START, DATE_END, disclosures=True)
-    print("All tests successful!")
