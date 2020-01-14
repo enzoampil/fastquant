@@ -320,16 +320,23 @@ def get_company_disclosures(symbol, from_date="06-26-2017", to_date="06-26-2019"
     table = parsed_html.find("table", {"class": "list"})
     table_rows = table.find_all("tr")
     l = []
+    edge_nos = []
     for tr in table_rows:
         td = tr.find_all("td")
         row = [tr.text for tr in td]
+        onclicks_raw = [tr.a["onclick"] for tr in td if tr.a and "onclick" in tr.a.attrs.keys()]
+        onclicks = [s[s.find("('")+2:s.find("')")] for s in onclicks_raw]
         l.append(row)
+        if onclicks:
+            edge_nos.append(onclicks[0])
 
     columns = [el.text for el in table.find_all("th")]
 
     df = pd.DataFrame(l, columns=columns)
     # Filter to rows where not all columns are null
     df = df[df.isna().mean(axis=1) < 1]
+    df['edge_nos'] = edge_nos
+    df['url'] = "https://edge.pse.com.ph/openDiscViewer.do?edge_no=" + df.edge_nos
     df["Announce Date and Time"] = pd.to_datetime(df["Announce Date and Time"])
     return df
 
