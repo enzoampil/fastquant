@@ -324,8 +324,10 @@ def get_company_disclosures(symbol, from_date="06-26-2017", to_date="06-26-2019"
     for tr in table_rows:
         td = tr.find_all("td")
         row = [tr.text for tr in td]
-        onclicks_raw = [tr.a["onclick"] for tr in td if tr.a and "onclick" in tr.a.attrs.keys()]
-        onclicks = [s[s.find("('")+2:s.find("')")] for s in onclicks_raw]
+        onclicks_raw = [
+            tr.a["onclick"] for tr in td if tr.a and "onclick" in tr.a.attrs.keys()
+        ]
+        onclicks = [s[s.find("('") + 2 : s.find("')")] for s in onclicks_raw]
         l.append(row)
         if onclicks:
             edge_nos.append(onclicks[0])
@@ -335,10 +337,120 @@ def get_company_disclosures(symbol, from_date="06-26-2017", to_date="06-26-2019"
     df = pd.DataFrame(l, columns=columns)
     # Filter to rows where not all columns are null
     df = df[df.isna().mean(axis=1) < 1]
-    df['edge_nos'] = edge_nos
-    df['url'] = "https://edge.pse.com.ph/openDiscViewer.do?edge_no=" + df.edge_nos
+    df["edge_no"] = edge_nos
+    df["url"] = "https://edge.pse.com.ph/openDiscViewer.do?edge_no=" + df.edge_no
     df["Announce Date and Time"] = pd.to_datetime(df["Announce Date and Time"])
     return df
+
+
+def get_disclosure_file_id(edge_no):
+    """
+    Returns file ID of a specified disclosure based on it edge number
+    ETA: 6.2 seconds per run
+    """
+    cookies = {
+        "BIGipServerPOOL_EDGE": "1427584378.20480.0000",
+        "JSESSIONID": "r2CYuOovD47c6FDnDoxHKW60.server-ep",
+    }
+
+    headers = {
+        "Connection": "keep-alive",
+        "Upgrade-Insecure-Requests": "1",
+        "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/79.0.3945.88 Safari/537.36",
+        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9",
+        "Sec-Fetch-Site": "none",
+        "Sec-Fetch-Mode": "navigate",
+        "Accept-Encoding": "gzip, deflate, br",
+        "Accept-Language": "en-PH,en-US;q=0.9,en;q=0.8",
+    }
+
+    params = (("edge_no", edge_no),)
+
+    response = requests.get(
+        "https://edge.pse.com.ph/openDiscViewer.do",
+        headers=headers,
+        params=params,
+        cookies=cookies,
+    )
+    html = response.text
+    parsed_html = BeautifulSoup(html, "lxml")
+    s = parsed_html.iframe["src"]
+    file_id = s[s.find("file_id=") + 8 :]
+    return file_id
+
+
+def get_disclosure_parsed_html(disclosure_file_id):
+    """
+    Returns the bs parsed html for a disclosure given its file id
+    ETA: 6.55 seconds per run
+    """
+    cookies = {
+        "BIGipServerPOOL_EDGE": "1427584378.20480.0000",
+        "JSESSIONID": "r2CYuOovD47c6FDnDoxHKW60.server-ep",
+    }
+
+    headers = {
+        "Connection": "keep-alive",
+        "Upgrade-Insecure-Requests": "1",
+        "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/79.0.3945.88 Safari/537.36",
+        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9",
+        "Sec-Fetch-Site": "same-origin",
+        "Sec-Fetch-Mode": "nested-navigate",
+        "Referer": "https://edge.pse.com.ph/openDiscViewer.do?edge_no=8a9a820ee365687cefdfc15ec263a54d",
+        "Accept-Encoding": "gzip, deflate, br",
+        "Accept-Language": "en-PH,en-US;q=0.9,en;q=0.8",
+    }
+
+    params = (("file_id", disclosure_file_id),)
+
+    response = requests.get(
+        "https://edge.pse.com.ph/downloadHtml.do",
+        headers=headers,
+        params=params,
+        cookies=cookies,
+    )
+    html = response.text
+
+    parsed_html = BeautifulSoup(html, "lxml")
+    return parsed_html
+
+
+def parse_stock_inventory(stock_inventory_str):
+    stock_inventory_lol = [
+        row.split("\n") for row in stock_inventory_str.split("\n\n\n\n")
+    ]
+    stock_inventory_df = pd.DataFrame(
+        stock_inventory_lol[1:], columns=stock_inventory_lol[0]
+    )
+    stock_inventory_df.iloc[:, 1] = (
+        stock_inventory_df.iloc[:, 1].apply(lambda x: x.replace(",", "")).astype(int)
+    )
+    return stock_inventory_df
+
+
+def get_company_summary(parsed_html):
+    """
+    Return the company summary (at the top) given the parsed html of the disclosure
+    """
+
+    keys = []
+    values = []
+    for dt, dd in zip(parsed_html.find_all("dt"), parsed_html.find_all("dd")):
+        # Take out first token (number followed by a period)
+        key = " ".join(dt.text.strip().split()[1:])
+        value = dd.text.strip()
+        if "Title of Each Class\n" in value:
+            stock_inventory_df = parse_stock_inventory(value)
+            keys += stock_inventory_df.iloc[:, 0].values.tolist()
+            values += stock_inventory_df.iloc[:, 1].values.tolist()
+        else:
+            keys.append(key)
+            values.append(value)
+
+    company_summary_df = pd.DataFrame()
+    company_summary_df["key"] = keys
+    company_summary_df["value"] = values
+    return company_summary_df
 
 
 def tweepy_api(consumer_key, consumer_secret, access_token, access_secret):
