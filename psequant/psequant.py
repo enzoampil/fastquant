@@ -453,6 +453,30 @@ def get_company_summary(parsed_html):
     return company_summary_df
 
 
+def parse_table(table_el):
+    table_dict = {"header": [], "value": []}
+    for tr in table_el.find_all("tr"):
+        th = None
+        td = None
+        if tr.find("th"):
+            th = tr.th.text
+        if tr.find("td"):
+            td = tr.td.text
+
+        table_dict["header"].append(th)
+        table_dict["value"].append(td)
+    return pd.DataFrame(table_dict)
+
+
+def get_tables(parsed_html):
+    table_els = parsed_html.find_all("table")
+    table_dfs = []
+    for table_el in table_els:
+        table_df = parse_table(table_el)
+        table_dfs.append(table_df)
+    return table_dfs
+
+
 def tweepy_api(consumer_key, consumer_secret, access_token, access_secret):
     """
     Returns authenticated tweepy.API object
