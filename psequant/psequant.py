@@ -454,6 +454,9 @@ def get_company_summary(parsed_html):
 
 
 def parse_table(table_el):
+    """
+    Returns a table as a dataframe from a table html element
+    """
     table_dict = {"header": [], "value": []}
     for tr in table_el.find_all("tr"):
         th = None
@@ -469,6 +472,9 @@ def parse_table(table_el):
 
 
 def get_tables(parsed_html):
+    """
+    Returns a list of tables as pd.DataFrame's from parsed HTML
+    """
     table_els = parsed_html.find_all("table")
     table_dfs = []
     for table_el in table_els:
