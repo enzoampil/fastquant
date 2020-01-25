@@ -1,2 +1,2 @@
 language: python
-script: pytest test_psequant.py
+script: pytest test_fastquant.py
