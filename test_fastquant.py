@@ -1,5 +1,5 @@
 import pandas as pd
-from psequant import (
+from fastquant import (
     get_disclosures_df,
     get_pse_data,
     get_company_disclosures,

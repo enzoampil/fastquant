@@ -1,11 +1,11 @@
-# psequant :nerd_face:
-[![Build Status](https://travis-ci.com/enzoampil/psequant.svg?token=UHxLpqqapxjVVa2vsreG&branch=master)](https://travis-ci.com/enzoampil/psequant)
+# fastquant :nerd_face:
+[![Build Status](https://travis-ci.com/enzoampil/psequant.svg?token=UHxLpqqapxjVVa2vsreG&branch=master)](https://travis-ci.com/enzoampil/fastquant)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/ambv/black)
 [![License: GPL v3](https://img.shields.io/badge/license-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 
 ## Easiest way to access and analyze Philippine stock data
 
-**psequant** (pronounced "see-kant") allows you easily access stock data from [PSE Edge](https://edge.pse.com.ph/) with as few as 2 lines of python code. Its goal is to promote data driven investments in the Philippines by making relevant information accessible to everyone.
+**fastquant** allows you easily access stock data from [PSE Edge](https://edge.pse.com.ph/) with as few as 2 lines of python code. Its goal is to promote data driven investments in the Philippines by making relevant information accessible to everyone.
 
 ## Features
 1. Easy access to Philippine stock data
@@ -13,12 +13,12 @@
 
 ## Installation
 ```
-pip install psequant
+pip install fastquant
 ```
 
 ## Get stock data from PSE
 ```
-from psequant import get_pse_data
+from fastquant import get_pse_data
 df = get_pse_data("JFC", "2018-01-01", "2019-01-01")
 print(df.head())
 

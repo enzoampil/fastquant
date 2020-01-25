@@ -6,14 +6,14 @@ with open("requirements.txt", "r") as fh:
     install_requires = fh.read().splitlines()
 
 setuptools.setup(
-     name='psequant',  
-     version='0.1.2.2',
+     name='fastquant',  
+     version='0.1.2.5',
      author="Lorenzo Ampil",
      author_email="lorenzo.ampil@gmail.com",
      description="The easiest way to access and analyze Philippine stock data",
      long_description=long_description,
      long_description_content_type="text/markdown",
-     url="https://github.com/enzoampil/psequant",
+     url="https://github.com/enzoampil/fastquant",
      packages=setuptools.find_packages(),
      classifiers=[
          "Programming Language :: Python :: 3",
