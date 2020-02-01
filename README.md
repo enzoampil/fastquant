@@ -8,7 +8,7 @@
 **fastquant** allows you easily access stock data from [PSE Edge](https://edge.pse.com.ph/) with as few as 2 lines of python code. Its goal is to promote data driven investments by making quantitative analysis in finance accessible to everyone.
 
 ## Features
-1. Easy access to Philippine stock data
+1. Easy access to *historical* Philippine stock data
 2. Templates for backtesting trading strategies on Philippine stocks
 
 ## Installation
