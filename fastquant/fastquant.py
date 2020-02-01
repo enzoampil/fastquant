@@ -277,7 +277,7 @@ def get_pse_data_by_date(symbol, date):
     return None
 
 
-def get_pse_data(symbol, start_date, end_date, cv=True):
+def get_pse_data(symbol, start_date, end_date, cv=True, save=True):
 
     """Returns pricing data for a specified stock.
 
@@ -313,6 +313,10 @@ def get_pse_data(symbol, start_date, end_date, cv=True):
         pse_data_df = pse_data_df[["dt", "close", "volume"]]
     else:
         pse_data_df = pse_data_df[["dt", "close", "volume", "symbol", "volume"]]
+    if save:
+        pse_data_df.to_csv(
+            "{}_{}_{}.csv".format(symbol, start_date, end_date), index=False
+        )
 
     return pse_data_df
 
