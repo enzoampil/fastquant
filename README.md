@@ -20,7 +20,7 @@ pip install fastquant
 Accessed via the [phisix](http://phisix-api2.appspot.com/) API
 ```
 from fastquant import get_pse_data
-df = get_pse_data("JFC", "2019-01-01", "2019-01-10")
+df = get_pse_data("JFC", "2018-01-01", "2019-01-01")
 print(df.head())
 
 #           dt  close   volume
