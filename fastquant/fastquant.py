@@ -189,9 +189,7 @@ def get_disclosures_df(symbol, from_date, to_date):
     return disclosures_dfs
 
 
-def get_pse_data_old(
-    symbol, start_date, end_date, stock_table_fp="stock_table.csv"
-):
+def get_pse_data_old(symbol, start_date, end_date, stock_table_fp="stock_table.csv"):
 
     """Returns pricing data for a specified stock.
 
@@ -249,17 +247,24 @@ def get_pse_data_old(
 
 
 def process_phisix_date_dict(phisix_dict):
-    date = datetime.strftime(pd.to_datetime(phisix_dict['as_of']).date(), '%Y-%m-%d')
-    stock_dict = phisix_dict['stock'][0]
-    stock_price_dict = stock_dict['price']
-    name = stock_dict['name']
-    currency = stock_price_dict['currency']
-    closing_price = stock_price_dict['amount']
-    percent_change = stock_dict['percent_change']
-    volume = stock_dict['volume']
-    symbol = stock_dict['symbol']
-    return {"dt": date, "name": name, "currency": currency, "close": closing_price, "percent_change": percent_change,
-            "volume": volume, "symbol": symbol}
+    date = datetime.strftime(pd.to_datetime(phisix_dict["as_of"]).date(), "%Y-%m-%d")
+    stock_dict = phisix_dict["stock"][0]
+    stock_price_dict = stock_dict["price"]
+    name = stock_dict["name"]
+    currency = stock_price_dict["currency"]
+    closing_price = stock_price_dict["amount"]
+    percent_change = stock_dict["percent_change"]
+    volume = stock_dict["volume"]
+    symbol = stock_dict["symbol"]
+    return {
+        "dt": date,
+        "name": name,
+        "currency": currency,
+        "close": closing_price,
+        "percent_change": percent_change,
+        "volume": volume,
+        "symbol": symbol,
+    }
 
 
 def get_pse_data_by_date(symbol, date):
@@ -272,9 +277,7 @@ def get_pse_data_by_date(symbol, date):
     return None
 
 
-
-def get_pse_data(
-    symbol, start_date, end_date, cv=True):
+def get_pse_data(symbol, start_date, end_date, cv=True):
 
     """Returns pricing data for a specified stock.
 
@@ -295,19 +298,21 @@ def get_pse_data(
         Stock data (in CV format if cv = True) for the specified company and date range
     """
 
-    date_range = pd.period_range(start_date, end_date, freq="D").to_series().astype(str).values
+    date_range = (
+        pd.period_range(start_date, end_date, freq="D").to_series().astype(str).values
+    )
     pse_data_list = []
     for date in tqdm(date_range):
         pse_data_1day = get_pse_data_by_date(symbol, date)
         if pse_data_1day is None:
-            #print("Date skipped:", date)
+            # print("Date skipped:", date)
             continue
         pse_data_list.append(pse_data_1day)
     pse_data_df = pd.DataFrame(pse_data_list)
     if cv:
-        pse_data_df = pse_data_df[['dt', 'close', 'volume']]
+        pse_data_df = pse_data_df[["dt", "close", "volume"]]
     else:
-        pse_data_df = pse_data_df[['dt', 'close', 'volume',  'symbol', 'volume']]
+        pse_data_df = pse_data_df[["dt", "close", "volume", "symbol", "volume"]]
 
     return pse_data_df
 
