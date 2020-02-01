@@ -13,6 +13,7 @@ import pandas as pd
 from string import digits
 import lxml.html as LH
 from bs4 import BeautifulSoup
+from tqdm import tqdm
 import tweepy
 
 PSE_TWITTER_ACCOUNTS = [
@@ -188,8 +189,8 @@ def get_disclosures_df(symbol, from_date, to_date):
     return disclosures_dfs
 
 
-def get_pse_data(
-    symbol, start_date, end_date, stock_table_fp="stock_table.csv", disclosures=False
+def get_pse_data_old(
+    symbol, start_date, end_date, stock_table_fp="stock_table.csv"
 ):
 
     """Returns pricing data for a specified stock.
@@ -245,6 +246,70 @@ def get_pse_data(
     df.index = pd.to_datetime(df.index)
 
     return df
+
+
+def process_phisix_date_dict(phisix_dict):
+    date = datetime.strftime(pd.to_datetime(phisix_dict['as_of']).date(), '%Y-%m-%d')
+    stock_dict = phisix_dict['stock'][0]
+    stock_price_dict = stock_dict['price']
+    name = stock_dict['name']
+    currency = stock_price_dict['currency']
+    closing_price = stock_price_dict['amount']
+    percent_change = stock_dict['percent_change']
+    volume = stock_dict['volume']
+    symbol = stock_dict['symbol']
+    return {"dt": date, "name": name, "currency": currency, "close": closing_price, "percent_change": percent_change,
+            "volume": volume, "symbol": symbol}
+
+
+def get_pse_data_by_date(symbol, date):
+    url = "http://phisix-api2.appspot.com/stocks/{}.{}.json".format(symbol, date)
+    res = requests.get(url)
+    if res.status_code == 200:
+        unprocessed_dict = res.json()
+        processed_dict = process_phisix_date_dict(unprocessed_dict)
+        return processed_dict
+    return None
+
+
+
+def get_pse_data(
+    symbol, start_date, end_date, cv=True):
+
+    """Returns pricing data for a specified stock.
+
+    Parameters
+    ----------
+    symbol : str
+        Symbol of the stock in the PSE. You can refer to this link: https://www.pesobility.com/stock.
+    start_date : str
+        Starting date (YYYY-MM-DD) of the period that you want to get data on
+    end_date : str
+        Ending date (YYYY-MM-DD) of the period you want to get data on
+    cv : bool
+        Whether to return only date and price related data (excluding the name of the company name and symbol)
+
+    Returns
+    -------
+    pandas.DataFrame
+        Stock data (in CV format if cv = True) for the specified company and date range
+    """
+
+    date_range = pd.period_range(start_date, end_date, freq="D").to_series().astype(str).values
+    pse_data_list = []
+    for date in tqdm(date_range):
+        pse_data_1day = get_pse_data_by_date(symbol, date)
+        if pse_data_1day is None:
+            #print("Date skipped:", date)
+            continue
+        pse_data_list.append(pse_data_1day)
+    pse_data_df = pd.DataFrame(pse_data_list)
+    if cv:
+        pse_data_df = pse_data_df[['dt', 'close', 'volume']]
+    else:
+        pse_data_df = pse_data_df[['dt', 'close', 'volume',  'symbol', 'volume']]
+
+    return pse_data_df
 
 
 def pse_data_to_csv(

@@ -5,7 +5,7 @@
 
 ## Easiest way to access and analyze Philippine stock data
 
-**fastquant** allows you easily access stock data from [PSE Edge](https://edge.pse.com.ph/) with as few as 2 lines of python code. Its goal is to promote data driven investments by making quantitative analysis in finance accessible to everyone.
+**fastquant** allows you easily access stock data with as few as 2 lines of python code. Its goal is to promote data driven investments by making quantitative analysis in finance accessible to everyone.
 
 ## Features
 1. Easy access to *historical* Philippine stock data
@@ -16,19 +16,19 @@
 pip install fastquant
 ```
 
-## Get stock data from PSE
+## Get Philippine stock data
+Accessed via the [phisix](http://phisix-api2.appspot.com/) API
 ```
 from fastquant import get_pse_data
-df = get_pse_data("JFC", "2018-01-01", "2019-01-01")
+df = get_pse_data("JFC", "2019-01-01", "2019-01-10")
 print(df.head())
 
-#             open   high    low  close        value
-#dt                                                 
-#2018-01-03  253.4  256.8  253.0  255.4  190253754.0
-#2018-01-04  255.4  255.4  253.0  255.0  157152856.0
-#2018-01-05  255.6  257.4  255.0  255.0  242201952.0
-#2018-01-08  257.4  259.0  253.4  256.0  216069242.0
-#2018-01-09  256.0  258.0  255.0  255.8  250188588.0
+#           dt  close   volume
+#   2019-01-01  293.0   181410
+#   2019-01-02  292.0  1665440
+#   2019-01-03  309.0  1622480
+#   2019-01-06  323.0  1004160
+#   2019-01-07  321.0   623090
 ```
 
 ## Plot daily closing prices
