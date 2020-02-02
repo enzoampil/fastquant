@@ -7,10 +7,10 @@ with open("requirements.txt", "r") as fh:
 
 setuptools.setup(
      name='fastquant',  
-     version='0.1.2.6',
+     version='0.1.2.8',
      author="Lorenzo Ampil",
      author_email="lorenzo.ampil@gmail.com",
-     description="The easiest way to access and analyze Philippine stock data",
+     description="Bringing quantitative investing to the mainstream",
      long_description=long_description,
      long_description_content_type="text/markdown",
      url="https://github.com/enzoampil/fastquant",
