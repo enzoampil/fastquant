@@ -37,7 +37,10 @@ class RSIStrategy(bt.Strategy):
         ("init_cash", INIT_CASH),
         ("buy_prop", BUY_PROP),
         ("sell_prop", SELL_PROP),
-        ("execution_type", "close"), # Either open or close, to indicate if a purchase is executed based on the next open or close
+        (
+            "execution_type",
+            "close",
+        ),  # Either open or close, to indicate if a purchase is executed based on the next open or close
     )
 
     def log(self, txt, dt=None):
@@ -121,26 +124,20 @@ class RSIStrategy(bt.Strategy):
                 self.log("BUY CREATE, %.2f" % self.dataclose[0])
                 # Take a 10% long position every time it's a buy signal (or whatever is afforded by the current cash position)
                 # "size" refers to the number of stocks to purchase
-                buy_prop_size = int((self.init_cash / self.dataclose[0]) * self.buy_prop)
+                buy_prop_size = int(
+                    (self.init_cash / self.dataclose[0]) * self.buy_prop
+                )
                 afforded_size = int(self.cash / self.dataclose[0])
-                final_size =min(
-                            buy_prop_size,
-                            afforded_size,
-                        )
+                final_size = min(buy_prop_size, afforded_size,)
                 print("Buy prop size:", buy_prop_size)
                 print("Afforded size:", afforded_size)
                 print("Final size:", final_size)
                 # Buy based on the closing price of the next closing day
                 if self.execution_type == "close":
-                    self.order = self.buy(
-                        size=final_size,
-                        exectype=bt.Order.Close,
-                        )
+                    self.order = self.buy(size=final_size, exectype=bt.Order.Close,)
                 # Buy based on the opening price of the next closing day (only works "open" data exists in the dataset)
                 else:
-                    self.order = self.buy(
-                        size=final_size,
-                        )                    
+                    self.order = self.buy(size=final_size,)
 
         # Only sell if you hold least one unit of the stock (and sell only that stock, so no short selling)
         if (self.value - self.cash) > 0:
@@ -158,8 +155,7 @@ class RSIStrategy(bt.Strategy):
                     # Sell based on the opening price of the next closing day (only works "open" data exists in the dataset)
                     self.order = self.sell(
                         size=int((self.init_cash / self.dataclose[0]) * self.sell_prop),
-                    )        
-
+                    )
 
 
 STRATEGY_MAPPING = {"rsi": RSIStrategy}
