@@ -9,7 +9,7 @@ import backtrader.feeds as btfeed
 # Global arguments
 INIT_CASH = 100000
 COMMISSION_PER_TRANSACTION = 0.006
-DATA_FILE = "examples/data/JFC_20180101_20190110.csv"
+DATA_FILE = "examples/data/JFC_20180101_20190101.csv"
 BUY_PROP = 0.1
 SELL_PROP = 0.1
 DATA_FORMAT_MAPPING = {
@@ -37,6 +37,7 @@ class RSIStrategy(bt.Strategy):
         ("init_cash", INIT_CASH),
         ("buy_prop", BUY_PROP),
         ("sell_prop", SELL_PROP),
+        ("execution_type", "close"), # Either open or close, to indicate if a purchase is executed based on the next open or close
     )
 
     def log(self, txt, dt=None):
@@ -48,6 +49,7 @@ class RSIStrategy(bt.Strategy):
         self.init_cash = self.params.init_cash
         self.buy_prop = self.params.buy_prop
         self.sell_prop = self.params.sell_prop
+        self.execution_type = self.params.execution_type
         print("===Global level arguments===")
         print("init_cash :", self.init_cash)
         print("buy_prop :", self.buy_prop)
@@ -121,14 +123,24 @@ class RSIStrategy(bt.Strategy):
                 # "size" refers to the number of stocks to purchase
                 buy_prop_size = int((self.init_cash / self.dataclose[0]) * self.buy_prop)
                 afforded_size = int(self.cash / self.dataclose[0])
-                print("Buy prop size:", buy_prop_size)
-                print("Afforded size:", afforded_size)
-                self.order = self.buy(
-                    size=min(
+                final_size =min(
                             buy_prop_size,
                             afforded_size,
                         )
-                    )
+                print("Buy prop size:", buy_prop_size)
+                print("Afforded size:", afforded_size)
+                print("Final size:", final_size)
+                # Buy based on the closing price of the next closing day
+                if self.execution_type == "close":
+                    self.order = self.buy(
+                        size=final_size,
+                        exectype=bt.Order.Close,
+                        )
+                # Buy based on the opening price of the next closing day (only works "open" data exists in the dataset)
+                else:
+                    self.order = self.buy(
+                        size=final_size,
+                        )                    
 
         # Only sell if you hold least one unit of the stock (and sell only that stock, so no short selling)
         if (self.value - self.cash) > 0:
@@ -136,9 +148,18 @@ class RSIStrategy(bt.Strategy):
                 self.log("SELL CREATE, %.2f" % self.dataclose[0])
                 # Sell a 5% sell position (or whatever is afforded by the current stock holding)
                 # "size" refers to the number of stocks to purchase
-                self.order = self.sell(
-                    size=int((self.init_cash / self.dataclose[0]) * self.sell_prop)
-                )
+                if self.execution_type == "close":
+                    # Sell based on the closing price of the next closing day
+                    self.order = self.sell(
+                        size=int((self.init_cash / self.dataclose[0]) * self.sell_prop),
+                        exectype=bt.Order.Close,
+                    )
+                else:
+                    # Sell based on the opening price of the next closing day (only works "open" data exists in the dataset)
+                    self.order = self.sell(
+                        size=int((self.init_cash / self.dataclose[0]) * self.sell_prop),
+                    )        
+
 
 
 STRATEGY_MAPPING = {"rsi": RSIStrategy}
