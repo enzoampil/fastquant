@@ -169,7 +169,10 @@ def backtest(
     data_format="dcv",
     **kwargs
 ):
-    cerebro = bt.Cerebro()
+    cerebro = bt.Cerebro(stdstats=False)
+    cerebro.addobserver(bt.observers.Broker)
+    cerebro.addobserver(bt.observers.Trades)
+    cerebro.addobserver(bt.observers.BuySell)
     cerebro.addstrategy(STRATEGY_MAPPING[strategy], init_cash=init_cash, **kwargs)
     cerebro.broker.setcommission(commission=commission)
 
