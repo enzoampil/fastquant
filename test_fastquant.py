@@ -7,7 +7,7 @@ from fastquant import (
 )
 
 SYMBOL = "JFC"
-DATE_START = "2010-01-01"
+DATE_START = "2018-01-01"
 DATE_END = "2019-01-01"
 
 
