@@ -5,6 +5,7 @@ import os.path
 import sys
 import backtrader as bt
 import backtrader.feeds as btfeed
+import pandas as pd
 
 # Global arguments
 INIT_CASH = 100000
@@ -15,12 +16,12 @@ SELL_PROP = 0.1
 DATA_FORMAT_MAPPING = {
     "dcv": {
         "datetime": 0,
-        "open": -1,
-        "high": -1,
-        "low": -1,
+        "open": None,
+        "high": None,
+        "low": None,
         "close": 1,
         "volume": 2,
-        "openinterest": -1,
+        "openinterest": None,
     }
 }
 
@@ -163,7 +164,7 @@ STRATEGY_MAPPING = {"rsi": RSIStrategy}
 
 def backtest(
     strategy,
-    csv,
+    data,  # Treated as csv path is str, and dataframe of pd.DataFrame
     commission=COMMISSION_PER_TRANSACTION,
     init_cash=INIT_CASH,
     data_format="dcv",
@@ -176,17 +177,14 @@ def backtest(
     cerebro.addstrategy(STRATEGY_MAPPING[strategy], init_cash=init_cash, **kwargs)
     cerebro.broker.setcommission(commission=commission)
 
-    data = btfeed.GenericCSVData(
-        dataname=csv,
-        # Date filters are note required
-        # TODO: Add optional date filter arguments
-        # fromdate=datetime.datetime(2017, 1, 1),
-        # todate=datetime.datetime(2019, 1, 1),
-        nullvalue=0.0,
-        dtformat=("%Y-%m-%d"),
-        **DATA_FORMAT_MAPPING[data_format]
-    )
-    cerebro.adddata(data)
+    # Treat `data` as a path if it's a string; otherwise, it's treated as a pandas dataframe
+    if isinstance(data, str):
+        print("Reading path as pandas dataframe ...")
+        data = pd.read_csv(data, header=0, parse_dates=["dt"])
+
+    pd_data = bt.feeds.PandasData(dataname=data, **DATA_FORMAT_MAPPING[data_format])
+
+    cerebro.adddata(pd_data)
     cerebro.broker.setcash(init_cash)
     print("Starting Portfolio Value: %.2f" % cerebro.broker.getvalue())
     cerebro.run()
