@@ -11,8 +11,8 @@ import pandas as pd
 INIT_CASH = 100000
 COMMISSION_PER_TRANSACTION = 0.006
 DATA_FILE = "examples/data/JFC_20180101_20190101.csv"
-BUY_PROP = 0.1
-SELL_PROP = 0.1
+BUY_PROP = 1
+SELL_PROP = 1
 DATA_FORMAT_MAPPING = {
     "dcv": {
         "datetime": 0,
@@ -24,7 +24,6 @@ DATA_FORMAT_MAPPING = {
         "openinterest": None,
     }
 }
-
 
 class RSIStrategy(bt.Strategy):
 
@@ -69,6 +68,7 @@ class RSIStrategy(bt.Strategy):
         print("rsi_lower :", self.rsi_lower)
 
         self.dataclose = self.datas[0].close
+        self.dataopen = self.datas[0].open
         self.order = None
         self.buyprice = None
         self.buycomm = None
@@ -119,43 +119,55 @@ class RSIStrategy(bt.Strategy):
         if self.order:
             return
 
+        print("CURRENT POSITION SIZE:", self.position.size)
         # Only buy if there is enough cash for at least one stock
         if self.cash >= self.dataclose[0]:
             if self.rsi[0] < self.rsi_lower:
-                self.log("BUY CREATE, %.2f" % self.dataclose[0])
+
+                self.log("BUY CREATE, %.2f" % self.dataclose[1])
                 # Take a 10% long position every time it's a buy signal (or whatever is afforded by the current cash position)
                 # "size" refers to the number of stocks to purchase
                 buy_prop_size = int(
-                    (self.init_cash / self.dataclose[0]) * self.buy_prop
+                    (self.cash / self.dataclose[0]) * self.buy_prop
                 )
-                afforded_size = int(self.cash / self.dataclose[0])
-                final_size = min(buy_prop_size, afforded_size,)
-                print("Buy prop size:", buy_prop_size)
-                print("Afforded size:", afforded_size)
-                print("Final size:", final_size)
                 # Buy based on the closing price of the next closing day
                 if self.execution_type == "close":
+                    # Afforded size is based on closing price for the next trading day
+                    afforded_size = int(self.cash / (self.dataclose[1] * (1 + COMMISSION_PER_TRANSACTION)))
+                    final_size = min(buy_prop_size, afforded_size,)
+                    print("Buy prop size:", buy_prop_size)
+                    print("Afforded size:", afforded_size)
+                    print("Final size:", final_size)
                     self.order = self.buy(size=final_size, exectype=bt.Order.Close,)
                 # Buy based on the opening price of the next closing day (only works "open" data exists in the dataset)
                 else:
+                    afforded_size = int(self.cash / (self.dataopen[1] * COMMISSION_PER_TRANSACTION))
+                    final_size = min(buy_prop_size, afforded_size,)
+                    print("Buy prop size:", buy_prop_size)
+                    print("Afforded size:", afforded_size)
+                    print("Final size:", final_size)
                     self.order = self.buy(size=final_size,)
 
         # Only sell if you hold least one unit of the stock (and sell only that stock, so no short selling)
-        if (self.value - self.cash) > 0:
+        stock_value = (self.value - self.cash)
+        if stock_value > 0:
             if self.rsi[0] > self.rsi_upper:
-                self.log("SELL CREATE, %.2f" % self.dataclose[0])
+                self.log("SELL CREATE, %.2f" % self.dataclose[1])
                 # Sell a 5% sell position (or whatever is afforded by the current stock holding)
                 # "size" refers to the number of stocks to purchase
                 if self.execution_type == "close":
-                    # Sell based on the closing price of the next closing day
-                    self.order = self.sell(
-                        size=int((self.init_cash / self.dataclose[0]) * self.sell_prop),
-                        exectype=bt.Order.Close,
-                    )
+                    if SELL_PROP == 1:
+                        self.order = self.sell(size=self.position.size, exectype=bt.Order.Close,)
+                    else:
+                        # Sell based on the closing price of the next closing day
+                        self.order = self.sell(
+                            size=int((stock_value / (self.dataclose[1])) * self.sell_prop),
+                            exectype=bt.Order.Close,
+                        )
                 else:
                     # Sell based on the opening price of the next closing day (only works "open" data exists in the dataset)
                     self.order = self.sell(
-                        size=int((self.init_cash / self.dataclose[0]) * self.sell_prop),
+                        size=int((self.init_cash / self.dataopen[1]) * self.sell_prop),
                     )
 
 
