@@ -205,5 +205,8 @@ def backtest(
 
 
 if __name__ == "__main__":
-    print("Testing RSI strategy ...")
+    print("Testing RSI strategy with csv ...")
     backtest("rsi", DATA_FILE)
+    print("Testing RSI strategy with dataframe ...")
+    data = pd.read_csv(DATA_FILE, header=0, parse_dates=["dt"])
+    backtest("rsi", data)
