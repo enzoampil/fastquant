@@ -9,7 +9,7 @@ import pandas as pd
 
 # Global arguments
 INIT_CASH = 100000
-COMMISSION_PER_TRANSACTION = 0.006
+COMMISSION_PER_TRANSACTION = 0.0075
 DATA_FILE = "examples/data/JFC_20180101_20190110_DCV.csv"
 BUY_PROP = 1
 SELL_PROP = 1
@@ -289,7 +289,7 @@ class SMACStrategy(bt.Strategy):
                 # Margin is required for both the buy and sell commission (which is why we multiply commission by 2)
                 afforded_size = int(
                     self.cash
-                    / (self.dataclose[1] * (1 + COMMISSION_PER_TRANSACTION * 2))
+                    / (self.dataclose[1] * (1 + COMMISSION_PER_TRANSACTION * 3))
                 )
                 buy_prop_size = int(afforded_size * self.buy_prop)
                 # Buy based on the closing price of the next closing day
@@ -303,7 +303,7 @@ class SMACStrategy(bt.Strategy):
                 else:
                     # Margin is required for both the buy and sell commission (which is why we multiply commission by 2)
                     afforded_size = int(
-                        self.cash / (self.dataopen[1] * COMMISSION_PER_TRANSACTION * 2)
+                        self.cash / (self.dataopen[1] * COMMISSION_PER_TRANSACTION * 3)
                     )
                     final_size = min(buy_prop_size, afforded_size,)
                     print("Buy prop size:", buy_prop_size)
