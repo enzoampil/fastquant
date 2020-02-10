@@ -555,18 +555,18 @@ def backtest(
 
 if __name__ == "__main__":
     print("Testing RSI strategy with csv ...")
-    #backtest("rsi", DATA_FILE, plot=False)
+    backtest("rsi", DATA_FILE, plot=False)
     print("Testing RSI strategy with dataframe ...")
     data = pd.read_csv(DATA_FILE, header=0, parse_dates=["dt"])
-    #backtest("rsi", data, plot=False)
+    backtest("rsi", data, plot=False)
 
     print("Testing SMAC strategy with dataframe ...")
     data = pd.read_csv(DATA_FILE, header=0, parse_dates=["dt"])
-    #backtest("smac", data, plot=False)
+    backtest("smac", data, plot=False)
 
     print("Testing Base strategy with dataframe ...")
     data = pd.read_csv(DATA_FILE, header=0, parse_dates=["dt"])
-    #backtest("base", data, plot=False)
+    backtest("base", data, plot=False)
 
     print("Testing RSI2 strategy with dataframe ...")
     data = pd.read_csv(DATA_FILE, header=0, parse_dates=["dt"])
