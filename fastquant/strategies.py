@@ -137,10 +137,10 @@ class BaseStrategy(bt.Strategy):
                 # "size" refers to the number of stocks to purchase
                 # Afforded size is based on closing price for the next trading day
                 print("cash:", self.cash)
-                # Margin is required for both the buy and sell commission (which is why we multiply commission by 2)
+                # Margin is required for both the buy and sell commission + 1 allowance (which is why we multiply commission by 3)
                 afforded_size = int(
                     self.cash
-                    / (self.dataclose[1] * (1 + COMMISSION_PER_TRANSACTION * 2))
+                    / (self.dataclose[1] * (1 + COMMISSION_PER_TRANSACTION * 3))
                 )
                 buy_prop_size = int(afforded_size * self.buy_prop)
                 # Buy based on the closing price of the next closing day
@@ -152,9 +152,9 @@ class BaseStrategy(bt.Strategy):
                     self.order = self.buy(size=final_size, exectype=bt.Order.Close,)
                 # Buy based on the opening price of the next closing day (only works "open" data exists in the dataset)
                 else:
-                    # Margin is required for both the buy and sell commission (which is why we multiply commission by 2)
+                    # Margin is required for both the buy and sell commission + 1 allowance (which is why we multiply commission by 3)
                     afforded_size = int(
-                        self.cash / (self.dataopen[1] * COMMISSION_PER_TRANSACTION * 2)
+                        self.cash / (self.dataopen[1] * COMMISSION_PER_TRANSACTION * 3)
                     )
                     final_size = min(buy_prop_size, afforded_size,)
                     print("Buy prop size:", buy_prop_size)
@@ -287,7 +287,7 @@ if __name__ == "__main__":
 
     print("Testing SMAC strategy with dataframe ...")
     data = pd.read_csv(DATA_FILE, header=0, parse_dates=["dt"])
-    backtest("smac", data, plot=False)
+    backtest("smac", data, plot=True)
 
     print("Testing Base strategy with dataframe ...")
     data = pd.read_csv(DATA_FILE, header=0, parse_dates=["dt"])
