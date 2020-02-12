@@ -300,10 +300,12 @@ def get_pse_data(symbol, start_date, end_date, cv=True, save=True):
     """
 
     file_name = "{}_{}_{}.csv".format(symbol, start_date, end_date)
-    
+
     if Path(file_name).exists():
         print("Reading cached file found:", file_name)
-        return pd.read_csv(file_name)
+        pse_data_df = pd.read_csv(file_name)
+        pse_data_df['dt'] = pd.to_datetime(df.dt)
+        return pse_data_df
 
     date_range = (
         pd.period_range(start_date, end_date, freq="D").to_series().astype(str).values
@@ -312,7 +314,6 @@ def get_pse_data(symbol, start_date, end_date, cv=True, save=True):
     for date in tqdm(date_range):
         pse_data_1day = get_pse_data_by_date(symbol, date)
         if pse_data_1day is None:
-            # print("Date skipped:", date)
             continue
         pse_data_list.append(pse_data_1day)
     pse_data_df = pd.DataFrame(pse_data_list)
@@ -325,6 +326,7 @@ def get_pse_data(symbol, start_date, end_date, cv=True, save=True):
             file_name, index=False
         )
 
+    pse_data_df['dt'] = pd.to_datetime(pse_data_df.dt)
     return pse_data_df
 
 
