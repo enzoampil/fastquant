@@ -15,6 +15,7 @@ import lxml.html as LH
 from bs4 import BeautifulSoup
 from tqdm import tqdm
 import tweepy
+from pathlib import Path
 
 PSE_TWITTER_ACCOUNTS = [
     "phstockexchange",
@@ -298,6 +299,12 @@ def get_pse_data(symbol, start_date, end_date, cv=True, save=True):
         Stock data (in CV format if cv = True) for the specified company and date range
     """
 
+    file_name = "{}_{}_{}.csv".format(symbol, start_date, end_date)
+    
+    if Path(file_name).exists():
+        print("Reading cached file found:", file_name)
+        return pd.read_csv(file_name)
+
     date_range = (
         pd.period_range(start_date, end_date, freq="D").to_series().astype(str).values
     )
@@ -315,7 +322,7 @@ def get_pse_data(symbol, start_date, end_date, cv=True, save=True):
         pse_data_df = pse_data_df[["dt", "close", "volume", "symbol", "volume"]]
     if save:
         pse_data_df.to_csv(
-            "{}_{}_{}.csv".format(symbol, start_date, end_date), index=False
+            file_name, index=False
         )
 
     return pse_data_df
