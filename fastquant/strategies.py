@@ -110,6 +110,8 @@ class BaseStrategy(bt.Strategy):
 
         elif order.status in [order.Canceled, order.Margin, order.Rejected]:
             if self.transaction_logging:
+                if not self.periodic_logging:
+                    self.log("Cash %s Value %s" % (self.cash, self.value))
                 self.log("Order Canceled/Margin/Rejected")
                 self.log("Canceled: {}".format(order.status == order.Canceled))
                 self.log("Margin: {}".format(order.status == order.Margin))
@@ -150,29 +152,32 @@ class BaseStrategy(bt.Strategy):
             if self.buy_signal():
 
                 if self.transaction_logging:
-                    self.log("BUY CREATE, %.2f" % self.dataclose[1])
+                    self.log("BUY CREATE, %.2f" % self.dataclose[0])
                 # Take a 10% long position every time it's a buy signal (or whatever is afforded by the current cash position)
                 # "size" refers to the number of stocks to purchase
-                # Afforded size is based on closing price for the next trading day
-                # Margin is required for both the buy and sell commission + 1 allowance (which is why we multiply commission by 3)
+                # Afforded size is based on closing price for the current trading day
+                # Margin is required for buy commission
                 afforded_size = int(
                     self.cash
-                    / (self.dataclose[1] * (1 + COMMISSION_PER_TRANSACTION * 3))
+                    / (self.dataclose[0] * (1 + COMMISSION_PER_TRANSACTION))
                 )
                 buy_prop_size = int(afforded_size * self.buy_prop)
                 # Buy based on the closing price of the next closing day
                 if self.execution_type == "close":
                     final_size = min(buy_prop_size, afforded_size,)
                     if self.transaction_logging:
+                        self.log("Cash: {}".format(self.cash))
+                        self.log("Price: {}".format(self.dataclose[0]))
                         self.log("Buy prop size: {}".format(buy_prop_size))
                         self.log("Afforded size: {}".format(afforded_size))
                         self.log("Final size: {}".format(final_size))
-                    self.order = self.buy(size=final_size, exectype=bt.Order.Close,)
+                    # Explicitly setting exectype=bt.Order.Close will make the next day's closing the reference price
+                    self.order = self.buy(size=final_size)
                 # Buy based on the opening price of the next closing day (only works "open" data exists in the dataset)
                 else:
-                    # Margin is required for both the buy and sell commission + 1 allowance (which is why we multiply commission by 3)
+                    # Margin is required for buy commission
                     afforded_size = int(
-                        self.cash / (self.dataopen[1] * COMMISSION_PER_TRANSACTION * 3)
+                        self.cash / (self.dataopen[1] * (1 + COMMISSION_PER_TRANSACTION))
                     )
                     final_size = min(buy_prop_size, afforded_size,)
                     if self.transaction_logging:
@@ -291,6 +296,9 @@ def backtest(
 
     cerebro.adddata(pd_data)
     cerebro.broker.setcash(init_cash)
+    # Allows us to set buy price based on next day closing
+    # (technically impossible, but reasonable assuming you use all your money to buy market at the end of the next day)
+    cerebro.broker.set_coc(True)
     print("Starting Portfolio Value: %.2f" % cerebro.broker.getvalue())
     cerebro.run()
     print("Final Portfolio Value: %.2f" % cerebro.broker.getvalue())
