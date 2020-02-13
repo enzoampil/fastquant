@@ -42,6 +42,8 @@ class BaseStrategy(bt.Strategy):
             "execution_type",
             "close",
         ),  # Either open or close, to indicate if a purchase is executed based on the next open or close
+        ("periodic_logging", False),
+        ("transaction_logging", True),
     )
 
     def log(self, txt, dt=None):
@@ -54,13 +56,12 @@ class BaseStrategy(bt.Strategy):
         self.buy_prop = self.params.buy_prop
         self.sell_prop = self.params.sell_prop
         self.execution_type = self.params.execution_type
-        print("===Global level arguments===")
-        print("init_cash :", self.init_cash)
-        print("buy_prop :", self.buy_prop)
-        print("sell_prop :", self.sell_prop)
-
-        # Strategy level arguments
-        print("===Strategy level arguments===")
+        self.periodic_logging = self.params.periodic_logging
+        self.transaction_logging = self.params.transaction_logging
+        self.log("===Global level arguments===")
+        self.log("init_cash : {}".format(self.init_cash))
+        self.log("buy_prop : {}".format(self.buy_prop))
+        self.log("sell_prop : {}".format(self.sell_prop))
 
         self.dataclose = self.datas[0].close
         self.dataopen = self.datas[0].open
@@ -82,26 +83,29 @@ class BaseStrategy(bt.Strategy):
 
         if order.status in [order.Completed]:
             if order.isbuy():
-                self.log(
-                    "BUY EXECUTED, Price: %.2f, Cost: %.2f, Comm %.2f"
-                    % (order.executed.price, order.executed.value, order.executed.comm)
-                )
+                if self.transaction_logging:
+                    self.log(
+                        "BUY EXECUTED, Price: %.2f, Cost: %.2f, Comm %.2f"
+                        % (order.executed.price, order.executed.value, order.executed.comm)
+                    )
 
                 self.buyprice = order.executed.price
                 self.buycomm = order.executed.comm
             else:  # Sell
-                self.log(
-                    "SELL EXECUTED, Price: %.2f, Cost: %.2f, Comm %.2f"
-                    % (order.executed.price, order.executed.value, order.executed.comm)
-                )
+                if self.transaction_logging:
+                    self.log(
+                        "SELL EXECUTED, Price: %.2f, Cost: %.2f, Comm %.2f"
+                        % (order.executed.price, order.executed.value, order.executed.comm)
+                    )
 
             self.bar_executed = len(self)
 
         elif order.status in [order.Canceled, order.Margin, order.Rejected]:
-            self.log("Order Canceled/Margin/Rejected")
-            print("Canceled:", order.status == order.Canceled)
-            print("Margin:", order.status == order.Margin)
-            print("Rejected:", order.status == order.Rejected)
+            if self.transaction_logging:
+                self.log("Order Canceled/Margin/Rejected")
+                self.log("Canceled: {}".format(order.status == order.Canceled))
+                self.log("Margin: {}".format(order.status == order.Margin))
+                self.log("Rejected: {}".format(order.status == order.Rejected))
 
         # Write down: no pending order
         self.order = None
@@ -109,17 +113,19 @@ class BaseStrategy(bt.Strategy):
     def notify_trade(self, trade):
         if not trade.isclosed:
             return
-
-        self.log("OPERATION PROFIT, GROSS %.2f, NET %.2f" % (trade.pnl, trade.pnlcomm))
+        if self.transaction_logging:
+            self.log("OPERATION PROFIT, GROSS %.2f, NET %.2f" % (trade.pnl, trade.pnlcomm))
 
     def notify_cashvalue(self, cash, value):
         # Update cash and value every period
-        self.log("Cash %s Value %s" % (cash, value))
+        if self.periodic_logging:
+            self.log("Cash %s Value %s" % (cash, value))
         self.cash = cash
         self.value = value
 
     def next(self):
-        self.log("Close, %.2f" % self.dataclose[0])
+        if self.periodic_logging:
+            self.log("Close, %.2f" % self.dataclose[0])
         if self.order:
             return
 
@@ -127,16 +133,17 @@ class BaseStrategy(bt.Strategy):
         if len(self) + 1 >= self.len_data:
             return
 
-        print("CURRENT POSITION SIZE:", self.position.size)
+        if self.periodic_logging:
+            self.log("CURRENT POSITION SIZE: {}".format(self.position.size))
         # Only buy if there is enough cash for at least one stock
         if self.cash >= self.dataclose[1]:
             if self.buy_signal():
 
-                self.log("BUY CREATE, %.2f" % self.dataclose[1])
+                if self.transaction_logging:
+                    self.log("BUY CREATE, %.2f" % self.dataclose[1])
                 # Take a 10% long position every time it's a buy signal (or whatever is afforded by the current cash position)
                 # "size" refers to the number of stocks to purchase
                 # Afforded size is based on closing price for the next trading day
-                print("cash:", self.cash)
                 # Margin is required for both the buy and sell commission + 1 allowance (which is why we multiply commission by 3)
                 afforded_size = int(
                     self.cash
@@ -146,9 +153,10 @@ class BaseStrategy(bt.Strategy):
                 # Buy based on the closing price of the next closing day
                 if self.execution_type == "close":
                     final_size = min(buy_prop_size, afforded_size,)
-                    print("Buy prop size:", buy_prop_size)
-                    print("Afforded size:", afforded_size)
-                    print("Final size:", final_size)
+                    if self.transaction_logging:
+                        self.log("Buy prop size: {}".format(buy_prop_size))
+                        self.log("Afforded size: {}".format(afforded_size))
+                        self.log("Final size: {}".format(final_size))
                     self.order = self.buy(size=final_size, exectype=bt.Order.Close,)
                 # Buy based on the opening price of the next closing day (only works "open" data exists in the dataset)
                 else:
@@ -157,16 +165,18 @@ class BaseStrategy(bt.Strategy):
                         self.cash / (self.dataopen[1] * COMMISSION_PER_TRANSACTION * 3)
                     )
                     final_size = min(buy_prop_size, afforded_size,)
-                    print("Buy prop size:", buy_prop_size)
-                    print("Afforded size:", afforded_size)
-                    print("Final size:", final_size)
+                    if self.transaction_logging:
+                        self.log("Buy prop size: {}".format(buy_prop_size))
+                        self.log("Afforded size: {}".format(afforded_size))
+                        self.log("Final size: {}".format(final_size))
                     self.order = self.buy(size=final_size,)
 
         # Only sell if you hold least one unit of the stock (and sell only that stock, so no short selling)
         stock_value = self.value - self.cash
         if stock_value > 0:
             if self.sell_signal():
-                self.log("SELL CREATE, %.2f" % self.dataclose[1])
+                if self.transaction_logging:
+                    self.log("SELL CREATE, %.2f" % self.dataclose[1])
                 # Sell a 5% sell position (or whatever is afforded by the current stock holding)
                 # "size" refers to the number of stocks to purchase
                 if self.execution_type == "close":
@@ -283,11 +293,11 @@ if __name__ == "__main__":
     backtest("rsi", DATA_FILE, plot=False)
     print("Testing RSI strategy with dataframe ...")
     data = pd.read_csv(DATA_FILE, header=0, parse_dates=["dt"])
-    backtest("rsi", data, plot=False)
+    backtest("rsi", data, plot=True)
 
     print("Testing SMAC strategy with dataframe ...")
     data = pd.read_csv(DATA_FILE, header=0, parse_dates=["dt"])
-    backtest("smac", data, plot=True)
+    backtest("smac", data, plot=False)
 
     print("Testing Base strategy with dataframe ...")
     data = pd.read_csv(DATA_FILE, header=0, parse_dates=["dt"])
