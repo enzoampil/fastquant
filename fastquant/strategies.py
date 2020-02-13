@@ -148,7 +148,7 @@ class BaseStrategy(bt.Strategy):
         if self.periodic_logging:
             self.log("CURRENT POSITION SIZE: {}".format(self.position.size))
         # Only buy if there is enough cash for at least one stock
-        if self.cash >= self.dataclose[1]:
+        if self.cash >= self.dataclose[0]:
             if self.buy_signal():
 
                 if self.transaction_logging:
