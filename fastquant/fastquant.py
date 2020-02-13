@@ -304,7 +304,7 @@ def get_pse_data(symbol, start_date, end_date, cv=True, save=True):
     if Path(file_name).exists():
         print("Reading cached file found:", file_name)
         pse_data_df = pd.read_csv(file_name)
-        pse_data_df['dt'] = pd.to_datetime(df.dt)
+        pse_data_df['dt'] = pd.to_datetime(pse_data_df.dt)
         return pse_data_df
 
     date_range = (
