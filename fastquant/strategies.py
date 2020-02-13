@@ -86,7 +86,11 @@ class BaseStrategy(bt.Strategy):
                 if self.transaction_logging:
                     self.log(
                         "BUY EXECUTED, Price: %.2f, Cost: %.2f, Comm %.2f"
-                        % (order.executed.price, order.executed.value, order.executed.comm)
+                        % (
+                            order.executed.price,
+                            order.executed.value,
+                            order.executed.comm,
+                        )
                     )
 
                 self.buyprice = order.executed.price
@@ -95,7 +99,11 @@ class BaseStrategy(bt.Strategy):
                 if self.transaction_logging:
                     self.log(
                         "SELL EXECUTED, Price: %.2f, Cost: %.2f, Comm %.2f"
-                        % (order.executed.price, order.executed.value, order.executed.comm)
+                        % (
+                            order.executed.price,
+                            order.executed.value,
+                            order.executed.comm,
+                        )
                     )
 
             self.bar_executed = len(self)
@@ -114,7 +122,9 @@ class BaseStrategy(bt.Strategy):
         if not trade.isclosed:
             return
         if self.transaction_logging:
-            self.log("OPERATION PROFIT, GROSS %.2f, NET %.2f" % (trade.pnl, trade.pnlcomm))
+            self.log(
+                "OPERATION PROFIT, GROSS %.2f, NET %.2f" % (trade.pnl, trade.pnlcomm)
+            )
 
     def notify_cashvalue(self, cash, value):
         # Update cash and value every period
