@@ -8,7 +8,7 @@
 **fastquant** allows you easily backtest investment strategies with as few as 3 lines of python code. Its goal is to promote data driven investments by making quantitative analysis in finance accessible to everyone.
 
 ## Features
-1. Easy access to historical stock data*
+1. Easily access historical stock data*
 2. Backtest trading strategies with only 3 lines of code
 
 `*` - Only Philippine stock data is available so far, but more countries will be covered soon with *Yahoo Finance* integration
