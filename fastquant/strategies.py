@@ -157,9 +157,10 @@ class BaseStrategy(bt.Strategy):
                 # "size" refers to the number of stocks to purchase
                 # Afforded size is based on closing price for the current trading day
                 # Margin is required for buy commission
+                # Add allowance to commission per transaction (avoid margin)
                 afforded_size = int(
                     self.cash
-                    / (self.dataclose[0] * (1 + COMMISSION_PER_TRANSACTION))
+                    / (self.dataclose[0] * (1 + COMMISSION_PER_TRANSACTION + 0.001))
                 )
                 buy_prop_size = int(afforded_size * self.buy_prop)
                 # Buy based on the closing price of the next closing day
@@ -177,7 +178,7 @@ class BaseStrategy(bt.Strategy):
                 else:
                     # Margin is required for buy commission
                     afforded_size = int(
-                        self.cash / (self.dataopen[1] * (1 + COMMISSION_PER_TRANSACTION))
+                        self.cash / (self.dataopen[1] * (1 + COMMISSION_PER_TRANSACTION + 0.001))
                     )
                     final_size = min(buy_prop_size, afforded_size,)
                     if self.transaction_logging:
