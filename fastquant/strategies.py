@@ -58,10 +58,10 @@ class BaseStrategy(bt.Strategy):
         self.execution_type = self.params.execution_type
         self.periodic_logging = self.params.periodic_logging
         self.transaction_logging = self.params.transaction_logging
-        self.log("===Global level arguments===")
-        self.log("init_cash : {}".format(self.init_cash))
-        self.log("buy_prop : {}".format(self.buy_prop))
-        self.log("sell_prop : {}".format(self.sell_prop))
+        print("===Global level arguments===")
+        print("init_cash : {}".format(self.init_cash))
+        print("buy_prop : {}".format(self.buy_prop))
+        print("sell_prop : {}".format(self.sell_prop))
 
         self.dataclose = self.datas[0].close
         self.dataopen = self.datas[0].open
