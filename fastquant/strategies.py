@@ -25,6 +25,12 @@ DATA_FORMAT_MAPPING = {
     }
 }
 
+def docstring_parameter(*sub):
+    def dec(obj):
+        obj.__doc__ = obj.__doc__.format(*sub)
+        return obj
+    return dec
+
 
 class BaseStrategy(bt.Strategy):
     """
@@ -216,6 +222,18 @@ class BaseStrategy(bt.Strategy):
 
 
 class RSIStrategy(BaseStrategy):
+    """
+    Relative Strength Index (RSI) trading strategy
+
+    Parameters
+    ----------
+    rsi_period : int
+        Period used as basis in computing RSI
+    rsi_upper : int
+        The RSI upper limit, above which the assess is considered "overbought" and is sold
+    rsi_lower : int
+        The RSI lower limit, below which the assess is considered "oversold" and is bought
+    """
     params = (
         ("rsi_period", 14),
         ("rsi_upper", 70),
@@ -223,6 +241,7 @@ class RSIStrategy(BaseStrategy):
     )
 
     def __init__(self):
+
         # Initialize global variables
         super().__init__()
         # Strategy level variables
@@ -243,6 +262,17 @@ class RSIStrategy(BaseStrategy):
 
 
 class SMACStrategy(BaseStrategy):
+    """
+    Simple moving average crossover strategy
+
+    Parameters
+    ----------
+    fast_period : int
+        The period used for the fast moving average line (should be smaller than `slow_upper`)
+    slow_upper : int
+        The period used for the slow moving average line (should be larger than `fast_upper`)
+
+    """
     params = (
         ("fast_period", 10),  # period for the fast moving average
         ("slow_period", 30),
@@ -271,7 +301,8 @@ class SMACStrategy(BaseStrategy):
 
 STRATEGY_MAPPING = {"rsi": RSIStrategy, "smac": SMACStrategy, "base": BaseStrategy}
 
-
+strat_docs = "\nExisting strategies:\n\n" + "\n".join([key + "\n" + value.__doc__ for key, value in STRATEGY_MAPPING.items()])
+@docstring_parameter(strat_docs)
 def backtest(
     strategy,
     data,  # Treated as csv path is str, and dataframe of pd.DataFrame
@@ -281,6 +312,12 @@ def backtest(
     plot=True,
     **kwargs
 ):
+    """
+    Backtest financial data with a specified trading strategy
+    
+    {0}
+    """
+
     cerebro = bt.Cerebro(stdstats=False)
     cerebro.addobserver(bt.observers.Broker)
     cerebro.addobserver(bt.observers.Trades)
