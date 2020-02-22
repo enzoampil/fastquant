@@ -43,6 +43,7 @@ print(df.head())
 ### Simple Moving Average Crossover (15 day MA vs 40 day MA)
 Daily Jollibee prices from 2018-01-01 to 2019-01-01
 ```
+from fastquant import backtest
 backtest('smac', jfc, fast_period=15, slow_period=40)
 
 # Starting Portfolio Value: 100000.00
