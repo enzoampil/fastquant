@@ -18,11 +18,10 @@
 pip install fastquant
 ```
 
-## Get Philippine stock data
-Accessed via the [phisix](http://phisix-api2.appspot.com/) API
+## Get stock data
 ```
-from fastquant import get_pse_data
-df = get_pse_data("JFC", "2018-01-01", "2019-01-01")
+from fastquant import get_stock_data
+df = get_stock_data("JFC", "2018-01-01", "2019-01-01")
 print(df.head())
 
 #           dt  close   volume
@@ -42,30 +41,11 @@ plt.title("Daily Closing Prices of JFC\nfrom 2018-01-01 to 2019-01-01", fontsize
 ```
 ![](daily_closing.png)
 
-## Analyze with a simple moving average (SMA) trading strategy
-```
-ma30 = df.close.rolling(30).mean()
-close_ma30 = pd.concat([df.close, ma30], axis=1).dropna()
-close_ma30.columns = ['Closing Price', 'Simple Moving Average (30 day)']
+## Backtest trading strategies
 
-close_ma30.plot(figsize=(10, 6))
-plt.title("Daily Closing Prices vs 30 day SMA of JFC\nfrom 2018-01-01 to 2019-01-01", fontsize=20)
+### Simple Moving Average Crossover (15 day MA vs 40 day MA)
+Daily Jollibee prices from 2018-01-01 to 2019-01-01
 ```
-![](daily_closing_sma30.png)
-
-## Backtesting templates
-Using the [backtrader](https://github.com/backtrader/backtrader) framework
-
-### Relative strength index (RSI) trading strategy (14 day window)
-Daily Jollibee prices from 2017-01-01 to 2019-01-01
+backtest('smac', jfc, fast_period=15, slow_period=40)
 ```
-python examples/jfc_rsi.py
-```
-![](examples/jfc_rsi.png)
-
-### Min max support resistance trading strategy (30 day window)
-Daily Jollibee prices from 2017-01-01 to 2019-01-01
-```
-python examples/jfc_support_resistance.py
-```
-![](examples/jfc_support_resistance.png)
+![](smac_sample.png)
