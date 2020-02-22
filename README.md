@@ -8,7 +8,7 @@
 **fastquant** allows you easily backtest investment strategies with as few as 3 lines of python code. Its goal is to promote data driven investments by making quantitative analysis in finance accessible to everyone.
 
 ## Features
-1. Easily access historical stock data*
+1. Easily access historical stock data
 2. Backtest trading strategies with only 3 lines of code
 
 <sup>`*` - Both Philippine stock data and Yahoo Finance data are accessible straight from fastquant<sup>
@@ -19,6 +19,10 @@ pip install fastquant
 ```
 
 ## Get stock data
+All symbols from [Yahoo Finance](https://finance.yahoo.com/) and Philippine Stock Exchange ([PSE](https://www.pesobility.com/stock)) are accessible via `get_stock_data`.
+
+
+
 ```
 from fastquant import get_stock_data
 df = get_stock_data("JFC", "2018-01-01", "2019-01-01")
@@ -31,6 +35,8 @@ print(df.head())
 #   2019-01-06  323.0  1004160
 #   2019-01-07  321.0   623090
 ```
+
+*Note: Symbols from Yahoo Finance will return closing prices in USD, while symbols from PSE will return closing prices in PHP*
 
 ## Backtest trading strategies
 
