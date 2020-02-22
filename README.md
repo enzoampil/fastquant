@@ -47,5 +47,8 @@ plt.title("Daily Closing Prices of JFC\nfrom 2018-01-01 to 2019-01-01", fontsize
 Daily Jollibee prices from 2018-01-01 to 2019-01-01
 ```
 backtest('smac', jfc, fast_period=15, slow_period=40)
+
+# Starting Portfolio Value: 100000.00
+# Final Portfolio Value: 102272.90
 ```
 ![](smac_sample.png)
