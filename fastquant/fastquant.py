@@ -330,6 +330,58 @@ def get_pse_data(symbol, start_date, end_date, cv=True, save=True):
     return pse_data_df
 
 
+def get_stock_data(symbol, start_date, end_date, cv=True, save=True):
+
+    """Returns pricing data for a specified stock.
+
+    Parameters
+    ----------
+    symbol : str
+        Symbol of the stock in the PSE. You can refer to this link: https://www.pesobility.com/stock.
+    start_date : str
+        Starting date (YYYY-MM-DD) of the period that you want to get data on
+    end_date : str
+        Ending date (YYYY-MM-DD) of the period you want to get data on
+    cv : bool
+        Whether to return only date and price related data (excluding the name of the company name and symbol)
+
+    Returns
+    -------
+    pandas.DataFrame
+        Stock data (in CV format if cv = True) for the specified company and date range
+    """
+
+    file_name = "{}_{}_{}.csv".format(symbol, start_date, end_date)
+
+    if Path(file_name).exists():
+        print("Reading cached file found:", file_name)
+        pse_data_df = pd.read_csv(file_name)
+        pse_data_df['dt'] = pd.to_datetime(pse_data_df.dt)
+        return pse_data_df
+
+    date_range = (
+        pd.period_range(start_date, end_date, freq="D").to_series().astype(str).values
+    )
+    pse_data_list = []
+    for date in tqdm(date_range):
+        pse_data_1day = get_pse_data_by_date(symbol, date)
+        if pse_data_1day is None:
+            continue
+        pse_data_list.append(pse_data_1day)
+    pse_data_df = pd.DataFrame(pse_data_list)
+    if cv:
+        pse_data_df = pse_data_df[["dt", "close", "volume"]]
+    else:
+        pse_data_df = pse_data_df[["dt", "close", "volume", "symbol", "volume"]]
+    if save:
+        pse_data_df.to_csv(
+            file_name, index=False
+        )
+
+    pse_data_df['dt'] = pd.to_datetime(pse_data_df.dt)
+    return pse_data_df
+
+
 def pse_data_to_csv(
     symbol,
     start_date,
