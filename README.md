@@ -32,15 +32,6 @@ print(df.head())
 #   2019-01-07  321.0   623090
 ```
 
-## Plot daily closing prices
-```
-from matplotlib import pyplot as plt
-
-df.close.plot(figsize=(10, 6))
-plt.title("Daily Closing Prices of JFC\nfrom 2018-01-01 to 2019-01-01", fontsize=20)
-```
-![](daily_closing.png)
-
 ## Backtest trading strategies
 
 ### Simple Moving Average Crossover (15 day MA vs 40 day MA)
