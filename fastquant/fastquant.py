@@ -10,12 +10,14 @@ import os
 import requests
 from datetime import datetime
 import pandas as pd
+import numpy as np
 from string import digits
 import lxml.html as LH
 from bs4 import BeautifulSoup
 from tqdm import tqdm
 import tweepy
 from pathlib import Path
+import yfinance as yf
 
 PSE_TWITTER_ACCOUNTS = [
     "phstockexchange",
@@ -28,6 +30,15 @@ PSE_TWITTER_ACCOUNTS = [
     "wealthsec",
 ]
 
+DATA_FORMAT_COLS = {
+    "d": "dt",
+    "o": "open",
+    "h": "high",
+    "l": "low",
+    "c": "close",
+    "v": "volume",
+    "i": "openinterest"
+}
 
 def get_stock_table(stock_table_fp="stock_table.csv"):
     """
@@ -241,8 +252,6 @@ def get_pse_data_old(symbol, start_date, end_date, stock_table_fp="stock_table.c
     }
     rename_list = ["dt", "open", "high", "low", "close", "value"]
     df = df.rename(columns=rename_dict)[rename_list].drop_duplicates()
-    df = df.set_index("dt")
-    df.index = pd.to_datetime(df.index)
 
     return df
 
@@ -278,7 +287,7 @@ def get_pse_data_by_date(symbol, date):
     return None
 
 
-def get_pse_data(symbol, start_date, end_date, cv=True, save=True):
+def get_pse_data(symbol, start_date, end_date, save=True, max_straight_nones=10):
 
     """Returns pricing data for a specified stock.
 
@@ -290,8 +299,6 @@ def get_pse_data(symbol, start_date, end_date, cv=True, save=True):
         Starting date (YYYY-MM-DD) of the period that you want to get data on
     end_date : str
         Ending date (YYYY-MM-DD) of the period you want to get data on
-    cv : bool
-        Whether to return only date and price related data (excluding the name of the company name and symbol)
 
     Returns
     -------
@@ -310,17 +317,30 @@ def get_pse_data(symbol, start_date, end_date, cv=True, save=True):
     date_range = (
         pd.period_range(start_date, end_date, freq="D").to_series().astype(str).values
     )
+    max_straight_nones = min(max_straight_nones, len(date_range))
     pse_data_list = []
-    for date in tqdm(date_range):
+    straight_none_count = 0
+    for i, date in tqdm(enumerate(date_range)):
+        iter_num = i + 1
         pse_data_1day = get_pse_data_by_date(symbol, date)
+
+        # Return None if the first `max_straight_nones` phisix iterations return Nones (status_code != 200)
         if pse_data_1day is None:
+            if iter_num < max_straight_nones:
+                straight_none_count += 1
+            else:
+                straight_none_count += 1
+                if straight_none_count >= max_straight_nones:        
+                    print("Symbol {} not found in phisix after the first {} date iterations!")
+                    return None
             continue
+        else:
+            # Refresh straight none count when phisix returns
+            straight_none_count = 0
         pse_data_list.append(pse_data_1day)
     pse_data_df = pd.DataFrame(pse_data_list)
-    if cv:
-        pse_data_df = pse_data_df[["dt", "close", "volume"]]
-    else:
-        pse_data_df = pse_data_df[["dt", "close", "volume", "symbol", "volume"]]
+    pse_data_df = pse_data_df[["dt", "close", "volume"]]
+
     if save:
         pse_data_df.to_csv(
             file_name, index=False
@@ -330,7 +350,24 @@ def get_pse_data(symbol, start_date, end_date, cv=True, save=True):
     return pse_data_df
 
 
-def get_stock_data(symbol, start_date, end_date, cv=True, save=True):
+def get_yahoo_data(symbol, start_date, end_date):
+    df = yf.download(symbol, start=start_date, end=end_date)
+    df = df.reset_index()
+    rename_dict = {
+        "Date": "dt",
+        "Open": "open",
+        "High": "high",
+        "Low": "low",
+        "Close": "close",
+        "Adj Close": "adj_close",
+        "Volume": "volume",
+    }
+    rename_list = ["dt", "open", "high", "low", "close", "adj_close", "volume"]
+    df = df.rename(columns=rename_dict)[rename_list].drop_duplicates()
+    return df if not df.empty else None
+
+
+def get_stock_data(symbol, start_date, end_date, source='phisix', format='dcv', stock_table_fp="stock_table.csv"):
 
     """Returns pricing data for a specified stock.
 
@@ -342,44 +379,43 @@ def get_stock_data(symbol, start_date, end_date, cv=True, save=True):
         Starting date (YYYY-MM-DD) of the period that you want to get data on
     end_date : str
         Ending date (YYYY-MM-DD) of the period you want to get data on
-    cv : bool
-        Whether to return only date and price related data (excluding the name of the company name and symbol)
+    source : str
+        First source to query from ("pse", "yahoo"). If the stock is not found in the first source, the query is run on the other source.
+    format : str
+        Format of the output data
+    stock_table_fp : str
+        File path of an existing stock table or where a newly downloaded table will be saved. Only relevant when source='pse'.
 
     Returns
     -------
     pandas.DataFrame
-        Stock data (in CV format if cv = True) for the specified company and date range
+        Stock data (in the specified `format`) for the specified company and date range
     """
 
-    file_name = "{}_{}_{}.csv".format(symbol, start_date, end_date)
-
-    if Path(file_name).exists():
-        print("Reading cached file found:", file_name)
-        pse_data_df = pd.read_csv(file_name)
-        pse_data_df['dt'] = pd.to_datetime(pse_data_df.dt)
-        return pse_data_df
-
-    date_range = (
-        pd.period_range(start_date, end_date, freq="D").to_series().astype(str).values
-    )
-    pse_data_list = []
-    for date in tqdm(date_range):
-        pse_data_1day = get_pse_data_by_date(symbol, date)
-        if pse_data_1day is None:
-            continue
-        pse_data_list.append(pse_data_1day)
-    pse_data_df = pd.DataFrame(pse_data_list)
-    if cv:
-        pse_data_df = pse_data_df[["dt", "close", "volume"]]
+    df_columns = [DATA_FORMAT_COLS[c] for c in format]
+    if source == 'phisix':
+        # The query is run on 'phisix', but if the symbol isn't found, the same query is run on 'yahoo'.
+        df = get_pse_data(symbol, start_date, end_date)
+        if df is None:
+            df = get_yahoo_data(symbol, start_date, end_date) 
+    elif source == 'yahoo':
+        # The query is run on 'yahoo', but if the symbol isn't found, the same query is run on 'phisix'.
+        df = get_yahoo_data(symbol, start_date, end_date)
+        if df is None:
+            df = get_pse_data(symbol, start_date, end_date)
     else:
-        pse_data_df = pse_data_df[["dt", "close", "volume", "symbol", "volume"]]
-    if save:
-        pse_data_df.to_csv(
-            file_name, index=False
-        )
+        raise Exception("Source must be either 'phisix' or 'yahoo'")
 
-    pse_data_df['dt'] = pd.to_datetime(pse_data_df.dt)
-    return pse_data_df
+    missing_columns = [col for col in df_columns if col not in df.columns]
+
+    # Fill missing columns with np.nan
+    for missing_column in missing_columns:
+        df[missing_column] = np.nan
+    
+    if len(missing_columns) > 0:
+        print("Missing columns filled w/ NaN:", missing_columns)
+
+    return df[df_columns]
 
 
 def pse_data_to_csv(
