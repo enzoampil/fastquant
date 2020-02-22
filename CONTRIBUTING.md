@@ -1,7 +1,7 @@
 ## Setup
 ```
-git clone https://github.com/enzoampil/psequant.git
-cd psequant
+git clone https://github.com/enzoampil/fastquant.git
+cd fastquant
 virtualenv env
 source env/bin/activate
 pip install -r requirements.txt
@@ -9,5 +9,5 @@ pip install -r requirements.txt
 
 ## Run tests
 ```
-pytest test_psequant.py
+pytest test_fastquant.py
 ```
