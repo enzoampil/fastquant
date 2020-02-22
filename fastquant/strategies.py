@@ -25,10 +25,12 @@ DATA_FORMAT_MAPPING = {
     }
 }
 
+
 def docstring_parameter(*sub):
     def dec(obj):
         obj.__doc__ = obj.__doc__.format(*sub)
         return obj
+
     return dec
 
 
@@ -184,7 +186,8 @@ class BaseStrategy(bt.Strategy):
                 else:
                     # Margin is required for buy commission
                     afforded_size = int(
-                        self.cash / (self.dataopen[1] * (1 + COMMISSION_PER_TRANSACTION + 0.001))
+                        self.cash
+                        / (self.dataopen[1] * (1 + COMMISSION_PER_TRANSACTION + 0.001))
                     )
                     final_size = min(buy_prop_size, afforded_size,)
                     if self.transaction_logging:
@@ -234,6 +237,7 @@ class RSIStrategy(BaseStrategy):
     rsi_lower : int
         The RSI lower limit, below which the assess is considered "oversold" and is bought
     """
+
     params = (
         ("rsi_period", 14),
         ("rsi_upper", 70),
@@ -273,6 +277,7 @@ class SMACStrategy(BaseStrategy):
         The period used for the slow moving average line (should be larger than `fast_upper`)
 
     """
+
     params = (
         ("fast_period", 10),  # period for the fast moving average
         ("slow_period", 30),
@@ -301,7 +306,11 @@ class SMACStrategy(BaseStrategy):
 
 STRATEGY_MAPPING = {"rsi": RSIStrategy, "smac": SMACStrategy, "base": BaseStrategy}
 
-strat_docs = "\nExisting strategies:\n\n" + "\n".join([key + "\n" + value.__doc__ for key, value in STRATEGY_MAPPING.items()])
+strat_docs = "\nExisting strategies:\n\n" + "\n".join(
+    [key + "\n" + value.__doc__ for key, value in STRATEGY_MAPPING.items()]
+)
+
+
 @docstring_parameter(strat_docs)
 def backtest(
     strategy,

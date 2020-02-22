@@ -37,8 +37,9 @@ DATA_FORMAT_COLS = {
     "l": "low",
     "c": "close",
     "v": "volume",
-    "i": "openinterest"
+    "i": "openinterest",
 }
+
 
 def get_stock_table(stock_table_fp="stock_table.csv"):
     """
@@ -311,7 +312,7 @@ def get_pse_data(symbol, start_date, end_date, save=True, max_straight_nones=10)
     if Path(file_name).exists():
         print("Reading cached file found:", file_name)
         pse_data_df = pd.read_csv(file_name)
-        pse_data_df['dt'] = pd.to_datetime(pse_data_df.dt)
+        pse_data_df["dt"] = pd.to_datetime(pse_data_df.dt)
         return pse_data_df
 
     date_range = (
@@ -330,8 +331,10 @@ def get_pse_data(symbol, start_date, end_date, save=True, max_straight_nones=10)
                 straight_none_count += 1
             else:
                 straight_none_count += 1
-                if straight_none_count >= max_straight_nones:        
-                    print("Symbol {} not found in phisix after the first {} date iterations!")
+                if straight_none_count >= max_straight_nones:
+                    print(
+                        "Symbol {} not found in phisix after the first {} date iterations!"
+                    )
                     return None
             continue
         else:
@@ -342,11 +345,9 @@ def get_pse_data(symbol, start_date, end_date, save=True, max_straight_nones=10)
     pse_data_df = pse_data_df[["dt", "close", "volume"]]
 
     if save:
-        pse_data_df.to_csv(
-            file_name, index=False
-        )
+        pse_data_df.to_csv(file_name, index=False)
 
-    pse_data_df['dt'] = pd.to_datetime(pse_data_df.dt)
+    pse_data_df["dt"] = pd.to_datetime(pse_data_df.dt)
     return pse_data_df
 
 
@@ -367,7 +368,14 @@ def get_yahoo_data(symbol, start_date, end_date):
     return df if not df.empty else None
 
 
-def get_stock_data(symbol, start_date, end_date, source='phisix', format='dcv', stock_table_fp="stock_table.csv"):
+def get_stock_data(
+    symbol,
+    start_date,
+    end_date,
+    source="phisix",
+    format="dcv",
+    stock_table_fp="stock_table.csv",
+):
 
     """Returns pricing data for a specified stock.
 
@@ -393,12 +401,12 @@ def get_stock_data(symbol, start_date, end_date, source='phisix', format='dcv', 
     """
 
     df_columns = [DATA_FORMAT_COLS[c] for c in format]
-    if source == 'phisix':
+    if source == "phisix":
         # The query is run on 'phisix', but if the symbol isn't found, the same query is run on 'yahoo'.
         df = get_pse_data(symbol, start_date, end_date)
         if df is None:
-            df = get_yahoo_data(symbol, start_date, end_date) 
-    elif source == 'yahoo':
+            df = get_yahoo_data(symbol, start_date, end_date)
+    elif source == "yahoo":
         # The query is run on 'yahoo', but if the symbol isn't found, the same query is run on 'phisix'.
         df = get_yahoo_data(symbol, start_date, end_date)
         if df is None:
@@ -411,7 +419,7 @@ def get_stock_data(symbol, start_date, end_date, source='phisix', format='dcv', 
     # Fill missing columns with np.nan
     for missing_column in missing_columns:
         df[missing_column] = np.nan
-    
+
     if len(missing_columns) > 0:
         print("Missing columns filled w/ NaN:", missing_columns)
 
