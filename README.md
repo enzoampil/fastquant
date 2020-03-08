@@ -11,7 +11,7 @@
 1. Easily access historical stock data
 2. Backtest trading strategies with only 3 lines of code
 
-<sup>`*` - Both Philippine stock data and Yahoo Finance data are accessible straight from fastquant<sup>
+<sup>`*` - Both Yahoo Finance and Philippine stock data data are accessible straight from fastquant<sup>
 
 ## Installation
 ```
