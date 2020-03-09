@@ -21,8 +21,6 @@ pip install fastquant
 ## Get stock data
 All symbols from [Yahoo Finance](https://finance.yahoo.com/) and Philippine Stock Exchange ([PSE](https://www.pesobility.com/stock)) are accessible via `get_stock_data`.
 
-
-
 ```
 from fastquant import get_stock_data
 df = get_stock_data("JFC", "2018-01-01", "2019-01-01")
