@@ -9,5 +9,11 @@ Authors@R:
            comment = c(ORCID = "YOUR-ORCID-ID"))
 Description: What the package does (one paragraph).
 License: What license it uses
+Imports: dplyr, 
+         httr, 
+         magrittr, 
+         purrr, 
+         tidyr
 Encoding: UTF-8
 LazyData: true
+RoxygenNote: 7.0.2
