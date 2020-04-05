@@ -80,7 +80,9 @@ def get_stock_table(stock_table_fp="stock_table.csv"):
             pd.concat(
                 [
                     pd.read_html(r.text)[0],
-                    pd.DataFrame({"attr": table.xpath("//tr/td/a/@onclick")[::2]}),
+                    pd.DataFrame(
+                        {"attr": table.xpath("//tr/td/a/@onclick")[::2]}
+                    ),
                 ],
                 axis=1,
             )
@@ -157,11 +159,19 @@ def disclosures_json_to_df(disclosures):
         filtered_examples = [ex for ex in disclosures if ex["label"] == disc]
         additional_feats_df = pd.DataFrame(
             [
-                dict([tuple(item.split(":")) for item in ex["tooltip"] if ":" in item])
+                dict(
+                    [
+                        tuple(item.split(":"))
+                        for item in ex["tooltip"]
+                        if ":" in item
+                    ]
+                )
                 for ex in filtered_examples
             ]
         )
-        main_df = pd.DataFrame(filtered_examples)[["id", "time", "color", "label"]]
+        main_df = pd.DataFrame(filtered_examples)[
+            ["id", "time", "color", "label"]
+        ]
         combined = pd.concat([main_df, additional_feats_df], axis=1)
         combined["time"] = pd.to_datetime(combined.time, unit="s")
         if "Total Revenue" in combined.columns.values:
@@ -185,7 +195,9 @@ def disclosures_json_to_df(disclosures):
                 .apply(lambda x: x.split()[0])
                 .astype(float)
             )
-            combined["Net Income YoY Growth (%)"] = combined["Net Income"].apply(
+            combined["Net Income YoY Growth (%)"] = combined[
+                "Net Income"
+            ].apply(
                 lambda x: str(x)
                 .replace("(", "")
                 .replace(")", "")
@@ -202,7 +214,9 @@ def get_disclosures_df(symbol, from_date, to_date):
     return disclosures_dfs
 
 
-def get_pse_data_old(symbol, start_date, end_date, stock_table_fp="stock_table.csv"):
+def get_pse_data_old(
+    symbol, start_date, end_date, stock_table_fp="stock_table.csv"
+):
 
     """Returns pricing data for a specified stock.
 
@@ -232,16 +246,26 @@ def get_pse_data_old(symbol, start_date, end_date, stock_table_fp="stock_table.c
 
     data = {
         "cmpy_id": int(
-            stock_table["company_id"][stock_table["Stock Symbol"] == symbol].values[0]
+            stock_table["company_id"][
+                stock_table["Stock Symbol"] == symbol
+            ].values[0]
         ),
         "security_id": int(
-            stock_table["security_id"][stock_table["Stock Symbol"] == symbol].values[0]
+            stock_table["security_id"][
+                stock_table["Stock Symbol"] == symbol
+            ].values[0]
         ),
-        "startDate": datetime.strptime(start_date, "%Y-%m-%d").strftime("%m-%d-%Y"),
-        "endDate": datetime.strptime(end_date, "%Y-%m-%d").strftime("%m-%d-%Y"),
+        "startDate": datetime.strptime(start_date, "%Y-%m-%d").strftime(
+            "%m-%d-%Y"
+        ),
+        "endDate": datetime.strptime(end_date, "%Y-%m-%d").strftime(
+            "%m-%d-%Y"
+        ),
     }
 
-    r = requests.post(url="https://edge.pse.com.ph/common/DisclosureCht.ax", json=data)
+    r = requests.post(
+        url="https://edge.pse.com.ph/common/DisclosureCht.ax", json=data
+    )
     df = pd.DataFrame(r.json()["chartData"])
     rename_dict = {
         "CHART_DATE": "dt",
@@ -258,7 +282,9 @@ def get_pse_data_old(symbol, start_date, end_date, stock_table_fp="stock_table.c
 
 
 def process_phisix_date_dict(phisix_dict):
-    date = datetime.strftime(pd.to_datetime(phisix_dict["as_of"]).date(), "%Y-%m-%d")
+    date = datetime.strftime(
+        pd.to_datetime(phisix_dict["as_of"]).date(), "%Y-%m-%d"
+    )
     stock_dict = phisix_dict["stock"][0]
     stock_price_dict = stock_dict["price"]
     name = stock_dict["name"]
@@ -279,7 +305,9 @@ def process_phisix_date_dict(phisix_dict):
 
 
 def get_pse_data_by_date(symbol, date):
-    url = "http://phisix-api2.appspot.com/stocks/{}.{}.json".format(symbol, date)
+    url = "http://phisix-api2.appspot.com/stocks/{}.{}.json".format(
+        symbol, date
+    )
     res = requests.get(url)
     if res.status_code == 200:
         unprocessed_dict = res.json()
@@ -288,7 +316,9 @@ def get_pse_data_by_date(symbol, date):
     return None
 
 
-def get_pse_data(symbol, start_date, end_date, save=True, max_straight_nones=10):
+def get_pse_data(
+    symbol, start_date, end_date, save=True, max_straight_nones=10
+):
 
     """Returns pricing data for a specified stock.
 
@@ -316,7 +346,10 @@ def get_pse_data(symbol, start_date, end_date, save=True, max_straight_nones=10)
         return pse_data_df
 
     date_range = (
-        pd.period_range(start_date, end_date, freq="D").to_series().astype(str).values
+        pd.period_range(start_date, end_date, freq="D")
+        .to_series()
+        .astype(str)
+        .values
     )
     max_straight_nones = min(max_straight_nones, len(date_range))
     pse_data_list = []
@@ -442,10 +475,16 @@ def pse_data_to_csv(
         disclosures=disclosures,
     )
     if isinstance(pse, pd.DataFrame):
-        pse.to_csv("{}{}_{}_{}_OHLCV.csv".format(pse_dir, symbol, start_date, end_date))
+        pse.to_csv(
+            "{}{}_{}_{}_OHLCV.csv".format(
+                pse_dir, symbol, start_date, end_date
+            )
+        )
     else:
         pse[0].to_csv(
-            "{}{}_{}_{}_OHLCV.csv".format(pse_dir, symbol, start_date, end_date)
+            "{}{}_{}_{}_OHLCV.csv".format(
+                pse_dir, symbol, start_date, end_date
+            )
         )
         performance_dict = pse[1]
         performance_dict["D"].to_csv(
@@ -456,7 +495,9 @@ def pse_data_to_csv(
         )
 
 
-def get_company_disclosures(symbol, from_date="06-26-2017", to_date="06-26-2019"):
+def get_company_disclosures(
+    symbol, from_date="06-26-2017", to_date="06-26-2019"
+):
     """
     symbol str - Ticker of the pse stock of choice
     from_date date str %m-%d-%Y - Beginning date of the disclosure data pull
@@ -498,26 +539,30 @@ def get_company_disclosures(symbol, from_date="06-26-2017", to_date="06-26-2019"
     parsed_html = BeautifulSoup(html, "lxml")
     table = parsed_html.find("table", {"class": "list"})
     table_rows = table.find_all("tr")
-    l = []
+    lines = []
     edge_nos = []
     for tr in table_rows:
         td = tr.find_all("td")
         row = [tr.text for tr in td]
         onclicks_raw = [
-            tr.a["onclick"] for tr in td if tr.a and "onclick" in tr.a.attrs.keys()
+            tr.a["onclick"]
+            for tr in td
+            if tr.a and "onclick" in tr.a.attrs.keys()
         ]
         onclicks = [s[s.find("('") + 2 : s.find("')")] for s in onclicks_raw]
-        l.append(row)
+        lines.append(row)
         if onclicks:
             edge_nos.append(onclicks[0])
 
     columns = [el.text for el in table.find_all("th")]
 
-    df = pd.DataFrame(l, columns=columns)
+    df = pd.DataFrame(lines, columns=columns)
     # Filter to rows where not all columns are null
     df = df[df.isna().mean(axis=1) < 1]
     df["edge_no"] = edge_nos
-    df["url"] = "https://edge.pse.com.ph/openDiscViewer.do?edge_no=" + df.edge_no
+    df["url"] = (
+        "https://edge.pse.com.ph/openDiscViewer.do?edge_no=" + df.edge_no
+    )
     df["Announce Date and Time"] = pd.to_datetime(df["Announce Date and Time"])
     return df
 
@@ -602,7 +647,9 @@ def parse_stock_inventory(stock_inventory_str):
         stock_inventory_lol[1:], columns=stock_inventory_lol[0]
     )
     stock_inventory_df.iloc[:, 1] = (
-        stock_inventory_df.iloc[:, 1].apply(lambda x: x.replace(",", "")).astype(int)
+        stock_inventory_df.iloc[:, 1]
+        .apply(lambda x: x.replace(",", ""))
+        .astype(int)
     )
     return stock_inventory_df
 
@@ -665,7 +712,7 @@ def get_tables(parsed_html):
 def tweepy_api(consumer_key, consumer_secret, access_token, access_secret):
     """
     Returns authenticated tweepy.API object
-    
+
     Sample methods:
         user_timeline: returns recent tweets from a specified twitter user
         - screen_name: username of account of interest

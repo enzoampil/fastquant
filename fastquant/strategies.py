@@ -1,4 +1,9 @@
-from __future__ import absolute_import, division, print_function, unicode_literals
+from __future__ import (
+    absolute_import,
+    division,
+    print_function,
+    unicode_literals,
+)
 
 import datetime
 import os.path
@@ -133,7 +138,8 @@ class BaseStrategy(bt.Strategy):
             return
         if self.transaction_logging:
             self.log(
-                "OPERATION PROFIT, GROSS %.2f, NET %.2f" % (trade.pnl, trade.pnlcomm)
+                "OPERATION PROFIT, GROSS %.2f, NET %.2f"
+                % (trade.pnl, trade.pnlcomm)
             )
 
     def notify_cashvalue(self, cash, value):
@@ -168,12 +174,15 @@ class BaseStrategy(bt.Strategy):
                 # Add allowance to commission per transaction (avoid margin)
                 afforded_size = int(
                     self.cash
-                    / (self.dataclose[0] * (1 + COMMISSION_PER_TRANSACTION + 0.001))
+                    / (
+                        self.dataclose[0]
+                        * (1 + COMMISSION_PER_TRANSACTION + 0.001)
+                    )
                 )
                 buy_prop_size = int(afforded_size * self.buy_prop)
                 # Buy based on the closing price of the next closing day
                 if self.execution_type == "close":
-                    final_size = min(buy_prop_size, afforded_size,)
+                    final_size = min(buy_prop_size, afforded_size)
                     if self.transaction_logging:
                         self.log("Cash: {}".format(self.cash))
                         self.log("Price: {}".format(self.dataclose[0]))
@@ -187,14 +196,17 @@ class BaseStrategy(bt.Strategy):
                     # Margin is required for buy commission
                     afforded_size = int(
                         self.cash
-                        / (self.dataopen[1] * (1 + COMMISSION_PER_TRANSACTION + 0.001))
+                        / (
+                            self.dataopen[1]
+                            * (1 + COMMISSION_PER_TRANSACTION + 0.001)
+                        )
                     )
-                    final_size = min(buy_prop_size, afforded_size,)
+                    final_size = min(buy_prop_size, afforded_size)
                     if self.transaction_logging:
                         self.log("Buy prop size: {}".format(buy_prop_size))
                         self.log("Afforded size: {}".format(afforded_size))
                         self.log("Final size: {}".format(final_size))
-                    self.order = self.buy(size=final_size,)
+                    self.order = self.buy(size=final_size)
 
         # Only sell if you hold least one unit of the stock (and sell only that stock, so no short selling)
         stock_value = self.value - self.cash
@@ -207,20 +219,24 @@ class BaseStrategy(bt.Strategy):
                 if self.execution_type == "close":
                     if SELL_PROP == 1:
                         self.order = self.sell(
-                            size=self.position.size, exectype=bt.Order.Close,
+                            size=self.position.size, exectype=bt.Order.Close
                         )
                     else:
                         # Sell based on the closing price of the next closing day
                         self.order = self.sell(
                             size=int(
-                                (stock_value / (self.dataclose[1])) * self.sell_prop
+                                (stock_value / (self.dataclose[1]))
+                                * self.sell_prop
                             ),
                             exectype=bt.Order.Close,
                         )
                 else:
                     # Sell based on the opening price of the next closing day (only works "open" data exists in the dataset)
                     self.order = self.sell(
-                        size=int((self.init_cash / self.dataopen[1]) * self.sell_prop),
+                        size=int(
+                            (self.init_cash / self.dataopen[1])
+                            * self.sell_prop
+                        )
                     )
 
 
@@ -238,11 +254,7 @@ class RSIStrategy(BaseStrategy):
         The RSI lower limit, below which the assess is considered "oversold" and is bought
     """
 
-    params = (
-        ("rsi_period", 14),
-        ("rsi_upper", 70),
-        ("rsi_lower", 30),
-    )
+    params = (("rsi_period", 14), ("rsi_upper", 70), ("rsi_lower", 30))
 
     def __init__(self):
 
@@ -295,7 +307,9 @@ class SMACStrategy(BaseStrategy):
         print("slow_period :", self.slow_period)
         sma_fast = bt.ind.SMA(period=self.fast_period)  # fast moving average
         sma_slow = bt.ind.SMA(period=self.slow_period)  # slow moving average
-        self.crossover = bt.ind.CrossOver(sma_fast, sma_slow)  # crossover signal
+        self.crossover = bt.ind.CrossOver(
+            sma_fast, sma_slow
+        )  # crossover signal
 
     def buy_signal(self):
         return self.crossover > 0
@@ -304,7 +318,11 @@ class SMACStrategy(BaseStrategy):
         return self.crossover < 0
 
 
-STRATEGY_MAPPING = {"rsi": RSIStrategy, "smac": SMACStrategy, "base": BaseStrategy}
+STRATEGY_MAPPING = {
+    "rsi": RSIStrategy,
+    "smac": SMACStrategy,
+    "base": BaseStrategy,
+}
 
 strat_docs = "\nExisting strategies:\n\n" + "\n".join(
     [key + "\n" + value.__doc__ for key, value in STRATEGY_MAPPING.items()]
@@ -323,7 +341,7 @@ def backtest(
 ):
     """
     Backtest financial data with a specified trading strategy
-    
+
     {0}
     """
 
@@ -331,7 +349,9 @@ def backtest(
     cerebro.addobserver(bt.observers.Broker)
     cerebro.addobserver(bt.observers.Trades)
     cerebro.addobserver(bt.observers.BuySell)
-    cerebro.addstrategy(STRATEGY_MAPPING[strategy], init_cash=init_cash, **kwargs)
+    cerebro.addstrategy(
+        STRATEGY_MAPPING[strategy], init_cash=init_cash, **kwargs
+    )
     cerebro.broker.setcommission(commission=commission)
 
     # Treat `data` as a path if it's a string; otherwise, it's treated as a pandas dataframe
@@ -339,7 +359,9 @@ def backtest(
         print("Reading path as pandas dataframe ...")
         data = pd.read_csv(data, header=0, parse_dates=["dt"])
 
-    pd_data = bt.feeds.PandasData(dataname=data, **DATA_FORMAT_MAPPING[data_format])
+    pd_data = bt.feeds.PandasData(
+        dataname=data, **DATA_FORMAT_MAPPING[data_format]
+    )
 
     cerebro.adddata(pd_data)
     cerebro.broker.setcash(init_cash)

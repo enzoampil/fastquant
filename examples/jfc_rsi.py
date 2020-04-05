@@ -1,4 +1,9 @@
-from __future__ import absolute_import, division, print_function, unicode_literals
+from __future__ import (
+    absolute_import,
+    division,
+    print_function,
+    unicode_literals,
+)
 
 import datetime
 import os.path
@@ -35,7 +40,11 @@ class RSIStrategy(bt.Strategy):
             if order.isbuy():
                 self.log(
                     "BUY EXECUTED, Price: %.2f, Cost: %.2f, Comm %.2f"
-                    % (order.executed.price, order.executed.value, order.executed.comm)
+                    % (
+                        order.executed.price,
+                        order.executed.value,
+                        order.executed.comm,
+                    )
                 )
 
                 self.buyprice = order.executed.price
@@ -43,7 +52,11 @@ class RSIStrategy(bt.Strategy):
             else:  # Sell
                 self.log(
                     "SELL EXECUTED, Price: %.2f, Cost: %.2f, Comm %.2f"
-                    % (order.executed.price, order.executed.value, order.executed.comm)
+                    % (
+                        order.executed.price,
+                        order.executed.value,
+                        order.executed.comm,
+                    )
                 )
 
             self.bar_executed = len(self)
@@ -58,7 +71,10 @@ class RSIStrategy(bt.Strategy):
         if not trade.isclosed:
             return
 
-        self.log("OPERATION PROFIT, GROSS %.2f, NET %.2f" % (trade.pnl, trade.pnlcomm))
+        self.log(
+            "OPERATION PROFIT, GROSS %.2f, NET %.2f"
+            % (trade.pnl, trade.pnlcomm)
+        )
 
     def notify_cashvalue(self, cash, value):
         # Update cash and value every period
@@ -93,7 +109,9 @@ class RSIStrategy(bt.Strategy):
                 self.log("SELL CREATE, %.2f" % self.dataclose[0])
                 # Sell a 5% sell position (or whatever is afforded by the current stock holding)
                 # "size" refers to the number of stocks to purchase
-                self.order = self.sell(size=int((INIT_CASH / self.dataclose[0]) * 0.1))
+                self.order = self.sell(
+                    size=int((INIT_CASH / self.dataclose[0]) * 0.1)
+                )
 
 
 if __name__ == "__main__":
