@@ -331,7 +331,7 @@ class MACDStrategy(BaseStrategy):
         ("slow_period", 26),
         ("signal_period", 9),
         ("sma_period", 30),
-        ("dir_period", 10)
+        ("dir_period", 10),
     )
 
     def __init__(self):
@@ -350,10 +350,16 @@ class MACDStrategy(BaseStrategy):
         print("signal_period :", self.signal_period)
         print("sma_period :", self.sma_period)
         print("dir_period :", self.dir_period)
-        macd_ind = bt.ind.MACD(period_me1=self.fast_period, period_me2=self.slow_period, period_signal=self.signal_period)
+        macd_ind = bt.ind.MACD(
+            period_me1=self.fast_period,
+            period_me2=self.slow_period,
+            period_signal=self.signal_period,
+        )
         self.macd = macd_ind.macd
         self.signal = macd_ind.signal
-        self.crossover = bt.ind.CrossOver(self.macd, self.signal)  # crossover buy signal
+        self.crossover = bt.ind.CrossOver(
+            self.macd, self.signal
+        )  # crossover buy signal
 
         # Control market trend
         self.sma = bt.indicators.SMA(period=self.sma_period)
@@ -366,7 +372,12 @@ class MACDStrategy(BaseStrategy):
         return self.crossover < 0 and self.smadir > 0.0
 
 
-STRATEGY_MAPPING = {"rsi": RSIStrategy, "smac": SMACStrategy, "base": BaseStrategy, "macd": MACDStrategy}
+STRATEGY_MAPPING = {
+    "rsi": RSIStrategy,
+    "smac": SMACStrategy,
+    "base": BaseStrategy,
+    "macd": MACDStrategy,
+}
 
 strat_docs = "\nExisting strategies:\n\n" + "\n".join(
     [key + "\n" + value.__doc__ for key, value in STRATEGY_MAPPING.items()]
