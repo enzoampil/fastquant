@@ -426,13 +426,13 @@ class MACDStrategy(BaseStrategy):
     def sell_signal(self):
         return self.crossover < 0 and self.smadir > 0.0
 
-      
+
 STRATEGY_MAPPING = {
     "rsi": RSIStrategy,
     "smac": SMACStrategy,
     "base": BaseStrategy,
     "macd": MACDStrategy,
-    "emac": EMACStrategy
+    "emac": EMACStrategy,
 }
 
 strat_docs = "\nExisting strategies:\n\n" + "\n".join(
@@ -484,6 +484,8 @@ def backtest(
     print("Final Portfolio Value: %.2f" % cerebro.broker.getvalue())
     if plot:
         cerebro.plot(figsize=(30, 15))
+    # True indicates the backtest finished with no errors
+    return True
 
 
 if __name__ == "__main__":
