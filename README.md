@@ -47,4 +47,4 @@ backtest('smac', jfc, fast_period=15, slow_period=40)
 # Starting Portfolio Value: 100000.00
 # Final Portfolio Value: 102272.90
 ```
-![](smac_sample.png)
+![](./docs/assets/smac_sample.png)
