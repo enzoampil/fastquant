@@ -8,6 +8,7 @@ Created on Tue Apr 5, 2020
 
 from inspect import signature
 from datetime import datetime
+import warnings
 from pathlib import Path
 import json
 import requests
@@ -22,6 +23,7 @@ import flammkuchen as fk
 from fastquant import get_stock_data
 from fastquant.config import DATA_PATH
 
+warnings.simplefilter("ignore")
 matplotlib.style.use("fivethirtyeight")
 
 COOKIES = {

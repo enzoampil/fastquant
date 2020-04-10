@@ -1,0 +1,72 @@
+#!/usr/bin/env python3
+"""
+Created on Tue Apr 5, 2020
+@author: jpdeleon
+
+download parsed company disclosures issued between specified dates
+"""
+
+import argparse
+
+# from pathlib import Path
+import matplotlib.pyplot as pl
+from fastquant import CompanyDisclosures
+
+parser = argparse.ArgumentParser(
+    description="download company disclosures data"
+)
+parser.add_argument("symbol", type=str, help="company symbol")
+parser.add_argument(
+    "-t1",
+    "--start_date",
+    type=str,
+    help="start date (default=1-1-2019)",
+    default="1-1-2019",
+)
+parser.add_argument(
+    "-t2",
+    "--end_date",
+    type=str,
+    help="end date (default=TODAY)",
+    default=None,
+)
+parser.add_argument(
+    "-v", "--verbose", action="store_true", help="verbose", default=False
+)
+parser.add_argument(
+    "-c", "--clobber", action="store_true", help="overwrite", default=False
+)
+parser.add_argument(
+    "-p", "--plot", action="store_true", help="show plot", default=False
+)
+# parser.add_argument(
+#     "-o", "--outdir", type=str, help="output directory", default=None
+# )
+# parser.add_argument(
+#     "-s", "--save", action='store_true', help="save csv", default=False
+# )
+parser.add_argument(
+    "-d",
+    "--disclosure_type",
+    type=str,
+    help="disclosure type (default=all)",
+    default="all",
+)
+
+args = parser.parse_args()
+if __name__ == "__main__":
+    cd = CompanyDisclosures(
+        args.symbol,
+        start_date=args.start_date,
+        end_date=args.end_date,
+        disclosure_type=args.disclosure_type,
+        verbose=args.verbose,
+        clobber=args.clobber,
+    )
+    # if args.save:
+    #     fp = Path(args.outdir, "{} disclosures_summary.csv".format(cd.symbol))
+    #     cd.disclosures_combined.to_csv(fp)
+
+    if args.plot:
+        fig = cd.plot_disclosures(disclosure_type=args.disclosure_type)
+        pl.show()
