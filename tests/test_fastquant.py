@@ -4,7 +4,7 @@ from fastquant import (
     get_pse_data,
     get_yahoo_data,
     get_stock_data,
-    get_company_disclosures,
+    CompanyDisclosures,
     pse_data_to_csv,
 )
 
@@ -41,5 +41,5 @@ def test_get_stock_data():
 
 
 def test_get_company_disclosures():
-    company_disclosures_df = get_company_disclosures(PHISIX_SYMBOL)
-    assert isinstance(company_disclosures_df, pd.DataFrame)
+    cd = CompanyDisclosures(symbol=PHISIX_SYMBOL)
+    assert isinstance(cd.company_disclosures, pd.DataFrame)
