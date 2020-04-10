@@ -21,4 +21,5 @@ tqdm==4.28.1
 tweepy==3.8.0
 urllib3==1.25.7
 yfinance==0.1.54
+flammkuchen
 pre-commit

@@ -8,6 +8,8 @@ Created on Tue Apr 5, 2020
 
 from inspect import signature
 from datetime import datetime
+from pathlib import Path
+import json
 import requests
 from bs4 import BeautifulSoup
 import matplotlib.cm as cm
@@ -16,11 +18,11 @@ import pandas as pd
 from tqdm import tqdm
 import matplotlib.pyplot as pl
 import matplotlib
+import flammkuchen as fk
 from fastquant import get_stock_data
-import json
+from fastquant.config import DATA_PATH
 
 matplotlib.style.use("fivethirtyeight")
-
 
 COOKIES = {
     "BIGipServerPOOL_EDGE": "1427584378.20480.0000",
@@ -48,16 +50,29 @@ class CompanyDisclosures:
         start_date="1-1-2019",
         end_date=None,
         verbose=True,
+        clobber=False,
     ):
+        """
+        Parameters
+        ----------
+        symbol : str
+            company symbol
+        disclosure_type : str
+            type of disclosure available
+        start_date : str
+            start date with format %m-%d-%Y
+        end_date : str
+            end date with format %m-%d-%Y
+        """
         self.symbol = symbol
         self.start_date = start_date
         self.end_date = TODAY if end_date is None else end_date
         self.disclosure_type = disclosure_type
         self.stock_data = None
-        # self.company_summary = self.get_company_summary()
         self.verbose = verbose
+        self.clobber = clobber
         if self.verbose:
-            print(f"Pulling {self.symbol} disclosures summary...")
+            print("Pulling {} disclosures summary...".format(self.symbol))
         self.company_disclosures = self.get_company_disclosures()
         self.disclosure_types = (
             self.company_disclosures["Template Name"]
@@ -66,12 +81,16 @@ class CompanyDisclosures:
         )
         if self.verbose:
             print(
-                f"Found {len(self.company_disclosures)} disclosures with {len(self.disclosure_types)} types:"
+                "Found {} disclosures with {} types:".format(
+                    len(self.company_disclosures), len(self.disclosure_types)
+                )
             )
             print(
-                f"{self.disclosure_types}\nbetween {self.start_date} & {self.end_date}."
+                "{}\nbetween {} & {}.".format(
+                    self.disclosure_types, self.start_date, self.end_date
+                )
             )
-        print(f"Pulling details in all {self.symbol} disclosures...")
+        print("Pulling details in all {} disclosures...".format(self.symbol))
         self.disclosure_tables = self.get_all_disclosure_tables()
         self.disclosure_tables_df = self.get_all_disclosure_tables_df()
         self.disclosure_backgrounds = self.get_disclosure_details()
@@ -79,21 +98,25 @@ class CompanyDisclosures:
             key="Subject of the Disclosure"
         )
         self.disclosures_combined = self.get_combined_disclosures()
-        errmsg = f"{self.disclosure_type} not available between {self.start_date} & {self.end_date}.\n"
-        errmsg += f"Try {self.disclosure_types}."
+        errmsg = "{} not available between {} & {}.\n".format(
+            self.disclosure_type, self.start_date, self.end_date
+        )
+        errmsg += "Try {}.".format(self.disclosure_types)
         if self.disclosure_type != "all":
             assert self.disclosure_type in self.disclosure_types, errmsg
 
     def __repr__(self):
+        """show class description after istantiation
+        """
         fields = signature(self.__init__).parameters
         values = ", ".join(repr(getattr(self, f)) for f in fields)
-        return f"{type(self).__name__}({values})"
+        return "{}({})".format(type(self).__name__, values)
 
     def get_stock_data(self):
         """overwrites get_stock_data
         """
         if self.verbose:
-            print(f"Pulling {self.symbol} stock data...")
+            print("Pulling {} stock data...".format(self.symbol))
         data = get_stock_data(
             self.symbol, start_date=self.start_date, end_date=self.end_date
         )
@@ -305,7 +328,7 @@ class CompanyDisclosures:
 
     def get_disclosure_tables(self, edge_no):
         """
-        Return the disclosure details (at the bottom page) given the parsed tables
+        Returns the disclosure details (at the bottom page) given the parsed tables
         """
         file_id = self.get_disclosure_file_id(edge_no)
         parsed_html = self.get_disclosure_parsed_html(file_id)
@@ -323,17 +346,30 @@ class CompanyDisclosures:
 
     def get_all_disclosure_tables(self):
         """
-        iterate all disclosure id and save details in a dictionary
+        Returns a dict after iterating all disclosures
         """
-        disclosure_details = {}
-        for edge_no in tqdm(self.company_disclosures["edge_no"].values):
-            df = self.get_disclosure_tables(edge_no)
-            disclosure_details[edge_no] = df
+        file_name = "{}_disclosures_{}_{}.hdf5".format(
+            self.symbol, self.start_date, self.end_date
+        )
+        fp = Path(DATA_PATH, file_name)
+
+        if not fp.exists() or self.clobber:
+            disclosure_details = {}
+            for edge_no in tqdm(self.company_disclosures["edge_no"].values):
+                df = self.get_disclosure_tables(edge_no)
+                disclosure_details[edge_no] = df
+            fk.save(fp, disclosure_details)
+            if self.verbose:
+                print("Saved: {}".format(fp))
+        else:
+            disclosure_details = fk.load(fp)
+            if self.verbose:
+                print("Loaded: {}".format(fp))
         return disclosure_details
 
     def get_all_disclosure_tables_df(self):
         """
-        Return disclosure tables as a dataframe
+        Returns disclosure tables as a dataframe
         """
         values = []
         for edge_no in self.disclosure_tables.keys():
@@ -347,7 +383,7 @@ class CompanyDisclosures:
         self, key="Background/Description of the Disclosure"
     ):
         """
-        return a dataframe of detailed background/decription per date
+        Returns a dataframe of specific data from disclosure_tables
         """
         values = []
         for edge_no in self.disclosure_tables.keys():
@@ -360,7 +396,10 @@ class CompanyDisclosures:
         return s
 
     def get_combined_disclosures(self):
-        return pd.concat(
+        """
+        Returns a dataframe of useful disclosure attributes
+        """
+        df = pd.concat(
             [
                 self.company_disclosures,
                 self.disclosure_tables_df,
@@ -369,10 +408,27 @@ class CompanyDisclosures:
             ],
             axis=1,
         )
+        file_name = "{}_disclosures_{}_{}.csv".format(
+            self.symbol, self.start_date, self.end_date
+        )
+        fp = Path(DATA_PATH, file_name)
+
+        if not fp.exists() or self.clobber:
+            df.to_csv(fp)
+            if self.verbose:
+                print("Saved: {}".format(fp))
+        return df
 
     def plot_disclosures(self, disclosure_type=None, data_type="close"):
         """
+        Parameters
+        ----------
         disclosure_type : str
+            type of disclosure to highlight (default=all)
+        data_type : str
+            stock data to overplot (close or volume)
+
+        Returns a figure instance
         """
         disclosure_type = (
             self.disclosure_type
@@ -419,6 +475,10 @@ class CompanyDisclosures:
         ax.set_ylabel(data_type.upper())
         ax.set_title(self.symbol)
         return fig
+
+    def __call__(self):
+        # return parsed data after instantiation
+        return self.disclosures_combined
 
 
 def _remove_amend(x):

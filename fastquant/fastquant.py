@@ -18,6 +18,8 @@ import tweepy
 from pathlib import Path
 import yfinance as yf
 
+from fastquant.config import DATA_PATH
+
 PSE_TWITTER_ACCOUNTS = [
     "phstockexchange",
     "colfinancial",
@@ -236,7 +238,7 @@ def get_pse_data_old(
         Stock data (in OHLCV format) for the specified company and date range
     """
 
-    if os.path.isfile(stock_table_fp):
+    if Path(DATA_PATH, stock_table_fp).exists():
         print("Stock table exists!")
         print("Reading {} ...".format(stock_table_fp))
         stock_table = pd.read_csv(stock_table_fp)
@@ -337,10 +339,10 @@ def get_pse_data(
     """
 
     file_name = "{}_{}_{}.csv".format(symbol, start_date, end_date)
-
-    if Path(file_name).exists():
-        print("Reading cached file found:", file_name)
-        pse_data_df = pd.read_csv(file_name)
+    fp = Path(DATA_PATH, file_name)
+    if fp.exists():
+        print("Reading cached file found: ", fp)
+        pse_data_df = pd.read_csv(fp)
         pse_data_df["dt"] = pd.to_datetime(pse_data_df.dt)
         return pse_data_df
 
@@ -377,7 +379,7 @@ def get_pse_data(
     pse_data_df = pse_data_df[["dt", "close", "volume"]]
 
     if save:
-        pse_data_df.to_csv(file_name, index=False)
+        pse_data_df.to_csv(fp, index=False)
 
     pse_data_df["dt"] = pd.to_datetime(pse_data_df.dt)
     return pse_data_df
