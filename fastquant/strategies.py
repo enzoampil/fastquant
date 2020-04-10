@@ -475,7 +475,7 @@ STRATEGY_MAPPING = {
     "base": BaseStrategy,
     "macd": MACDStrategy,
     "emac": EMACStrategy,
-    "bband": BBandsStrategy,
+    "bbands": BBandsStrategy,
 }
 
 strat_docs = "\nExisting strategies:\n\n" + "\n".join(
