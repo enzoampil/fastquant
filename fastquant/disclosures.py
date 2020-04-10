@@ -6,22 +6,30 @@ Created on Tue Apr 5, 2020
 @author: enzoampil & jpdeleon
 """
 
+from inspect import signature
+from datetime import datetime
 import requests
-from datetime import datetime as dt
 from bs4 import BeautifulSoup
 import matplotlib.cm as cm
+import numpy as np
+import pandas as pd
 from tqdm import tqdm
-
+import matplotlib.pyplot as pl
+import matplotlib
 from fastquant import get_stock_data
+
+matplotlib.style.use("fivethirtyeight")
+
 
 COOKIES = {
     "BIGipServerPOOL_EDGE": "1427584378.20480.0000",
     "JSESSIONID": "r2CYuOovD47c6FDnDoxHKW60.server-ep",
 }
 
-TODAY = dt.now().date().strftime("%m-%d-%Y")
+TODAY = datetime.now().date().strftime("%m-%d-%Y")
 
 __all__ = ["CompanyDisclosures"]
+
 
 class CompanyDisclosures:
     """
@@ -31,41 +39,66 @@ class CompanyDisclosures:
         Company Summary
     company_disclosures :
     """
-    def __init__(self, symbol, disclosure_type='all', start_date='1-1-2019', end_date=None):
-        self.symbol=symbol
-        self.start_date=start_date
-        self.end_date=TODAY if end_date is None else end_date
-        self.disclosure_type=disclosure_type
-        self.stock_data = None
-        self.summary = None
-        self.company_disclosures = self.get_company_disclosures()
-        self.disclosure_types = self.company_disclosures['Template Name'].apply(self._remove_amend).unique()
-        self.disclosure_details = self.get_all_disclosure_details()
-        errmsg = f"{self.disclosure_type} not available between {start_date} & {end_date}.\n"
-        errmsg += f"Try {self.disclosure_types}."
-        assert self.disclosure_type in self.disclosure_types, errmsg
 
-    def get_all_disclosure_details(self):
-        """
-        iterate all disclosure id and save details in a dictionary
-        """
-        disclosure_details = {}
-        for key,row in self.company_disclosures.iterrows():
-            file_id = row['edge_no']
-            df = self.get_disclosure_details(file_id)
-            disclosure_details[file_id] = df
-        return disclosure_details
+    def __init__(
+        self,
+        symbol,
+        disclosure_type="all",
+        start_date="1-1-2019",
+        end_date=None,
+        verbose=True,
+    ):
+        self.symbol = symbol
+        self.start_date = start_date
+        self.end_date = TODAY if end_date is None else end_date
+        self.disclosure_type = disclosure_type
+        self.stock_data = None
+        # self.company_summary = self.get_company_summary()
+        self.verbose = verbose
+        if self.verbose:
+            print(f"Pulling {self.symbol} disclosures summary...")
+        self.company_disclosures = self.get_company_disclosures()
+        self.disclosure_types = (
+            self.company_disclosures["Template Name"]
+            .apply(_remove_amend)
+            .unique()
+        )
+        if self.verbose:
+            print(
+                f"Found {len(self.company_disclosures)} disclosures with {len(self.disclosure_types)} types:"
+            )
+            print(
+                f"{self.disclosure_types}\nbetween {self.start_date} & {self.end_date}."
+            )
+        print(f"Pulling details in all {self.symbol} disclosures...")
+        self.disclosure_tables = self.get_all_disclosure_tables()
+        self.disclosure_backgrounds = self.get_disclosure_details()
+        self.disclosure_subjects = self.get_disclosure_details(
+            key="Subject of the Disclosure"
+        )
+        errmsg = f"{self.disclosure_type} not available between {self.start_date} & {self.end_date}.\n"
+        errmsg += f"Try {self.disclosure_types}."
+        if self.disclosure_type != "all":
+            assert self.disclosure_type in self.disclosure_types, errmsg
+
+    def __repr__(self):
+        fields = signature(self.__init__).parameters
+        values = ", ".join(repr(getattr(self, f)) for f in fields)
+        return f"{type(self).__name__}({values})"
 
     def get_stock_data(self):
         """overwrites get_stock_data
         """
-        data = self.get_stock_data()
-        data['dt'] = pd.to_datetime(data.dt)
-        #set dt as index
-        data = data.set_index('dt')
+        if self.verbose:
+            print(f"Pulling {self.symbol} stock data...")
+        data = get_stock_data(
+            self.symbol, start_date=self.start_date, end_date=self.end_date
+        )
+        data["dt"] = pd.to_datetime(data.dt)
+        # set dt as index
+        data = data.set_index("dt")
         self.stock_data = data
         return data
-
 
     def get_company_disclosures(self):
         """
@@ -115,7 +148,9 @@ class CompanyDisclosures:
                 for tr in td
                 if tr.a and "onclick" in tr.a.attrs.keys()
             ]
-            onclicks = [s[s.find("('") + 2 : s.find("')")] for s in onclicks_raw]
+            onclicks = [
+                s[s.find("('") + 2 : s.find("')")] for s in onclicks_raw
+            ]
             lines.append(row)
             if onclicks:
                 edge_nos.append(onclicks[0])
@@ -129,25 +164,26 @@ class CompanyDisclosures:
         df["url"] = (
             "https://edge.pse.com.ph/openDiscViewer.do?edge_no=" + df.edge_no
         )
-        df["Announce Date and Time"] = pd.to_datetime(df["Announce Date and Time"])
+        df["Announce Date and Time"] = pd.to_datetime(
+            df["Announce Date and Time"]
+        )
         return df
 
-
-    def get_disclosure_file_id(edge_no):
+    def get_disclosure_file_id(self, edge_no):
         """
         Returns file ID of a specified disclosure based on its edge number
         ETA: 6.2 seconds per run
         """
         headers = {
-                    "Connection": "keep-alive",
-                    "Upgrade-Insecure-Requests": "1",
-                    "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/79.0.3945.88 Safari/537.36",
-                    "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9",
-                    "Sec-Fetch-Site": "none",
-                    "Sec-Fetch-Mode": "navigate",
-                    "Accept-Encoding": "gzip, deflate, br",
-                    "Accept-Language": "en-PH,en-US;q=0.9,en;q=0.8",
-                }
+            "Connection": "keep-alive",
+            "Upgrade-Insecure-Requests": "1",
+            "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/79.0.3945.88 Safari/537.36",
+            "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9",
+            "Sec-Fetch-Site": "none",
+            "Sec-Fetch-Mode": "navigate",
+            "Accept-Encoding": "gzip, deflate, br",
+            "Accept-Language": "en-PH,en-US;q=0.9,en;q=0.8",
+        }
 
         params = (("edge_no", edge_no),)
 
@@ -155,7 +191,7 @@ class CompanyDisclosures:
             "https://edge.pse.com.ph/openDiscViewer.do",
             headers=headers,
             params=params,
-            cookies=cookies,
+            cookies=COOKIES,
         )
         html = response.text
         parsed_html = BeautifulSoup(html, "lxml")
@@ -163,8 +199,7 @@ class CompanyDisclosures:
         file_id = s[s.find("file_id=") + 8 :]
         return file_id
 
-
-    def get_disclosure_parsed_html(disclosure_file_id):
+    def get_disclosure_parsed_html(self, disclosure_file_id):
         """
         Returns the bs parsed html for a disclosure given its file id
         ETA: 6.55 seconds per run
@@ -195,8 +230,7 @@ class CompanyDisclosures:
         parsed_html = BeautifulSoup(html, "lxml")
         return parsed_html
 
-
-    def parse_stock_inventory(stock_inventory_str):
+    def parse_stock_inventory(self, stock_inventory_str):
         stock_inventory_lol = [
             row.split("\n") for row in stock_inventory_str.split("\n\n\n\n")
         ]
@@ -210,20 +244,23 @@ class CompanyDisclosures:
         )
         return stock_inventory_df
 
-
-    def get_company_summary(parsed_html):
+    def get_company_summary(self, edge_no):
         """
-        Return the company summary (at the top) given the parsed html of the disclosure
+        Return the company summary (at the top) given edge_no
         """
+        file_id = self.get_disclosure_file_id(edge_no)
+        parsed_html = self.get_disclosure_parsed_html(file_id)
 
         keys = []
         values = []
-        for dt, dd in zip(parsed_html.find_all("dt"), parsed_html.find_all("dd")):
+        for dt, dd in zip(
+            parsed_html.find_all("dt"), parsed_html.find_all("dd")
+        ):
             # Take out first token (number followed by a period)
             key = " ".join(dt.text.strip().split()[1:])
             value = dd.text.strip()
             if "Title of Each Class\n" in value:
-                stock_inventory_df = parse_stock_inventory(value)
+                stock_inventory_df = self.parse_stock_inventory(value)
                 keys += stock_inventory_df.iloc[:, 0].values.tolist()
                 values += stock_inventory_df.iloc[:, 1].values.tolist()
             else:
@@ -233,11 +270,9 @@ class CompanyDisclosures:
         company_summary_df = pd.DataFrame()
         company_summary_df["key"] = keys
         company_summary_df["value"] = values
-        self.summary = company_summary_df
         return company_summary_df
 
-
-    def parse_table(table_el):
+    def parse_table(self, table_el):
         """
         Returns a table as a dataframe from a table html element
         """
@@ -254,48 +289,72 @@ class CompanyDisclosures:
             table_dict["value"].append(td)
         return pd.DataFrame(table_dict)
 
-
-    def get_tables(parsed_html):
+    def get_tables(self, parsed_html):
         """
         Returns a list of tables as pd.DataFrame's from parsed HTML
         """
         table_els = parsed_html.find_all("table")
         table_dfs = []
         for table_el in table_els:
-            table_df = parse_table(table_el)
+            table_df = self.parse_table(table_el)
             table_dfs.append(table_df)
         return table_dfs
 
-    def _remove_amend(x):
-        if len(x.split(']'))==2:
-            return x.split(']')[1]
-        else:
-            return x
-
-    def get_disclosure_details(self, disclosure_file_id):
+    def get_disclosure_tables(self, edge_no):
         """
-        Return the company summary (at the top) given the parsed tables
+        Return the disclosure details (at the bottom page) given the parsed tables
         """
-        parsed_html = self.get_disclosure_parsed_html(disclosure_file_id)
+        file_id = self.get_disclosure_file_id(edge_no)
+        parsed_html = self.get_disclosure_parsed_html(file_id)
         tables = self.get_tables(parsed_html)
 
         k, v = [], []
         for tab in tables:
             header = tab.header.dropna().values
             value = tab.value.dropna().values
-            for i,j in zip(header,value):
+            for i, j in zip(header, value):
                 k.append(i)
                 v.append(j)
-        df = pd.DataFrame(np.c_[k,v], columns=['key','value'])
+        df = pd.DataFrame(np.c_[k, v], columns=["key", "value"])
         return df
 
-    def plot_discolures(self, disclosure_type=None, data_type='close'):
+    def get_all_disclosure_tables(self):
+        """
+        iterate all disclosure id and save details in a dictionary
+        """
+        disclosure_details = {}
+        for edge_no in tqdm(self.company_disclosures["edge_no"].values):
+            df = self.get_disclosure_tables(edge_no)
+            disclosure_details[edge_no] = df
+        return disclosure_details
+
+    def get_disclosure_details(
+        self, key="Background/Description of the Disclosure"
+    ):
+        """
+        return a dataframe of detailed background/decription per date
+        """
+        values = []
+        for edge_no in self.disclosure_tables.keys():
+            df = self.disclosure_tables[edge_no]
+            idx = df["key"].isin([key])
+            value = df.loc[idx, "value"].values
+            values.append(value)
+        # dataframe is used instead of series for better parsing
+        s = pd.DataFrame(values, columns=[key])
+        return s
+
+    def plot_discolures(self, disclosure_type=None, data_type="close"):
         """
         disclosure_type : str
         """
-        disclosure_type = self.disclosure_type if disclosure_type is None else disclosure_type
+        disclosure_type = (
+            self.disclosure_type
+            if disclosure_type is None
+            else disclosure_type
+        )
 
-        fig = pl.figure(figsize=(15,10))
+        fig = pl.figure(figsize=(15, 10))
 
         if self.stock_data is None:
             data = self.get_stock_data()
@@ -303,19 +362,41 @@ class CompanyDisclosures:
             data = self.stock_data
 
         colors = cm.rainbow(np.linspace(0, 1, len(self.disclosure_types)))
-        color_map = {n: colors[i] for i,n in enumerate(self.disclosure_types)}
+        color_map = {n: colors[i] for i, n in enumerate(self.disclosure_types)}
 
-        ax = data[data_type].plot(c='k', zorder=1)
-        for key,row in self.company_disclosures.iterrows():
-            date = row['Announce Date and Time']
-            template = self._remove_amend(row['Template Name'])
-            if template==disclosure_type:
-                #vertical line
-                ax.axvline(date, 0, 1, color=color_map[template], zorder=0, label=template)
-            elif disclosure_type=='all':
-                ax.axvline(date, 0, 1, color=color_map[template], zorder=0, label=template)
+        ax = data[data_type].plot(c="k", zorder=1)
+        for key, row in self.company_disclosures.iterrows():
+            date = row["Announce Date and Time"]
+            template = _remove_amend(row["Template Name"])
+            if template.lower() == disclosure_type.lower():
+                # vertical line
+                ax.axvline(
+                    date,
+                    0,
+                    1,
+                    color=color_map[template],
+                    zorder=0,
+                    label=template,
+                )
+            elif disclosure_type == "all":
+                ax.axvline(
+                    date,
+                    0,
+                    1,
+                    color=color_map[template],
+                    zorder=0,
+                    label=template,
+                )
         handles, labels = ax.get_legend_handles_labels()
         by_label = dict(zip(labels, handles))
         ax.legend(by_label.values(), by_label.keys())
+        ax.set_ylabel(data_type.upper())
         ax.set_title(self.symbol)
-        return ax
+        return fig
+
+
+def _remove_amend(x):
+    if len(x.split("]")) == 2:
+        return x.split("]")[1]
+    else:
+        return x
