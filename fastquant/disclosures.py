@@ -72,10 +72,12 @@ class CompanyDisclosures:
             )
         print(f"Pulling details in all {self.symbol} disclosures...")
         self.disclosure_tables = self.get_all_disclosure_tables()
+        self.disclosure_tables_df = self.get_all_disclosure_tables_df()
         self.disclosure_backgrounds = self.get_disclosure_details()
         self.disclosure_subjects = self.get_disclosure_details(
             key="Subject of the Disclosure"
         )
+        self.disclosures_combined = get_combined_disclosures()
         errmsg = f"{self.disclosure_type} not available between {self.start_date} & {self.end_date}.\n"
         errmsg += f"Try {self.disclosure_types}."
         if self.disclosure_type != "all":
@@ -328,6 +330,18 @@ class CompanyDisclosures:
             disclosure_details[edge_no] = df
         return disclosure_details
 
+    def get_all_disclosure_tables_df(self):
+        """
+        Return disclosure tables as a dataframe
+        """
+        values = []
+        for edge_no in self.disclosure_tables.keys():
+            df = self.disclosure_tables[edge_no]
+            df_dict = {k: v for k, v in df.values}
+            # Convert dictionary to string
+            values.append(json.dumps(df_dict))
+        return pd.DataFrame(values, columns=["disclosure_table"])
+
     def get_disclosure_details(
         self, key="Background/Description of the Disclosure"
     ):
@@ -344,7 +358,18 @@ class CompanyDisclosures:
         s = pd.DataFrame(values, columns=[key])
         return s
 
-    def plot_discolures(self, disclosure_type=None, data_type="close"):
+    def get_combined_disclosures(self):
+        return pd.concat(
+            [
+                self.company_disclosures,
+                self.disclosure_tables_df,
+                self.disclosure_backgrounds,
+                self.disclosure_subjects,
+            ],
+            axis=1,
+        )
+
+    def plot_disclosures(self, disclosure_type=None, data_type="close"):
         """
         disclosure_type : str
         """
