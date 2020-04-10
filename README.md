@@ -48,3 +48,38 @@ backtest('smac', jfc, fast_period=15, slow_period=40)
 # Final Portfolio Value: 102272.90
 ```
 ![](./docs/assets/smac_sample.png)
+
+## Library of trading strategies
+
+| Strategy | Alias | Parameters |
+| --- | --- | --- |
+| Relative Strength Index (RSI) | rsi | `rsi_period`, `rsi_upper`,  `rsi_lower` |
+| Simple moving average crossover (SMAC) | smac | `fast_period`, `slow_period` |
+| Exponential moving average crossover (EMAC) | macd | `fast_period`, `slow_period` |
+| Moving Average Convergence Divergence (MACD) | emac | `fast_perod`, `slow_upper`, `signal_period`, `sma_period`, `sma_dir_period` |
+| Bollinger Bands | bband | `period`, `devfactor` |
+
+### Relative Strength Index (RSI) Strategy
+```
+backtest('rsi', jfc, rsi_period=14, rsi_upper=70, rsi_lower=30)
+```
+
+### Simple moving average crossover (SMAC) Strategy
+```
+backtest('smac', jfc, fast_period=10, slow_period=30)
+```
+
+### Exponential moving average crossover (EMAC) Strategy
+```
+backtest('emac', jfc, fast_period=10, slow_period=30)
+```
+
+### Moving Average Convergence Divergence (MACD) Strategy
+```
+backtest('macd', jfc, fast_period=12, slow_period=26, signal_period=9, sma_period=30, dir_period=10)
+```
+
+### Bollinger Bands Strategy
+```
+backtest('bband', jfc, fast_period=12, slow_period=26, signal_period=9, sma_period=30, dir_period=10)
+```
