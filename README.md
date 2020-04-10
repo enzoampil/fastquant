@@ -57,7 +57,7 @@ backtest('smac', jfc, fast_period=15, slow_period=40)
 | Simple moving average crossover (SMAC) | smac | `fast_period`, `slow_period` |
 | Exponential moving average crossover (EMAC) | macd | `fast_period`, `slow_period` |
 | Moving Average Convergence Divergence (MACD) | emac | `fast_perod`, `slow_upper`, `signal_period`, `sma_period`, `sma_dir_period` |
-| Bollinger Bands | bband | `period`, `devfactor` |
+| Bollinger Bands | bbands | `period`, `devfactor` |
 
 ### Relative Strength Index (RSI) Strategy
 ```
@@ -81,5 +81,5 @@ backtest('macd', jfc, fast_period=12, slow_period=26, signal_period=9, sma_perio
 
 ### Bollinger Bands Strategy
 ```
-backtest('bband', jfc, fast_period=12, slow_period=26, signal_period=9, sma_period=30, dir_period=10)
+backtest('bbands', jfc, fast_period=12, slow_period=26, signal_period=9, sma_period=30, dir_period=10)
 ```
