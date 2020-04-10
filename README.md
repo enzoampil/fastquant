@@ -42,7 +42,7 @@ print(df.head())
 Daily Jollibee prices from 2018-01-01 to 2019-01-01
 ```
 from fastquant import backtest
-backtest('smac', jfc, fast_period=15, slow_period=40)
+backtest('smac', df, fast_period=15, slow_period=40)
 
 # Starting Portfolio Value: 100000.00
 # Final Portfolio Value: 102272.90
@@ -61,7 +61,7 @@ backtest('smac', jfc, fast_period=15, slow_period=40)
 
 ### Relative Strength Index (RSI) Strategy
 ```
-backtest('rsi', jfc, rsi_period=14, rsi_upper=70, rsi_lower=30)
+backtest('rsi', df, rsi_period=14, rsi_upper=70, rsi_lower=30)
 
 # Starting Portfolio Value: 100000.00
 # Final Portfolio Value: 132967.87
@@ -70,7 +70,7 @@ backtest('rsi', jfc, rsi_period=14, rsi_upper=70, rsi_lower=30)
 
 ### Simple moving average crossover (SMAC) Strategy
 ```
-backtest('smac', jfc, fast_period=10, slow_period=30)
+backtest('smac', df, fast_period=10, slow_period=30)
 
 # Starting Portfolio Value: 100000.00
 # Final Portfolio Value: 95902.74
@@ -79,7 +79,7 @@ backtest('smac', jfc, fast_period=10, slow_period=30)
 
 ### Exponential moving average crossover (EMAC) Strategy
 ```
-backtest('emac', jfc, fast_period=10, slow_period=30)
+backtest('emac', df, fast_period=10, slow_period=30)
 
 # Starting Portfolio Value: 100000.00
 # Final Portfolio Value: 90976.00
@@ -88,7 +88,7 @@ backtest('emac', jfc, fast_period=10, slow_period=30)
 
 ### Moving Average Convergence Divergence (MACD) Strategy
 ```
-backtest('macd', jfc, fast_period=12, slow_period=26, signal_period=9, sma_period=30, dir_period=10)
+backtest('macd', df, fast_period=12, slow_period=26, signal_period=9, sma_period=30, dir_period=10)
 
 # Starting Portfolio Value: 100000.00
 # Final Portfolio Value: 96229.58
@@ -97,7 +97,7 @@ backtest('macd', jfc, fast_period=12, slow_period=26, signal_period=9, sma_perio
 
 ### Bollinger Bands Strategy
 ```
-backtest('bbands', jfc, period=20, devfactor=2.0)
+backtest('bbands', df, period=20, devfactor=2.0)
 
 # Starting Portfolio Value: 100000.00
 # Final Portfolio Value: 97060.30
