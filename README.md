@@ -62,24 +62,44 @@ backtest('smac', jfc, fast_period=15, slow_period=40)
 ### Relative Strength Index (RSI) Strategy
 ```
 backtest('rsi', jfc, rsi_period=14, rsi_upper=70, rsi_lower=30)
+
+# Starting Portfolio Value: 100000.00
+# Final Portfolio Value: 132967.87
 ```
+![](./docs/assets/rsi.png)
 
 ### Simple moving average crossover (SMAC) Strategy
 ```
 backtest('smac', jfc, fast_period=10, slow_period=30)
+
+# Starting Portfolio Value: 100000.00
+# Final Portfolio Value: 95902.74
 ```
+![](./docs/assets/smac.png)
 
 ### Exponential moving average crossover (EMAC) Strategy
 ```
 backtest('emac', jfc, fast_period=10, slow_period=30)
+
+# Starting Portfolio Value: 100000.00
+# Final Portfolio Value: 90976.00
 ```
+![](./docs/assets/emac.png)
 
 ### Moving Average Convergence Divergence (MACD) Strategy
 ```
 backtest('macd', jfc, fast_period=12, slow_period=26, signal_period=9, sma_period=30, dir_period=10)
+
+# Starting Portfolio Value: 100000.00
+# Final Portfolio Value: 96229.58
 ```
+![](./docs/assets/macd.png)
 
 ### Bollinger Bands Strategy
 ```
-backtest('bbands', jfc, fast_period=12, slow_period=26, signal_period=9, sma_period=30, dir_period=10)
+backtest('bbands', jfc, period=20, devfactor=2.0)
+
+# Starting Portfolio Value: 100000.00
+# Final Portfolio Value: 97060.30
 ```
+![](./docs/assets/bbands.png)
