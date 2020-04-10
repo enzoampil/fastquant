@@ -17,6 +17,7 @@ from tqdm import tqdm
 import matplotlib.pyplot as pl
 import matplotlib
 from fastquant import get_stock_data
+import json
 
 matplotlib.style.use("fivethirtyeight")
 
