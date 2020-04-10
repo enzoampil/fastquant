@@ -78,7 +78,7 @@ class CompanyDisclosures:
         self.disclosure_subjects = self.get_disclosure_details(
             key="Subject of the Disclosure"
         )
-        self.disclosures_combined = get_combined_disclosures()
+        self.disclosures_combined = self.get_combined_disclosures()
         errmsg = f"{self.disclosure_type} not available between {self.start_date} & {self.end_date}.\n"
         errmsg += f"Try {self.disclosure_types}."
         if self.disclosure_type != "all":
