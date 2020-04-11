@@ -25,8 +25,11 @@
 #' @export
 get_pse_data <- function(sym, s_date, e_date) {
 
-  # TODO sym should be a single character vector
-  # assert_that
+  assert_that(is.character(sym),
+              msg = "`sym` must be character")
+
+  assert_that(length(sym) == 1,
+              msg = "`sym` must be length 1")
 
   # TODO Start and end dates must be in YYYY-mm-dd format
   # assert_that
