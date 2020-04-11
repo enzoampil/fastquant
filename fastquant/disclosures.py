@@ -5,13 +5,14 @@ Created on Tue Apr 5, 2020
 
 @author: enzoampil & jpdeleon
 """
-
+import os
 from inspect import signature
 from datetime import datetime
 import warnings
 from pathlib import Path
-import json
 import requests
+import json
+from pandas.io.json import json_normalize
 from bs4 import BeautifulSoup
 import matplotlib.cm as cm
 import numpy as np
@@ -19,7 +20,6 @@ import pandas as pd
 from tqdm import tqdm
 import matplotlib.pyplot as pl
 import matplotlib
-import flammkuchen as fk
 from fastquant import get_stock_data
 from fastquant.config import DATA_PATH
 
@@ -40,16 +40,15 @@ class CompanyDisclosures:
     """
     Attribues
     ---------
-    summary : pd.DataFrame
-        Company Summary
-    company_disclosures :
+    disclosures_combined : pd.DataFrame
+        Company disclosure summary
     """
 
     def __init__(
         self,
         symbol,
         disclosure_type="all",
-        start_date="1-1-2019",
+        start_date="1-1-2020",
         end_date=None,
         verbose=True,
         clobber=False,
@@ -66,7 +65,7 @@ class CompanyDisclosures:
         end_date : str
             end date with format %m-%d-%Y
         """
-        self.symbol = symbol
+        self.symbol = symbol.upper()
         self.start_date = start_date
         self.end_date = TODAY if end_date is None else end_date
         self.disclosure_type = disclosure_type
@@ -75,6 +74,15 @@ class CompanyDisclosures:
         self.clobber = clobber
         if self.verbose:
             print("Pulling {} disclosures summary...".format(self.symbol))
+        self.files = list(
+            Path(DATA_PATH).glob("{}_disclosures_*.csv".format(self.symbol))
+        )
+        self.fp = Path(
+            DATA_PATH,
+            "{}_disclosures_{}_{}.csv".format(
+                self.symbol, self.start_date, self.end_date
+            ),
+        )
         self.company_disclosures = self.get_company_disclosures()
         self.disclosure_types = (
             self.company_disclosures["Template Name"]
@@ -83,13 +91,12 @@ class CompanyDisclosures:
         )
         if self.verbose:
             print(
-                "Found {} disclosures with {} types:".format(
-                    len(self.company_disclosures), len(self.disclosure_types)
-                )
-            )
-            print(
-                "{}\nbetween {} & {}.".format(
-                    self.disclosure_types, self.start_date, self.end_date
+                "Found {} disclosures between {} & {} with {} types:\n{}".format(
+                    len(self.company_disclosures),
+                    self.start_date,
+                    self.end_date,
+                    len(self.disclosure_types),
+                    self.disclosure_types,
                 )
             )
         print("Pulling details in all {} disclosures...".format(self.symbol))
@@ -130,9 +137,19 @@ class CompanyDisclosures:
 
     def get_company_disclosures(self):
         """
-        symbol str - Ticker of the pse stock of choice
-        start_date date str %m-%d-%Y - Beginning date of the disclosure data pull
-        end_date date str %m-%d-%Y - Ending date of the disclosure data pull
+        symbol : str
+            Ticker of the pse stock of choice
+        start_date date : str (%m-%d-%Y)
+            Beginning date of the disclosure data pull
+        end_date : str (%m-%d-%Y)
+            Ending date of the disclosure data pull
+
+        FIXME:
+        This can be loaded using:
+        cols = ['Company Name', 'Template Name', 'PSE Form Number',
+                'Announce Date and Time', 'Circular Number', 'edge_no', 'url']
+        self.company_disclosures = pd.read_csv(self.fp)[cols]
+        but posting request is fast anyway
         """
 
         headers = {
@@ -330,7 +347,7 @@ class CompanyDisclosures:
 
     def get_disclosure_tables(self, edge_no):
         """
-        Returns the disclosure details (at the bottom page) given the parsed tables
+        Returns the disclosure details (at the bottom page) given edge_no
         """
         file_id = self.get_disclosure_file_id(edge_no)
         parsed_html = self.get_disclosure_parsed_html(file_id)
@@ -346,27 +363,72 @@ class CompanyDisclosures:
         df = pd.DataFrame(np.c_[k, v], columns=["key", "value"])
         return df
 
+    def load_disclosures(self):
+        """load disclosures data from disk and append older or newer if necessary
+        """
+
+        data = pd.read_csv(self.files[0])
+        newest_date = data["Announce Date and Time"].iloc[1]
+        oldest_date = data["Announce Date and Time"].iloc[-1]
+        disclosure_details = {}
+
+        # append older disclosures
+        older = (
+            oldest_date > self.company_disclosures["Announce Date and Time"]
+        )
+        idxs1 = np.argwhere(older).flatten()
+        if idxs1.sum() > 0:
+            for idx in tqdm(idxs1):
+                edge_no = self.company_disclosures.loc[idx, "edge_no"]
+                df = self.get_disclosure_tables(edge_no)
+                disclosure_details[edge_no] = df
+
+        # load local data from disk
+        # FIXME: the JSON object must be str, bytes or bytearray, not float
+        for key, row in data.iterrows():
+            try:
+                edge_no = row["edge_no"]
+                df = json_normalize(json.loads(row["disclosure_table"])).T
+                df = df.reset_index()
+                df.columns = ["key", "value"]
+                disclosure_details[edge_no] = df
+            except Exception as e:
+                print(e)
+
+        # append newer disclosures
+        more_recent = (
+            newest_date < self.company_disclosures["Announce Date and Time"]
+        )
+        idxs2 = np.argwhere(more_recent).flatten()
+        # append newer disclosures
+        if idxs2.sum() > 0:
+            for idx in tqdm(idxs2):
+                edge_no = self.company_disclosures.loc[idx, "edge_no"]
+                df = self.get_disclosure_tables(edge_no)
+                disclosure_details[edge_no] = df
+        if self.verbose:
+            print("Loaded: {}".format(self.files[0]))
+
+        if (idxs1.sum() > 0) or (idxs2.sum() > 0):
+            # remove older file
+            os.remove(self.files[0])
+            if self.verbose:
+                print("Deleted: {}".format(self.files[0]))
+            self.clobber = True
+        return disclosure_details
+
     def get_all_disclosure_tables(self):
         """
         Returns a dict after iterating all disclosures
         """
-        file_name = "{}_disclosures_{}_{}.hdf5".format(
-            self.symbol, self.start_date, self.end_date
-        )
-        fp = Path(DATA_PATH, file_name)
-
-        if not fp.exists() or self.clobber:
+        if (len(self.files) == 0) or self.clobber:
             disclosure_details = {}
             for edge_no in tqdm(self.company_disclosures["edge_no"].values):
                 df = self.get_disclosure_tables(edge_no)
                 disclosure_details[edge_no] = df
-            fk.save(fp, disclosure_details)
-            if self.verbose:
-                print("Saved: {}".format(fp))
         else:
-            disclosure_details = fk.load(fp)
-            if self.verbose:
-                print("Loaded: {}".format(fp))
+            disclosure_details = self.load_disclosures()
+
         return disclosure_details
 
     def get_all_disclosure_tables_df(self):
@@ -410,15 +472,11 @@ class CompanyDisclosures:
             ],
             axis=1,
         )
-        file_name = "{}_disclosures_{}_{}.csv".format(
-            self.symbol, self.start_date, self.end_date
-        )
-        fp = Path(DATA_PATH, file_name)
 
-        if not fp.exists() or self.clobber:
-            df.to_csv(fp)
+        if (len(self.files) == 0) or self.clobber:
+            df.to_csv(self.fp)
             if self.verbose:
-                print("Saved: {}".format(fp))
+                print("Saved: {}".format(self.fp))
         return df
 
     def plot_disclosures(self, disclosure_type=None, data_type="close"):
