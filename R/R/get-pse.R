@@ -17,6 +17,8 @@
 #' * volume: The total value of shares traded of the stock at dt
 #' @md
 #'
+#' @importFrom lubridate parse_date_time
+#' @importFrom assertthat assert_that
 #' @importFrom dplyr tibble mutate
 #' @importFrom tidyr unnest
 #' @importFrom purrr map2
@@ -31,8 +33,11 @@ get_pse_data <- function(sym, s_date, e_date) {
   assert_that(length(sym) == 1,
               msg = "`sym` must be length 1")
 
-  # TODO Start and end dates must be in YYYY-mm-dd format
-  # assert_that
+  assert_that(!is.na(parse_date_time(s_date, orders = "ymd")),
+              msg = "s_date is not in YYYY-mm-dd format")
+
+  assert_that(!is.na(parse_date_time(e_date, orders = "ymd")),
+              msg = "e_date is not in YYYY-mm-dd format")
 
   res <- tibble(symbol = sym,
                 dt = seq(as.Date(s_date), as.Date(e_date), by = "days")) %>%
