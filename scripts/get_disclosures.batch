@@ -1,300 +1,300 @@
-./get_disclosures 2GO -t1 1-1-2015 -v
-./get_disclosures AAA -t1 1-1-2015 -v
-./get_disclosures AB -t1 1-1-2015 -v
-./get_disclosures ABA -t1 1-1-2015 -v
-./get_disclosures ABG -t1 1-1-2015 -v
-./get_disclosures ABS -t1 1-1-2015 -v
-./get_disclosures ABSP -t1 1-1-2015 -v
-./get_disclosures AC -t1 1-1-2015 -v
-./get_disclosures ACE -t1 1-1-2015 -v
-./get_disclosures ACEPH -t1 1-1-2015 -v
-./get_disclosures ACEX -t1 1-1-2015 -v
-./get_disclosures ACPA -t1 1-1-2015 -v
-./get_disclosures ACR -t1 1-1-2015 -v
-./get_disclosures AEV -t1 1-1-2015 -v
-./get_disclosures AGI -t1 1-1-2015 -v
-./get_disclosures ALCO -t1 1-1-2015 -v
-./get_disclosures ALCPB -t1 1-1-2015 -v
-./get_disclosures ALHI -t1 1-1-2015 -v
-./get_disclosures ALI -t1 1-1-2015 -v
-./get_disclosures ALLHC -t1 1-1-2015 -v
-./get_disclosures ANI -t1 1-1-2015 -v
-./get_disclosures ANS -t1 1-1-2015 -v
-./get_disclosures AP -t1 1-1-2015 -v
-./get_disclosures APC -t1 1-1-2015 -v
-./get_disclosures APL -t1 1-1-2015 -v
-./get_disclosures APO -t1 1-1-2015 -v
-./get_disclosures APX -t1 1-1-2015 -v
-./get_disclosures AR -t1 1-1-2015 -v
-./get_disclosures ARA -t1 1-1-2015 -v
-./get_disclosures AT -t1 1-1-2015 -v
-./get_disclosures ATI -t1 1-1-2015 -v
-./get_disclosures ATN -t1 1-1-2015 -v
-./get_disclosures ATNB -t1 1-1-2015 -v
-./get_disclosures AUB -t1 1-1-2015 -v
-./get_disclosures AXLM -t1 1-1-2015 -v
-./get_disclosures BC -t1 1-1-2015 -v
-./get_disclosures BCB -t1 1-1-2015 -v
-./get_disclosures BCOR -t1 1-1-2015 -v
-./get_disclosures BCP -t1 1-1-2015 -v
-./get_disclosures BDO -t1 1-1-2015 -v
-./get_disclosures BEL -t1 1-1-2015 -v
-./get_disclosures BH -t1 1-1-2015 -v
-./get_disclosures BHI -t1 1-1-2015 -v
-./get_disclosures BKR -t1 1-1-2015 -v
-./get_disclosures BLFI -t1 1-1-2015 -v
-./get_disclosures BLOOM -t1 1-1-2015 -v
-./get_disclosures BMM -t1 1-1-2015 -v
-./get_disclosures BPI -t1 1-1-2015 -v
-./get_disclosures BRN -t1 1-1-2015 -v
-./get_disclosures BSC -t1 1-1-2015 -v
-./get_disclosures C -t1 1-1-2015 -v
-./get_disclosures CA -t1 1-1-2015 -v
-./get_disclosures CAB -t1 1-1-2015 -v
-./get_disclosures CAT -t1 1-1-2015 -v
-./get_disclosures CDC -t1 1-1-2015 -v
-./get_disclosures CEB -t1 1-1-2015 -v
-./get_disclosures CEI -t1 1-1-2015 -v
-./get_disclosures CEU -t1 1-1-2015 -v
-./get_disclosures CHI -t1 1-1-2015 -v
-./get_disclosures CHIB -t1 1-1-2015 -v
-./get_disclosures CHP -t1 1-1-2015 -v
-./get_disclosures CIC -t1 1-1-2015 -v
-./get_disclosures CIP -t1 1-1-2015 -v
-./get_disclosures CLI -t1 1-1-2015 -v
-./get_disclosures CNPF -t1 1-1-2015 -v
-./get_disclosures COAL -t1 1-1-2015 -v
-./get_disclosures COL -t1 1-1-2015 -v
-./get_disclosures COSCO -t1 1-1-2015 -v
-./get_disclosures CPG -t1 1-1-2015 -v
-./get_disclosures CPM -t1 1-1-2015 -v
-./get_disclosures CPV -t1 1-1-2015 -v
-./get_disclosures CPVB -t1 1-1-2015 -v
-./get_disclosures CROWN -t1 1-1-2015 -v
-./get_disclosures CSB -t1 1-1-2015 -v
-./get_disclosures CYBR -t1 1-1-2015 -v
-./get_disclosures DAVIN -t1 1-1-2015 -v
-./get_disclosures DD -t1 1-1-2015 -v
-./get_disclosures DDPR -t1 1-1-2015 -v
-./get_disclosures DELM -t1 1-1-2015 -v
-./get_disclosures DFNN -t1 1-1-2015 -v
-./get_disclosures DITO -t1 1-1-2015 -v
-./get_disclosures DIZ -t1 1-1-2015 -v
-./get_disclosures DMC -t1 1-1-2015 -v
-./get_disclosures DMW -t1 1-1-2015 -v
-./get_disclosures DNA -t1 1-1-2015 -v
-./get_disclosures DNL -t1 1-1-2015 -v
-./get_disclosures DWC -t1 1-1-2015 -v
-./get_disclosures EAGLE -t1 1-1-2015 -v
-./get_disclosures ECP -t1 1-1-2015 -v
-./get_disclosures EEI -t1 1-1-2015 -v
-./get_disclosures EG -t1 1-1-2015 -v
-./get_disclosures ELI -t1 1-1-2015 -v
-./get_disclosures EMP -t1 1-1-2015 -v
-./get_disclosures EURO -t1 1-1-2015 -v
-./get_disclosures EVER -t1 1-1-2015 -v
-./get_disclosures EW -t1 1-1-2015 -v
-./get_disclosures FAF -t1 1-1-2015 -v
-./get_disclosures FB -t1 1-1-2015 -v
-./get_disclosures FBP -t1 1-1-2015 -v
-./get_disclosures FBP2 -t1 1-1-2015 -v
-./get_disclosures FDC -t1 1-1-2015 -v
-./get_disclosures FERRO -t1 1-1-2015 -v
-./get_disclosures FEU -t1 1-1-2015 -v
-./get_disclosures FFI -t1 1-1-2015 -v
-./get_disclosures FGEN -t1 1-1-2015 -v
-./get_disclosures FGENG -t1 1-1-2015 -v
-./get_disclosures FJP -t1 1-1-2015 -v
-./get_disclosures FJPB -t1 1-1-2015 -v
-./get_disclosures FLI -t1 1-1-2015 -v
-./get_disclosures FMETF -t1 1-1-2015 -v
-./get_disclosures FNI -t1 1-1-2015 -v
-./get_disclosures FOOD -t1 1-1-2015 -v
-./get_disclosures FPH -t1 1-1-2015 -v
-./get_disclosures FPI -t1 1-1-2015 -v
-./get_disclosures FRUIT -t1 1-1-2015 -v
-./get_disclosures GEO -t1 1-1-2015 -v
-./get_disclosures GERI -t1 1-1-2015 -v
-./get_disclosures GLO -t1 1-1-2015 -v
-./get_disclosures GLOPA -t1 1-1-2015 -v
-./get_disclosures GLOPP -t1 1-1-2015 -v
-./get_disclosures GMA7 -t1 1-1-2015 -v
-./get_disclosures GMAP -t1 1-1-2015 -v
-./get_disclosures GPH -t1 1-1-2015 -v
-./get_disclosures GREEN -t1 1-1-2015 -v
-./get_disclosures GSMI -t1 1-1-2015 -v
-./get_disclosures GTCAP -t1 1-1-2015 -v
-./get_disclosures GTPPA -t1 1-1-2015 -v
-./get_disclosures GTPPB -t1 1-1-2015 -v
-./get_disclosures HI -t1 1-1-2015 -v
-./get_disclosures HLCM -t1 1-1-2015 -v
-./get_disclosures HOME -t1 1-1-2015 -v
-./get_disclosures HOUSE -t1 1-1-2015 -v
-./get_disclosures HVN -t1 1-1-2015 -v
-./get_disclosures I -t1 1-1-2015 -v
-./get_disclosures ICT -t1 1-1-2015 -v
-./get_disclosures IDC -t1 1-1-2015 -v
-./get_disclosures IMI -t1 1-1-2015 -v
-./get_disclosures IMP -t1 1-1-2015 -v
-./get_disclosures ION -t1 1-1-2015 -v
-./get_disclosures IPM -t1 1-1-2015 -v
-./get_disclosures IPO -t1 1-1-2015 -v
-./get_disclosures IRC -t1 1-1-2015 -v
-./get_disclosures IS -t1 1-1-2015 -v
-./get_disclosures JAS -t1 1-1-2015 -v
-./get_disclosures JFC -t1 1-1-2015 -v
-./get_disclosures JGS -t1 1-1-2015 -v
-./get_disclosures JOH -t1 1-1-2015 -v
-./get_disclosures KEP -t1 1-1-2015 -v
-./get_disclosures KPH -t1 1-1-2015 -v
-./get_disclosures KPHB -t1 1-1-2015 -v
-./get_disclosures KPPI -t1 1-1-2015 -v
-./get_disclosures LAND -t1 1-1-2015 -v
-./get_disclosures LBC -t1 1-1-2015 -v
-./get_disclosures LC -t1 1-1-2015 -v
-./get_disclosures LCB -t1 1-1-2015 -v
-./get_disclosures LFM -t1 1-1-2015 -v
-./get_disclosures LIHC -t1 1-1-2015 -v
-./get_disclosures LMG -t1 1-1-2015 -v
-./get_disclosures LOTO -t1 1-1-2015 -v
-./get_disclosures LPZ -t1 1-1-2015 -v
-./get_disclosures LR -t1 1-1-2015 -v
-./get_disclosures LRP -t1 1-1-2015 -v
-./get_disclosures LRW -t1 1-1-2015 -v
-./get_disclosures LSC -t1 1-1-2015 -v
-./get_disclosures LTG -t1 1-1-2015 -v
-./get_disclosures MA -t1 1-1-2015 -v
-./get_disclosures MAB -t1 1-1-2015 -v
-./get_disclosures MAC -t1 1-1-2015 -v
-./get_disclosures MACAY -t1 1-1-2015 -v
-./get_disclosures MAH -t1 1-1-2015 -v
-./get_disclosures MAHB -t1 1-1-2015 -v
-./get_disclosures MARC -t1 1-1-2015 -v
-./get_disclosures MAXS -t1 1-1-2015 -v
-./get_disclosures MB -t1 1-1-2015 -v
-./get_disclosures MBC -t1 1-1-2015 -v
-./get_disclosures MBT -t1 1-1-2015 -v
-./get_disclosures MED -t1 1-1-2015 -v
-./get_disclosures MEG -t1 1-1-2015 -v
-./get_disclosures MER -t1 1-1-2015 -v
-./get_disclosures MFC -t1 1-1-2015 -v
-./get_disclosures MFIN -t1 1-1-2015 -v
-./get_disclosures MG -t1 1-1-2015 -v
-./get_disclosures MHC -t1 1-1-2015 -v
-./get_disclosures MJC -t1 1-1-2015 -v
-./get_disclosures MJIC -t1 1-1-2015 -v
-./get_disclosures MPI -t1 1-1-2015 -v
-./get_disclosures MRC -t1 1-1-2015 -v
-./get_disclosures MRSGI -t1 1-1-2015 -v
-./get_disclosures MVC -t1 1-1-2015 -v
-./get_disclosures MWC -t1 1-1-2015 -v
-./get_disclosures MWIDE -t1 1-1-2015 -v
-./get_disclosures MWP -t1 1-1-2015 -v
-./get_disclosures NI -t1 1-1-2015 -v
-./get_disclosures NIKL -t1 1-1-2015 -v
-./get_disclosures NOW -t1 1-1-2015 -v
-./get_disclosures NRCP -t1 1-1-2015 -v
-./get_disclosures OM -t1 1-1-2015 -v
-./get_disclosures OPM -t1 1-1-2015 -v
-./get_disclosures OPMB -t1 1-1-2015 -v
-./get_disclosures ORE -t1 1-1-2015 -v
-./get_disclosures OV -t1 1-1-2015 -v
-./get_disclosures PA -t1 1-1-2015 -v
-./get_disclosures PAL -t1 1-1-2015 -v
-./get_disclosures PAX -t1 1-1-2015 -v
-./get_disclosures PBB -t1 1-1-2015 -v
-./get_disclosures PBC -t1 1-1-2015 -v
-./get_disclosures PCOR -t1 1-1-2015 -v
-./get_disclosures PERC -t1 1-1-2015 -v
-./get_disclosures PGOLD -t1 1-1-2015 -v
-./get_disclosures PHA -t1 1-1-2015 -v
-./get_disclosures PHES -t1 1-1-2015 -v
-./get_disclosures PHN -t1 1-1-2015 -v
-./get_disclosures PHR -t1 1-1-2015 -v
-./get_disclosures PIP -t1 1-1-2015 -v
-./get_disclosures PIZZA -t1 1-1-2015 -v
-./get_disclosures PLC -t1 1-1-2015 -v
-./get_disclosures PMPC -t1 1-1-2015 -v
-./get_disclosures PNB -t1 1-1-2015 -v
-./get_disclosures PNX -t1 1-1-2015 -v
-./get_disclosures PNX3A -t1 1-1-2015 -v
-./get_disclosures PNX3B -t1 1-1-2015 -v
-./get_disclosures PNXP -t1 1-1-2015 -v
-./get_disclosures PORT -t1 1-1-2015 -v
-./get_disclosures PPC -t1 1-1-2015 -v
-./get_disclosures PRC -t1 1-1-2015 -v
-./get_disclosures PRF2A -t1 1-1-2015 -v
-./get_disclosures PRF2B -t1 1-1-2015 -v
-./get_disclosures PRF3B -t1 1-1-2015 -v
-./get_disclosures PRIM -t1 1-1-2015 -v
-./get_disclosures PRMX -t1 1-1-2015 -v
-./get_disclosures PSB -t1 1-1-2015 -v
-./get_disclosures PSE -t1 1-1-2015 -v
-./get_disclosures PTC -t1 1-1-2015 -v
-./get_disclosures PX -t1 1-1-2015 -v
-./get_disclosures PXP -t1 1-1-2015 -v
-./get_disclosures RCB -t1 1-1-2015 -v
-./get_disclosures RCI -t1 1-1-2015 -v
-./get_disclosures REG -t1 1-1-2015 -v
-./get_disclosures RFM -t1 1-1-2015 -v
-./get_disclosures RLC -t1 1-1-2015 -v
-./get_disclosures RLT -t1 1-1-2015 -v
-./get_disclosures ROCK -t1 1-1-2015 -v
-./get_disclosures ROX -t1 1-1-2015 -v
-./get_disclosures RRHI -t1 1-1-2015 -v
-./get_disclosures SBS -t1 1-1-2015 -v
-./get_disclosures SCC -t1 1-1-2015 -v
-./get_disclosures SECB -t1 1-1-2015 -v
-./get_disclosures SEVN -t1 1-1-2015 -v
-./get_disclosures SFI -t1 1-1-2015 -v
-./get_disclosures SFIP -t1 1-1-2015 -v
-./get_disclosures SGI -t1 1-1-2015 -v
-./get_disclosures SGP -t1 1-1-2015 -v
-./get_disclosures SHLPH -t1 1-1-2015 -v
-./get_disclosures SHNG -t1 1-1-2015 -v
-./get_disclosures SLF -t1 1-1-2015 -v
-./get_disclosures SLI -t1 1-1-2015 -v
-./get_disclosures SM -t1 1-1-2015 -v
-./get_disclosures SMC -t1 1-1-2015 -v
-./get_disclosures SMC2A -t1 1-1-2015 -v
-./get_disclosures SMC2B -t1 1-1-2015 -v
-./get_disclosures SMC2C -t1 1-1-2015 -v
-./get_disclosures SMC2D -t1 1-1-2015 -v
-./get_disclosures SMC2E -t1 1-1-2015 -v
-./get_disclosures SMC2F -t1 1-1-2015 -v
-./get_disclosures SMC2G -t1 1-1-2015 -v
-./get_disclosures SMC2H -t1 1-1-2015 -v
-./get_disclosures SMC2I -t1 1-1-2015 -v
-./get_disclosures SMPH -t1 1-1-2015 -v
-./get_disclosures SOC -t1 1-1-2015 -v
-./get_disclosures SPC -t1 1-1-2015 -v
-./get_disclosures SPM -t1 1-1-2015 -v
-./get_disclosures SRDC -t1 1-1-2015 -v
-./get_disclosures SSI -t1 1-1-2015 -v
-./get_disclosures SSP -t1 1-1-2015 -v
-./get_disclosures STI -t1 1-1-2015 -v
-./get_disclosures STR -t1 1-1-2015 -v
-./get_disclosures SUN -t1 1-1-2015 -v
-./get_disclosures T -t1 1-1-2015 -v
-./get_disclosures TBGI -t1 1-1-2015 -v
-./get_disclosures TECH -t1 1-1-2015 -v
-./get_disclosures TEL -t1 1-1-2015 -v
-./get_disclosures TFC -t1 1-1-2015 -v
-./get_disclosures TFHI -t1 1-1-2015 -v
-./get_disclosures TUGS -t1 1-1-2015 -v
-./get_disclosures UBP -t1 1-1-2015 -v
-./get_disclosures UNI -t1 1-1-2015 -v
-./get_disclosures UPM -t1 1-1-2015 -v
-./get_disclosures URC -t1 1-1-2015 -v
-./get_disclosures V -t1 1-1-2015 -v
-./get_disclosures VITA -t1 1-1-2015 -v
-./get_disclosures VLL -t1 1-1-2015 -v
-./get_disclosures VMC -t1 1-1-2015 -v
-./get_disclosures VUL -t1 1-1-2015 -v
-./get_disclosures VVT -t1 1-1-2015 -v
-./get_disclosures WEB -t1 1-1-2015 -v
-./get_disclosures WIN -t1 1-1-2015 -v
-./get_disclosures WLCON -t1 1-1-2015 -v
-./get_disclosures WPI -t1 1-1-2015 -v
-./get_disclosures X -t1 1-1-2015 -v
-./get_disclosures ZHI -t1 1-1-2015 -v
+./get_disclosures 2GO -t1 1-1-2015 -v -s
+./get_disclosures AAA -t1 1-1-2015 -v -s
+./get_disclosures AB -t1 1-1-2015 -v -s
+./get_disclosures ABA -t1 1-1-2015 -v -s
+./get_disclosures ABG -t1 1-1-2015 -v -s
+./get_disclosures ABS -t1 1-1-2015 -v -s
+./get_disclosures ABSP -t1 1-1-2015 -v -s
+./get_disclosures AC -t1 1-1-2015 -v -s
+./get_disclosures ACE -t1 1-1-2015 -v -s
+./get_disclosures ACEPH -t1 1-1-2015 -v -s
+./get_disclosures ACEX -t1 1-1-2015 -v -s
+./get_disclosures ACPA -t1 1-1-2015 -v -s
+./get_disclosures ACR -t1 1-1-2015 -v -s
+./get_disclosures AEV -t1 1-1-2015 -v -s
+./get_disclosures AGI -t1 1-1-2015 -v -s
+./get_disclosures ALCO -t1 1-1-2015 -v -s
+./get_disclosures ALCPB -t1 1-1-2015 -v -s
+./get_disclosures ALHI -t1 1-1-2015 -v -s
+./get_disclosures ALI -t1 1-1-2015 -v -s
+./get_disclosures ALLHC -t1 1-1-2015 -v -s
+./get_disclosures ANI -t1 1-1-2015 -v -s
+./get_disclosures ANS -t1 1-1-2015 -v -s
+./get_disclosures AP -t1 1-1-2015 -v -s
+./get_disclosures APC -t1 1-1-2015 -v -s
+./get_disclosures APL -t1 1-1-2015 -v -s
+./get_disclosures APO -t1 1-1-2015 -v -s
+./get_disclosures APX -t1 1-1-2015 -v -s
+./get_disclosures AR -t1 1-1-2015 -v -s
+./get_disclosures ARA -t1 1-1-2015 -v -s
+./get_disclosures AT -t1 1-1-2015 -v -s
+./get_disclosures ATI -t1 1-1-2015 -v -s
+./get_disclosures ATN -t1 1-1-2015 -v -s
+./get_disclosures ATNB -t1 1-1-2015 -v -s
+./get_disclosures AUB -t1 1-1-2015 -v -s
+./get_disclosures AXLM -t1 1-1-2015 -v -s
+./get_disclosures BC -t1 1-1-2015 -v -s
+./get_disclosures BCB -t1 1-1-2015 -v -s
+./get_disclosures BCOR -t1 1-1-2015 -v -s
+./get_disclosures BCP -t1 1-1-2015 -v -s
+./get_disclosures BDO -t1 1-1-2015 -v -s
+./get_disclosures BEL -t1 1-1-2015 -v -s
+./get_disclosures BH -t1 1-1-2015 -v -s
+./get_disclosures BHI -t1 1-1-2015 -v -s
+./get_disclosures BKR -t1 1-1-2015 -v -s
+./get_disclosures BLFI -t1 1-1-2015 -v -s
+./get_disclosures BLOOM -t1 1-1-2015 -v -s
+./get_disclosures BMM -t1 1-1-2015 -v -s
+./get_disclosures BPI -t1 1-1-2015 -v -s
+./get_disclosures BRN -t1 1-1-2015 -v -s
+./get_disclosures BSC -t1 1-1-2015 -v -s
+./get_disclosures C -t1 1-1-2015 -v -s
+./get_disclosures CA -t1 1-1-2015 -v -s
+./get_disclosures CAB -t1 1-1-2015 -v -s
+./get_disclosures CAT -t1 1-1-2015 -v -s
+./get_disclosures CDC -t1 1-1-2015 -v -s
+./get_disclosures CEB -t1 1-1-2015 -v -s
+./get_disclosures CEI -t1 1-1-2015 -v -s
+./get_disclosures CEU -t1 1-1-2015 -v -s
+./get_disclosures CHI -t1 1-1-2015 -v -s
+./get_disclosures CHIB -t1 1-1-2015 -v -s
+./get_disclosures CHP -t1 1-1-2015 -v -s
+./get_disclosures CIC -t1 1-1-2015 -v -s
+./get_disclosures CIP -t1 1-1-2015 -v -s
+./get_disclosures CLI -t1 1-1-2015 -v -s
+./get_disclosures CNPF -t1 1-1-2015 -v -s
+./get_disclosures COAL -t1 1-1-2015 -v -s
+./get_disclosures COL -t1 1-1-2015 -v -s
+./get_disclosures COSCO -t1 1-1-2015 -v -s
+./get_disclosures CPG -t1 1-1-2015 -v -s
+./get_disclosures CPM -t1 1-1-2015 -v -s
+./get_disclosures CPV -t1 1-1-2015 -v -s
+./get_disclosures CPVB -t1 1-1-2015 -v -s
+./get_disclosures CROWN -t1 1-1-2015 -v -s
+./get_disclosures CSB -t1 1-1-2015 -v -s
+./get_disclosures CYBR -t1 1-1-2015 -v -s
+./get_disclosures DAVIN -t1 1-1-2015 -v -s
+./get_disclosures DD -t1 1-1-2015 -v -s
+./get_disclosures DDPR -t1 1-1-2015 -v -s
+./get_disclosures DELM -t1 1-1-2015 -v -s
+./get_disclosures DFNN -t1 1-1-2015 -v -s
+./get_disclosures DITO -t1 1-1-2015 -v -s
+./get_disclosures DIZ -t1 1-1-2015 -v -s
+./get_disclosures DMC -t1 1-1-2015 -v -s
+./get_disclosures DMW -t1 1-1-2015 -v -s
+./get_disclosures DNA -t1 1-1-2015 -v -s
+./get_disclosures DNL -t1 1-1-2015 -v -s
+./get_disclosures DWC -t1 1-1-2015 -v -s
+./get_disclosures EAGLE -t1 1-1-2015 -v -s
+./get_disclosures ECP -t1 1-1-2015 -v -s
+./get_disclosures EEI -t1 1-1-2015 -v -s
+./get_disclosures EG -t1 1-1-2015 -v -s
+./get_disclosures ELI -t1 1-1-2015 -v -s
+./get_disclosures EMP -t1 1-1-2015 -v -s
+./get_disclosures EURO -t1 1-1-2015 -v -s
+./get_disclosures EVER -t1 1-1-2015 -v -s
+./get_disclosures EW -t1 1-1-2015 -v -s
+./get_disclosures FAF -t1 1-1-2015 -v -s
+./get_disclosures FB -t1 1-1-2015 -v -s
+./get_disclosures FBP -t1 1-1-2015 -v -s
+./get_disclosures FBP2 -t1 1-1-2015 -v -s
+./get_disclosures FDC -t1 1-1-2015 -v -s
+./get_disclosures FERRO -t1 1-1-2015 -v -s
+./get_disclosures FEU -t1 1-1-2015 -v -s
+./get_disclosures FFI -t1 1-1-2015 -v -s
+./get_disclosures FGEN -t1 1-1-2015 -v -s
+./get_disclosures FGENG -t1 1-1-2015 -v -s
+./get_disclosures FJP -t1 1-1-2015 -v -s
+./get_disclosures FJPB -t1 1-1-2015 -v -s
+./get_disclosures FLI -t1 1-1-2015 -v -s
+./get_disclosures FMETF -t1 1-1-2015 -v -s
+./get_disclosures FNI -t1 1-1-2015 -v -s
+./get_disclosures FOOD -t1 1-1-2015 -v -s
+./get_disclosures FPH -t1 1-1-2015 -v -s
+./get_disclosures FPI -t1 1-1-2015 -v -s
+./get_disclosures FRUIT -t1 1-1-2015 -v -s
+./get_disclosures GEO -t1 1-1-2015 -v -s
+./get_disclosures GERI -t1 1-1-2015 -v -s
+./get_disclosures GLO -t1 1-1-2015 -v -s
+./get_disclosures GLOPA -t1 1-1-2015 -v -s
+./get_disclosures GLOPP -t1 1-1-2015 -v -s
+./get_disclosures GMA7 -t1 1-1-2015 -v -s
+./get_disclosures GMAP -t1 1-1-2015 -v -s
+./get_disclosures GPH -t1 1-1-2015 -v -s
+./get_disclosures GREEN -t1 1-1-2015 -v -s
+./get_disclosures GSMI -t1 1-1-2015 -v -s
+./get_disclosures GTCAP -t1 1-1-2015 -v -s
+./get_disclosures GTPPA -t1 1-1-2015 -v -s
+./get_disclosures GTPPB -t1 1-1-2015 -v -s
+./get_disclosures HI -t1 1-1-2015 -v -s
+./get_disclosures HLCM -t1 1-1-2015 -v -s
+./get_disclosures HOME -t1 1-1-2015 -v -s
+./get_disclosures HOUSE -t1 1-1-2015 -v -s
+./get_disclosures HVN -t1 1-1-2015 -v -s
+./get_disclosures I -t1 1-1-2015 -v -s
+./get_disclosures ICT -t1 1-1-2015 -v -s
+./get_disclosures IDC -t1 1-1-2015 -v -s
+./get_disclosures IMI -t1 1-1-2015 -v -s
+./get_disclosures IMP -t1 1-1-2015 -v -s
+./get_disclosures ION -t1 1-1-2015 -v -s
+./get_disclosures IPM -t1 1-1-2015 -v -s
+./get_disclosures IPO -t1 1-1-2015 -v -s
+./get_disclosures IRC -t1 1-1-2015 -v -s
+./get_disclosures IS -t1 1-1-2015 -v -s
+./get_disclosures JAS -t1 1-1-2015 -v -s
+./get_disclosures JFC -t1 1-1-2015 -v -s
+./get_disclosures JGS -t1 1-1-2015 -v -s
+./get_disclosures JOH -t1 1-1-2015 -v -s
+./get_disclosures KEP -t1 1-1-2015 -v -s
+./get_disclosures KPH -t1 1-1-2015 -v -s
+./get_disclosures KPHB -t1 1-1-2015 -v -s
+./get_disclosures KPPI -t1 1-1-2015 -v -s
+./get_disclosures LAND -t1 1-1-2015 -v -s
+./get_disclosures LBC -t1 1-1-2015 -v -s
+./get_disclosures LC -t1 1-1-2015 -v -s
+./get_disclosures LCB -t1 1-1-2015 -v -s
+./get_disclosures LFM -t1 1-1-2015 -v -s
+./get_disclosures LIHC -t1 1-1-2015 -v -s
+./get_disclosures LMG -t1 1-1-2015 -v -s
+./get_disclosures LOTO -t1 1-1-2015 -v -s
+./get_disclosures LPZ -t1 1-1-2015 -v -s
+./get_disclosures LR -t1 1-1-2015 -v -s
+./get_disclosures LRP -t1 1-1-2015 -v -s
+./get_disclosures LRW -t1 1-1-2015 -v -s
+./get_disclosures LSC -t1 1-1-2015 -v -s
+./get_disclosures LTG -t1 1-1-2015 -v -s
+./get_disclosures MA -t1 1-1-2015 -v -s
+./get_disclosures MAB -t1 1-1-2015 -v -s
+./get_disclosures MAC -t1 1-1-2015 -v -s
+./get_disclosures MACAY -t1 1-1-2015 -v -s
+./get_disclosures MAH -t1 1-1-2015 -v -s
+./get_disclosures MAHB -t1 1-1-2015 -v -s
+./get_disclosures MARC -t1 1-1-2015 -v -s
+./get_disclosures MAXS -t1 1-1-2015 -v -s
+./get_disclosures MB -t1 1-1-2015 -v -s
+./get_disclosures MBC -t1 1-1-2015 -v -s
+./get_disclosures MBT -t1 1-1-2015 -v -s
+./get_disclosures MED -t1 1-1-2015 -v -s
+./get_disclosures MEG -t1 1-1-2015 -v -s
+./get_disclosures MER -t1 1-1-2015 -v -s
+./get_disclosures MFC -t1 1-1-2015 -v -s
+./get_disclosures MFIN -t1 1-1-2015 -v -s
+./get_disclosures MG -t1 1-1-2015 -v -s
+./get_disclosures MHC -t1 1-1-2015 -v -s
+./get_disclosures MJC -t1 1-1-2015 -v -s
+./get_disclosures MJIC -t1 1-1-2015 -v -s
+./get_disclosures MPI -t1 1-1-2015 -v -s
+./get_disclosures MRC -t1 1-1-2015 -v -s
+./get_disclosures MRSGI -t1 1-1-2015 -v -s
+./get_disclosures MVC -t1 1-1-2015 -v -s
+./get_disclosures MWC -t1 1-1-2015 -v -s
+./get_disclosures MWIDE -t1 1-1-2015 -v -s
+./get_disclosures MWP -t1 1-1-2015 -v -s
+./get_disclosures NI -t1 1-1-2015 -v -s
+./get_disclosures NIKL -t1 1-1-2015 -v -s
+./get_disclosures NOW -t1 1-1-2015 -v -s
+./get_disclosures NRCP -t1 1-1-2015 -v -s
+./get_disclosures OM -t1 1-1-2015 -v -s
+./get_disclosures OPM -t1 1-1-2015 -v -s
+./get_disclosures OPMB -t1 1-1-2015 -v -s
+./get_disclosures ORE -t1 1-1-2015 -v -s
+./get_disclosures OV -t1 1-1-2015 -v -s
+./get_disclosures PA -t1 1-1-2015 -v -s
+./get_disclosures PAL -t1 1-1-2015 -v -s
+./get_disclosures PAX -t1 1-1-2015 -v -s
+./get_disclosures PBB -t1 1-1-2015 -v -s
+./get_disclosures PBC -t1 1-1-2015 -v -s
+./get_disclosures PCOR -t1 1-1-2015 -v -s
+./get_disclosures PERC -t1 1-1-2015 -v -s
+./get_disclosures PGOLD -t1 1-1-2015 -v -s
+./get_disclosures PHA -t1 1-1-2015 -v -s
+./get_disclosures PHES -t1 1-1-2015 -v -s
+./get_disclosures PHN -t1 1-1-2015 -v -s
+./get_disclosures PHR -t1 1-1-2015 -v -s
+./get_disclosures PIP -t1 1-1-2015 -v -s
+./get_disclosures PIZZA -t1 1-1-2015 -v -s
+./get_disclosures PLC -t1 1-1-2015 -v -s
+./get_disclosures PMPC -t1 1-1-2015 -v -s
+./get_disclosures PNB -t1 1-1-2015 -v -s
+./get_disclosures PNX -t1 1-1-2015 -v -s
+./get_disclosures PNX3A -t1 1-1-2015 -v -s
+./get_disclosures PNX3B -t1 1-1-2015 -v -s
+./get_disclosures PNXP -t1 1-1-2015 -v -s
+./get_disclosures PORT -t1 1-1-2015 -v -s
+./get_disclosures PPC -t1 1-1-2015 -v -s
+./get_disclosures PRC -t1 1-1-2015 -v -s
+./get_disclosures PRF2A -t1 1-1-2015 -v -s
+./get_disclosures PRF2B -t1 1-1-2015 -v -s
+./get_disclosures PRF3B -t1 1-1-2015 -v -s
+./get_disclosures PRIM -t1 1-1-2015 -v -s
+./get_disclosures PRMX -t1 1-1-2015 -v -s
+./get_disclosures PSB -t1 1-1-2015 -v -s
+./get_disclosures PSE -t1 1-1-2015 -v -s
+./get_disclosures PTC -t1 1-1-2015 -v -s
+./get_disclosures PX -t1 1-1-2015 -v -s
+./get_disclosures PXP -t1 1-1-2015 -v -s
+./get_disclosures RCB -t1 1-1-2015 -v -s
+./get_disclosures RCI -t1 1-1-2015 -v -s
+./get_disclosures REG -t1 1-1-2015 -v -s
+./get_disclosures RFM -t1 1-1-2015 -v -s
+./get_disclosures RLC -t1 1-1-2015 -v -s
+./get_disclosures RLT -t1 1-1-2015 -v -s
+./get_disclosures ROCK -t1 1-1-2015 -v -s
+./get_disclosures ROX -t1 1-1-2015 -v -s
+./get_disclosures RRHI -t1 1-1-2015 -v -s
+./get_disclosures SBS -t1 1-1-2015 -v -s
+./get_disclosures SCC -t1 1-1-2015 -v -s
+./get_disclosures SECB -t1 1-1-2015 -v -s
+./get_disclosures SEVN -t1 1-1-2015 -v -s
+./get_disclosures SFI -t1 1-1-2015 -v -s
+./get_disclosures SFIP -t1 1-1-2015 -v -s
+./get_disclosures SGI -t1 1-1-2015 -v -s
+./get_disclosures SGP -t1 1-1-2015 -v -s
+./get_disclosures SHLPH -t1 1-1-2015 -v -s
+./get_disclosures SHNG -t1 1-1-2015 -v -s
+./get_disclosures SLF -t1 1-1-2015 -v -s
+./get_disclosures SLI -t1 1-1-2015 -v -s
+./get_disclosures SM -t1 1-1-2015 -v -s
+./get_disclosures SMC -t1 1-1-2015 -v -s
+./get_disclosures SMC2A -t1 1-1-2015 -v -s
+./get_disclosures SMC2B -t1 1-1-2015 -v -s
+./get_disclosures SMC2C -t1 1-1-2015 -v -s
+./get_disclosures SMC2D -t1 1-1-2015 -v -s
+./get_disclosures SMC2E -t1 1-1-2015 -v -s
+./get_disclosures SMC2F -t1 1-1-2015 -v -s
+./get_disclosures SMC2G -t1 1-1-2015 -v -s
+./get_disclosures SMC2H -t1 1-1-2015 -v -s
+./get_disclosures SMC2I -t1 1-1-2015 -v -s
+./get_disclosures SMPH -t1 1-1-2015 -v -s
+./get_disclosures SOC -t1 1-1-2015 -v -s
+./get_disclosures SPC -t1 1-1-2015 -v -s
+./get_disclosures SPM -t1 1-1-2015 -v -s
+./get_disclosures SRDC -t1 1-1-2015 -v -s
+./get_disclosures SSI -t1 1-1-2015 -v -s
+./get_disclosures SSP -t1 1-1-2015 -v -s
+./get_disclosures STI -t1 1-1-2015 -v -s
+./get_disclosures STR -t1 1-1-2015 -v -s
+./get_disclosures SUN -t1 1-1-2015 -v -s
+./get_disclosures T -t1 1-1-2015 -v -s
+./get_disclosures TBGI -t1 1-1-2015 -v -s
+./get_disclosures TECH -t1 1-1-2015 -v -s
+./get_disclosures TEL -t1 1-1-2015 -v -s
+./get_disclosures TFC -t1 1-1-2015 -v -s
+./get_disclosures TFHI -t1 1-1-2015 -v -s
+./get_disclosures TUGS -t1 1-1-2015 -v -s
+./get_disclosures UBP -t1 1-1-2015 -v -s
+./get_disclosures UNI -t1 1-1-2015 -v -s
+./get_disclosures UPM -t1 1-1-2015 -v -s
+./get_disclosures URC -t1 1-1-2015 -v -s
+./get_disclosures V -t1 1-1-2015 -v -s
+./get_disclosures VITA -t1 1-1-2015 -v -s
+./get_disclosures VLL -t1 1-1-2015 -v -s
+./get_disclosures VMC -t1 1-1-2015 -v -s
+./get_disclosures VUL -t1 1-1-2015 -v -s
+./get_disclosures VVT -t1 1-1-2015 -v -s
+./get_disclosures WEB -t1 1-1-2015 -v -s
+./get_disclosures WIN -t1 1-1-2015 -v -s
+./get_disclosures WLCON -t1 1-1-2015 -v -s
+./get_disclosures WPI -t1 1-1-2015 -v -s
+./get_disclosures X -t1 1-1-2015 -v -s
+./get_disclosures ZHI -t1 1-1-2015 -v -s

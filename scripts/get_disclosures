@@ -5,12 +5,15 @@ Created on Tue Apr 5, 2020
 
 download parsed company disclosures issued between specified dates
 """
+import os
 import sys
 import argparse
 
-# from pathlib import Path
+from pathlib import Path
 import matplotlib.pyplot as pl
+
 from fastquant import CompanyDisclosures
+from fastquant import DATA_PATH
 
 parser = argparse.ArgumentParser(
     description="download company disclosures data"
@@ -31,20 +34,28 @@ parser.add_argument(
     default=None,
 )
 parser.add_argument(
-    "-v", "--verbose", action="store_true", help="verbose", default=False
+    "-v", "--verbose", action="store_true", help="show details", default=False
 )
 parser.add_argument(
-    "-c", "--clobber", action="store_true", help="overwrite", default=False
+    "-c",
+    "--clobber",
+    action="store_true",
+    help="clobber/overwrite",
+    default=False,
 )
 parser.add_argument(
     "-p", "--plot", action="store_true", help="show plot", default=False
 )
-# parser.add_argument(
-#     "-o", "--outdir", type=str, help="output directory", default=None
-# )
-# parser.add_argument(
-#     "-s", "--save", action='store_true', help="save csv", default=False
-# )
+parser.add_argument(
+    "-o", "--outdir", type=str, help="output directory", default=DATA_PATH
+)
+parser.add_argument(
+    "-s",
+    "--savefig",
+    action="store_true",
+    help="save disclosures figure",
+    default=False,
+)
 parser.add_argument(
     "-d",
     "--disclosure_type",
@@ -64,10 +75,13 @@ if __name__ == "__main__":
         verbose=args.verbose,
         clobber=args.clobber,
     )
-    # if args.save:
-    #     fp = Path(args.outdir, "{} disclosures_summary.csv".format(cd.symbol))
-    #     cd.disclosures_combined.to_csv(fp)
+    if not Path(args.outdir).exists():
+        os.makedirs(args.outdir)
 
+    fig = cd.plot_disclosures(disclosure_type=args.disclosure_type)
     if args.plot:
-        fig = cd.plot_disclosures(disclosure_type=args.disclosure_type)
         pl.show()
+
+    if args.savefig:
+        fp = Path(args.outdir, "{}_disclosures.png".format(cd.symbol))
+        fig.savefig(fp)
