@@ -364,9 +364,10 @@ class CompanyDisclosures:
         return df
 
     def load_disclosures(self):
-        """load disclosures data from disk and append older or newer if necessary
+        """Loads disclosures data from disk and append older or newer if necessary
         """
-
+        errmsg = "No cache file found."
+        assert len(self.files) > 0, errmsg
         data = pd.read_csv(self.files[0])
         newest_date = data["Announce Date and Time"].iloc[1]
         oldest_date = data["Announce Date and Time"].iloc[-1]
@@ -377,7 +378,7 @@ class CompanyDisclosures:
             oldest_date > self.company_disclosures["Announce Date and Time"]
         )
         idxs1 = np.argwhere(older).flatten()
-        if idxs1.sum() > 0:
+        if older.sum() > 0:
             for idx in tqdm(idxs1):
                 edge_no = self.company_disclosures.loc[idx, "edge_no"]
                 df = self.get_disclosure_tables(edge_no)
@@ -396,12 +397,12 @@ class CompanyDisclosures:
                 print(e)
 
         # append newer disclosures
-        more_recent = (
+        newer = (
             newest_date < self.company_disclosures["Announce Date and Time"]
         )
-        idxs2 = np.argwhere(more_recent).flatten()
+        idxs2 = np.argwhere(newer).flatten()
         # append newer disclosures
-        if idxs2.sum() > 0:
+        if newer.sum() > 0:
             for idx in tqdm(idxs2):
                 edge_no = self.company_disclosures.loc[idx, "edge_no"]
                 df = self.get_disclosure_tables(edge_no)
@@ -409,7 +410,7 @@ class CompanyDisclosures:
         if self.verbose:
             print("Loaded: {}".format(self.files[0]))
 
-        if (idxs1.sum() > 0) or (idxs2.sum() > 0):
+        if (older.sum() > 0) or (newer.sum() > 0):
             # remove older file
             os.remove(self.files[0])
             if self.verbose:

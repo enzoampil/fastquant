@@ -5,7 +5,7 @@ Created on Tue Apr 5, 2020
 
 download parsed company disclosures issued between specified dates
 """
-
+import sys
 import argparse
 
 # from pathlib import Path
@@ -20,8 +20,8 @@ parser.add_argument(
     "-t1",
     "--start_date",
     type=str,
-    help="start date (default=1-1-2019)",
-    default="1-1-2019",
+    help="start date (default=1-1-2020)",
+    default="1-1-2020",
 )
 parser.add_argument(
     "-t2",
@@ -53,7 +53,8 @@ parser.add_argument(
     default="all",
 )
 
-args = parser.parse_args()
+# print help if no arguments supplied
+args = parser.parse_args(None if sys.argv[1:] else ["-h"])
 if __name__ == "__main__":
     cd = CompanyDisclosures(
         args.symbol,
