@@ -1,20 +1,25 @@
+# Import standard library
 from __future__ import (
     absolute_import,
     division,
     print_function,
     unicode_literals,
 )
-
 import datetime
 import os.path
 import sys
+from pkg_resources import resource_filename
+
+# Import modules
 import backtrader as bt
 import backtrader.feeds as btfeed
 
 INIT_CASH = 100000
 BAND_PERIOD = 30
 COMMISSION_PER_TRANSACTION = 0.006
-DATA_FILE = "examples/data/JFC_2010-01-01_2019-01-01_OHLCV.csv"
+DATA_FILE = resource_filename(
+    __name__, "../data/JFC_2010-01-01_2019-01-01_OHLCV.csv"
+)
 
 
 class MinMaxSupportResistance(bt.Strategy):

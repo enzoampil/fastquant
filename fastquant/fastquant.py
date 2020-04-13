@@ -5,20 +5,23 @@ Created on Tue Jun 25 19:48:03 2019
 
 @author: enzoampil
 """
-
+# Import standard library
 import os
 import requests
 from datetime import datetime
+from pathlib import Path
+from pkg_resources import resource_filename
+from string import digits
+
+# Import modules
 import pandas as pd
 import numpy as np
-from string import digits
 import lxml.html as LH
 from tqdm import tqdm
 import tweepy
-from pathlib import Path
 import yfinance as yf
 
-from fastquant.config import DATA_PATH
+DATA_PATH = resource_filename(__name__, "../data")
 
 PSE_TWITTER_ACCOUNTS = [
     "phstockexchange",
@@ -126,93 +129,6 @@ def remove_digits(string):
     remove_digits = str.maketrans("", "", digits)
     res = string.translate(remove_digits)
     return res
-
-
-def get_disclosures_json(symbol, from_date, to_date):
-    headers = {
-        "Accept": "application/json, text/javascript, */*; q=0.01",
-        "Referer": "https://www.investagrams.com/Stock/PSE:JFC",
-        "Origin": "https://www.investagrams.com",
-        "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36",
-        "Content-Type": "text/plain; charset=utf-8",
-    }
-    from_date_epoch = date_to_epoch(from_date)
-    to_date_epoch = date_to_epoch(to_date)
-    params = (
-        ("symbol", "PSE:{}".format(symbol)),
-        ("from", from_date_epoch),
-        ("to", to_date_epoch),
-        ("resolution", "D"),  # Setting D (daily) by default
-    )
-
-    response = requests.post(
-        "https://webapi.investagrams.com/InvestaApi/TradingViewChart/timescale_marks",
-        headers=headers,
-        params=params,
-    )
-    results = response.json()
-    return results
-
-
-def disclosures_json_to_df(disclosures):
-    disclosure_dfs = {}
-    for disc in ["D", "E"]:
-        filtered_examples = [ex for ex in disclosures if ex["label"] == disc]
-        additional_feats_df = pd.DataFrame(
-            [
-                dict(
-                    [
-                        tuple(item.split(":"))
-                        for item in ex["tooltip"]
-                        if ":" in item
-                    ]
-                )
-                for ex in filtered_examples
-            ]
-        )
-        main_df = pd.DataFrame(filtered_examples)[
-            ["id", "time", "color", "label"]
-        ]
-        combined = pd.concat([main_df, additional_feats_df], axis=1)
-        combined["time"] = pd.to_datetime(combined.time, unit="s")
-        if "Total Revenue" in combined.columns.values:
-            combined["Revenue Unit"] = combined["Total Revenue"].apply(
-                lambda x: remove_digits(x).replace(".", "")
-            )
-            combined["Total Revenue"] = (
-                combined["Total Revenue"]
-                .str.replace("B", "")
-                .str.replace("M", "")
-                .astype(float)
-            )
-            # Net income is followed by a parenthesis which corresponds to that quarter's YoY growth
-            combined["NI Unit"] = combined["Net Income"].apply(
-                lambda x: remove_digits(x).replace(".", "")
-            )
-            combined["Net Income Amount"] = (
-                combined["Net Income"]
-                .str.replace("B", "")
-                .str.replace("M", "")
-                .apply(lambda x: x.split()[0])
-                .astype(float)
-            )
-            combined["Net Income YoY Growth (%)"] = combined[
-                "Net Income"
-            ].apply(
-                lambda x: str(x)
-                .replace("(", "")
-                .replace(")", "")
-                .replace("%", "")
-                .split()[1]
-            )
-        disclosure_dfs[disc] = combined
-    return disclosure_dfs
-
-
-def get_disclosures_df(symbol, from_date, to_date):
-    disclosures = get_disclosures_json(symbol, from_date, to_date)
-    disclosures_dfs = disclosures_json_to_df(disclosures)
-    return disclosures_dfs
 
 
 def get_pse_data_old(
