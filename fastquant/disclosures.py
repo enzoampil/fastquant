@@ -12,6 +12,7 @@ from datetime import datetime
 import warnings
 from pathlib import Path
 from pkg_resources import resource_filename
+from string import digits
 import requests
 import json
 
@@ -25,7 +26,7 @@ import matplotlib.pyplot as pl
 import matplotlib as mpl
 
 # Import from package
-from fastquant import get_stock_data, date_to_epoch, remove_digits
+from fastquant import get_stock_data
 
 DATA_PATH = resource_filename(__name__, "../data")
 
@@ -186,6 +187,11 @@ class DisclosuresPSE:
             cookies=COOKIES,
             data=data,
         )
+        if hasattr(response, "text"):
+            assert (
+                len(response.text) > 10
+            ), "Empty response from edge.pse.com.ph"
+
         html = response.text
         # Indicating the parser (e.g.  lxml) removes the bs warning
         parsed_html = BeautifulSoup(html, "lxml")
@@ -556,6 +562,8 @@ class DisclosuresInvestagrams:
 
     Attribues
     ---------
+    disclosures_df : pd.DataFrame
+        parsed disclosures
     """
 
     def __init__(self, symbol, from_date, to_date):
@@ -595,8 +603,11 @@ class DisclosuresInvestagrams:
             headers=headers,
             params=params,
         )
-        results = response.json()
-        return results
+        if hasattr(response, "text"):
+            assert (
+                len(response.text) > 10
+            ), "Empty response from investagrams.com"
+        return response.json()
 
     def disclosures_json_to_df(self):
         disclosure_dfs = {}
@@ -665,3 +676,13 @@ def _remove_amend(x):
         return x.split("]")[1]
     else:
         return x
+
+
+def date_to_epoch(date):
+    return int(datetime.strptime(date, "%Y-%m-%d").timestamp())
+
+
+def remove_digits(string):
+    remove_digits = str.maketrans("", "", digits)
+    res = string.translate(remove_digits)
+    return res

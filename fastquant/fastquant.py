@@ -11,7 +11,6 @@ import requests
 from datetime import datetime
 from pathlib import Path
 from pkg_resources import resource_filename
-from string import digits
 
 # Import modules
 import pandas as pd
@@ -119,16 +118,6 @@ def fill_gaps(df):
     df_filled = pd.concat([df, ts], axis=1)
     del df_filled["empty"]
     return df_filled
-
-
-def date_to_epoch(date):
-    return int(datetime.strptime(date, "%Y-%m-%d").timestamp())
-
-
-def remove_digits(string):
-    remove_digits = str.maketrans("", "", digits)
-    res = string.translate(remove_digits)
-    return res
 
 
 def get_pse_data_old(
