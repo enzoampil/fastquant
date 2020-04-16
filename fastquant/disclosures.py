@@ -5,22 +5,33 @@ Created on Tue Apr 5, 2020
 
 @author: enzoampil & jpdeleon
 """
-
+# Import standard library
+import os
 from inspect import signature
 from datetime import datetime
+import warnings
+from pathlib import Path
+from pkg_resources import resource_filename
+from string import digits
 import requests
-from bs4 import BeautifulSoup
-import matplotlib.cm as cm
+import json
+
+# Import modules
 import numpy as np
 import pandas as pd
 from tqdm import tqdm
+from bs4 import BeautifulSoup
+from pandas.io.json import json_normalize
 import matplotlib.pyplot as pl
-import matplotlib
+import matplotlib as mpl
+
+# Import from package
 from fastquant import get_stock_data
-import json
 
-matplotlib.style.use("fivethirtyeight")
+DATA_PATH = resource_filename(__name__, "../data")
 
+warnings.simplefilter("ignore")
+mpl.style.use("fivethirtyeight")
 
 COOKIES = {
     "BIGipServerPOOL_EDGE": "1427584378.20480.0000",
@@ -29,35 +40,58 @@ COOKIES = {
 
 TODAY = datetime.now().date().strftime("%m-%d-%Y")
 
-__all__ = ["CompanyDisclosures"]
+__all__ = ["DisclosuresPSE", "DisclosuresInvestagrams"]
 
 
-class CompanyDisclosures:
+class DisclosuresPSE:
     """
+    Disclosures scraped from PSE
+
     Attribues
     ---------
-    summary : pd.DataFrame
-        Company Summary
-    company_disclosures :
+    disclosures_combined : pd.DataFrame
+        Company disclosure summary
     """
 
     def __init__(
         self,
         symbol,
         disclosure_type="all",
-        start_date="1-1-2019",
+        start_date="1-1-2020",
         end_date=None,
         verbose=True,
+        clobber=False,
     ):
-        self.symbol = symbol
+        """
+        Parameters
+        ----------
+        symbol : str
+            company symbol
+        disclosure_type : str
+            type of disclosure available
+        start_date : str
+            start date with format %m-%d-%Y
+        end_date : str
+            end date with format %m-%d-%Y
+        """
+        self.symbol = symbol.upper()
         self.start_date = start_date
         self.end_date = TODAY if end_date is None else end_date
         self.disclosure_type = disclosure_type
         self.stock_data = None
-        # self.company_summary = self.get_company_summary()
         self.verbose = verbose
+        self.clobber = clobber
         if self.verbose:
-            print(f"Pulling {self.symbol} disclosures summary...")
+            print("Pulling {} disclosures summary...".format(self.symbol))
+        self.files = list(
+            Path(DATA_PATH).glob("{}_disclosures_*.csv".format(self.symbol))
+        )
+        self.fp = Path(
+            DATA_PATH,
+            "{}_disclosures_{}_{}.csv".format(
+                self.symbol, self.start_date, self.end_date
+            ),
+        )
         self.company_disclosures = self.get_company_disclosures()
         self.disclosure_types = (
             self.company_disclosures["Template Name"]
@@ -66,12 +100,15 @@ class CompanyDisclosures:
         )
         if self.verbose:
             print(
-                f"Found {len(self.company_disclosures)} disclosures with {len(self.disclosure_types)} types:"
+                "Found {} disclosures between {} & {} with {} types:\n{}".format(
+                    len(self.company_disclosures),
+                    self.start_date,
+                    self.end_date,
+                    len(self.disclosure_types),
+                    self.disclosure_types,
+                )
             )
-            print(
-                f"{self.disclosure_types}\nbetween {self.start_date} & {self.end_date}."
-            )
-        print(f"Pulling details in all {self.symbol} disclosures...")
+        print("Pulling details in all {} disclosures...".format(self.symbol))
         self.disclosure_tables = self.get_all_disclosure_tables()
         self.disclosure_tables_df = self.get_all_disclosure_tables_df()
         self.disclosure_backgrounds = self.get_disclosure_details()
@@ -79,21 +116,25 @@ class CompanyDisclosures:
             key="Subject of the Disclosure"
         )
         self.disclosures_combined = self.get_combined_disclosures()
-        errmsg = f"{self.disclosure_type} not available between {self.start_date} & {self.end_date}.\n"
-        errmsg += f"Try {self.disclosure_types}."
+        errmsg = "{} not available between {} & {}.\n".format(
+            self.disclosure_type, self.start_date, self.end_date
+        )
+        errmsg += "Try {}.".format(self.disclosure_types)
         if self.disclosure_type != "all":
             assert self.disclosure_type in self.disclosure_types, errmsg
 
     def __repr__(self):
+        """show class description after istantiation
+        """
         fields = signature(self.__init__).parameters
         values = ", ".join(repr(getattr(self, f)) for f in fields)
-        return f"{type(self).__name__}({values})"
+        return "{}({})".format(type(self).__name__, values)
 
     def get_stock_data(self):
         """overwrites get_stock_data
         """
         if self.verbose:
-            print(f"Pulling {self.symbol} stock data...")
+            print("Pulling {} stock data...".format(self.symbol))
         data = get_stock_data(
             self.symbol, start_date=self.start_date, end_date=self.end_date
         )
@@ -105,9 +146,19 @@ class CompanyDisclosures:
 
     def get_company_disclosures(self):
         """
-        symbol str - Ticker of the pse stock of choice
-        start_date date str %m-%d-%Y - Beginning date of the disclosure data pull
-        end_date date str %m-%d-%Y - Ending date of the disclosure data pull
+        symbol : str
+            Ticker of the pse stock of choice
+        start_date date : str (%m-%d-%Y)
+            Beginning date of the disclosure data pull
+        end_date : str (%m-%d-%Y)
+            Ending date of the disclosure data pull
+
+        FIXME:
+        This can be loaded using:
+        cols = ['Company Name', 'Template Name', 'PSE Form Number',
+                'Announce Date and Time', 'Circular Number', 'edge_no', 'url']
+        self.company_disclosures = pd.read_csv(self.fp)[cols]
+        but posting request is fast anyway
         """
 
         headers = {
@@ -136,6 +187,11 @@ class CompanyDisclosures:
             cookies=COOKIES,
             data=data,
         )
+        if hasattr(response, "text"):
+            assert (
+                len(response.text) > 10
+            ), "Empty response from edge.pse.com.ph"
+
         html = response.text
         # Indicating the parser (e.g.  lxml) removes the bs warning
         parsed_html = BeautifulSoup(html, "lxml")
@@ -305,7 +361,7 @@ class CompanyDisclosures:
 
     def get_disclosure_tables(self, edge_no):
         """
-        Return the disclosure details (at the bottom page) given the parsed tables
+        Returns the disclosure details (at the bottom page) given edge_no
         """
         file_id = self.get_disclosure_file_id(edge_no)
         parsed_html = self.get_disclosure_parsed_html(file_id)
@@ -321,19 +377,78 @@ class CompanyDisclosures:
         df = pd.DataFrame(np.c_[k, v], columns=["key", "value"])
         return df
 
+    def load_disclosures(self):
+        """Loads disclosures data from disk and append older or newer if necessary
+        """
+        errmsg = "No cache file found."
+        assert len(self.files) > 0, errmsg
+        data = pd.read_csv(self.files[0])
+        newest_date = data["Announce Date and Time"].iloc[1]
+        oldest_date = data["Announce Date and Time"].iloc[-1]
+        disclosure_details = {}
+
+        # append older disclosures
+        older = (
+            oldest_date > self.company_disclosures["Announce Date and Time"]
+        )
+        idxs1 = np.argwhere(older).flatten()
+        if older.sum() > 0:
+            for idx in tqdm(idxs1):
+                edge_no = self.company_disclosures.loc[idx, "edge_no"]
+                df = self.get_disclosure_tables(edge_no)
+                disclosure_details[edge_no] = df
+
+        # load local data from disk
+        # FIXME: the JSON object must be str, bytes or bytearray, not float
+        for key, row in data.iterrows():
+            try:
+                edge_no = row["edge_no"]
+                df = json_normalize(json.loads(row["disclosure_table"])).T
+                df = df.reset_index()
+                df.columns = ["key", "value"]
+                disclosure_details[edge_no] = df
+            except Exception as e:
+                print(e)
+
+        # append newer disclosures
+        newer = (
+            newest_date < self.company_disclosures["Announce Date and Time"]
+        )
+        idxs2 = np.argwhere(newer).flatten()
+        # append newer disclosures
+        if newer.sum() > 0:
+            for idx in tqdm(idxs2):
+                edge_no = self.company_disclosures.loc[idx, "edge_no"]
+                df = self.get_disclosure_tables(edge_no)
+                disclosure_details[edge_no] = df
+        if self.verbose:
+            print("Loaded: {}".format(self.files[0]))
+
+        if (older.sum() > 0) or (newer.sum() > 0):
+            # remove older file
+            os.remove(self.files[0])
+            if self.verbose:
+                print("Deleted: {}".format(self.files[0]))
+            self.clobber = True
+        return disclosure_details
+
     def get_all_disclosure_tables(self):
         """
-        iterate all disclosure id and save details in a dictionary
+        Returns a dict after iterating all disclosures
         """
-        disclosure_details = {}
-        for edge_no in tqdm(self.company_disclosures["edge_no"].values):
-            df = self.get_disclosure_tables(edge_no)
-            disclosure_details[edge_no] = df
+        if (len(self.files) == 0) or self.clobber:
+            disclosure_details = {}
+            for edge_no in tqdm(self.company_disclosures["edge_no"].values):
+                df = self.get_disclosure_tables(edge_no)
+                disclosure_details[edge_no] = df
+        else:
+            disclosure_details = self.load_disclosures()
+
         return disclosure_details
 
     def get_all_disclosure_tables_df(self):
         """
-        Return disclosure tables as a dataframe
+        Returns disclosure tables as a dataframe
         """
         values = []
         for edge_no in self.disclosure_tables.keys():
@@ -347,7 +462,7 @@ class CompanyDisclosures:
         self, key="Background/Description of the Disclosure"
     ):
         """
-        return a dataframe of detailed background/decription per date
+        Returns a dataframe of specific data from disclosure_tables
         """
         values = []
         for edge_no in self.disclosure_tables.keys():
@@ -360,7 +475,10 @@ class CompanyDisclosures:
         return s
 
     def get_combined_disclosures(self):
-        return pd.concat(
+        """
+        Returns a dataframe of useful disclosure attributes
+        """
+        df = pd.concat(
             [
                 self.company_disclosures,
                 self.disclosure_tables_df,
@@ -370,9 +488,22 @@ class CompanyDisclosures:
             axis=1,
         )
 
+        if (len(self.files) == 0) or self.clobber:
+            df.to_csv(self.fp)
+            if self.verbose:
+                print("Saved: {}".format(self.fp))
+        return df
+
     def plot_disclosures(self, disclosure_type=None, data_type="close"):
         """
+        Parameters
+        ----------
         disclosure_type : str
+            type of disclosure to highlight (default=all)
+        data_type : str
+            stock data to overplot (close or volume)
+
+        Returns a figure instance
         """
         disclosure_type = (
             self.disclosure_type
@@ -387,7 +518,7 @@ class CompanyDisclosures:
         else:
             data = self.stock_data
 
-        colors = cm.rainbow(np.linspace(0, 1, len(self.disclosure_types)))
+        colors = mpl.cm.rainbow(np.linspace(0, 1, len(self.disclosure_types)))
         color_map = {n: colors[i] for i, n in enumerate(self.disclosure_types)}
 
         ax = data[data_type].plot(c="k", zorder=1)
@@ -420,9 +551,138 @@ class CompanyDisclosures:
         ax.set_title(self.symbol)
         return fig
 
+    def __call__(self):
+        # return parsed data after instantiation
+        return self.disclosures_combined
+
+
+class DisclosuresInvestagrams:
+    """
+    Disclosures scraped from investagrams
+
+    Attribues
+    ---------
+    disclosures_df : pd.DataFrame
+        parsed disclosures
+    """
+
+    def __init__(self, symbol, from_date, to_date):
+        """
+        symbol : str
+            phisix symbol
+        from_date : str
+            (%Y-%m-%d)
+        end_date = str
+            (%Y-%m-%d)
+        """
+        self.symbol = symbol
+        self.from_date = from_date
+        self.to_date = to_date
+        self.disclosures_json = self.get_disclosures_json()
+        self.disclosures_df = self.get_disclosures_df()
+
+    def get_disclosures_json(self):
+        headers = {
+            "Accept": "application/json, text/javascript, */*; q=0.01",
+            "Referer": "https://www.investagrams.com/Stock/PSE:JFC",
+            "Origin": "https://www.investagrams.com",
+            "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36",
+            "Content-Type": "text/plain; charset=utf-8",
+        }
+        from_date_epoch = date_to_epoch(self.from_date)
+        to_date_epoch = date_to_epoch(self.to_date)
+        params = (
+            ("symbol", "PSE:{}".format(self.symbol)),
+            ("from", from_date_epoch),
+            ("to", to_date_epoch),
+            ("resolution", "D"),  # Setting D (daily) by default
+        )
+
+        response = requests.post(
+            "https://webapi.investagrams.com/InvestaApi/TradingViewChart/timescale_marks",
+            headers=headers,
+            params=params,
+        )
+        if hasattr(response, "text"):
+            assert (
+                len(response.text) > 10
+            ), "Empty response from investagrams.com"
+        return response.json()
+
+    def disclosures_json_to_df(self):
+        disclosure_dfs = {}
+        for disc in ["D", "E"]:
+            filtered_examples = [
+                ex for ex in self.disclosures_json if ex["label"] == disc
+            ]
+            additional_feats_df = pd.DataFrame(
+                [
+                    dict(
+                        [
+                            tuple(item.split(":"))
+                            for item in ex["tooltip"]
+                            if ":" in item
+                        ]
+                    )
+                    for ex in filtered_examples
+                ]
+            )
+            main_df = pd.DataFrame(filtered_examples)[
+                ["id", "time", "color", "label"]
+            ]
+            combined = pd.concat([main_df, additional_feats_df], axis=1)
+            combined["time"] = pd.to_datetime(combined.time, unit="s")
+            if "Total Revenue" in combined.columns.values:
+                combined["Revenue Unit"] = combined["Total Revenue"].apply(
+                    lambda x: remove_digits(x).replace(".", "")
+                )
+                combined["Total Revenue"] = (
+                    combined["Total Revenue"]
+                    .str.replace("B", "")
+                    .str.replace("M", "")
+                    .astype(float)
+                )
+                # Net income is followed by a parenthesis which corresponds to that quarter's YoY growth
+                combined["NI Unit"] = combined["Net Income"].apply(
+                    lambda x: remove_digits(x).replace(".", "")
+                )
+                combined["Net Income Amount"] = (
+                    combined["Net Income"]
+                    .str.replace("B", "")
+                    .str.replace("M", "")
+                    .apply(lambda x: x.split()[0])
+                    .astype(float)
+                )
+                combined["Net Income YoY Growth (%)"] = combined[
+                    "Net Income"
+                ].apply(
+                    lambda x: str(x)
+                    .replace("(", "")
+                    .replace(")", "")
+                    .replace("%", "")
+                    .split()[1]
+                )
+            disclosure_dfs[disc] = combined
+        return disclosure_dfs
+
+    def get_disclosures_df(self):
+        if self.disclosures_json is None:
+            self.disclosures_json = self.get_disclosures_json()
+        return self.disclosures_json_to_df()
+
 
 def _remove_amend(x):
     if len(x.split("]")) == 2:
         return x.split("]")[1]
     else:
         return x
+
+
+def date_to_epoch(date):
+    return int(datetime.strptime(date, "%Y-%m-%d").timestamp())
+
+
+def remove_digits(string):
+    remove_digits = str.maketrans("", "", digits)
+    res = string.translate(remove_digits)
+    return res

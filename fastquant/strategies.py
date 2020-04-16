@@ -1,13 +1,15 @@
+# Import standard library
 from __future__ import (
     absolute_import,
     division,
     print_function,
     unicode_literals,
 )
-
+from pkg_resources import resource_filename
 import datetime
-import os.path
 import sys
+
+# Import modules
 import backtrader as bt
 import backtrader.feeds as btfeed
 import pandas as pd
@@ -15,7 +17,10 @@ import pandas as pd
 # Global arguments
 INIT_CASH = 100000
 COMMISSION_PER_TRANSACTION = 0.0075
-DATA_FILE = "examples/data/JFC_20180101_20190110_DCV.csv"
+DATA_FILE = resource_filename(
+    __name__, "../data/JFC_20180101_20190110_DCV.csv"
+)
+
 BUY_PROP = 1
 SELL_PROP = 1
 DATA_FORMAT_MAPPING = {
@@ -365,7 +370,7 @@ class MACDStrategy(BaseStrategy):
     Simple implementation of backtrader MACD reference: https://www.backtrader.com/blog/posts/2016-07-30-macd-settings/macd-settings/
 
     Summary:
-    Enter if the macd line crosses the signal line to the upside and a control Simple Moving Average has had a 
+    Enter if the macd line crosses the signal line to the upside and a control Simple Moving Average has had a
     net negative direction in the last x periods (current SMA value below the value x periods ago).
     In the opposite situation, given a market position exists, a sell position is made.
 
@@ -457,7 +462,7 @@ class BBandsStrategy(BaseStrategy):
         print("===Strategy level arguments===")
         print("period :", self.period)
         print("devfactor :", self.devfactor)
-        bbands = bt.ind.BBands(period=self.period, devfactor=self.devfactor,)
+        bbands = bt.ind.BBands(period=self.period, devfactor=self.devfactor)
         self.mid = bbands.mid
         self.top = bbands.top
         self.bot = bbands.bot

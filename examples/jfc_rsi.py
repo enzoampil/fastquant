@@ -1,13 +1,16 @@
+# Import standard library
 from __future__ import (
     absolute_import,
     division,
     print_function,
     unicode_literals,
 )
-
 import datetime
 import os.path
 import sys
+from pkg_resources import resource_filename
+
+# Import from package
 import backtrader as bt
 import backtrader.feeds as btfeed
 
@@ -16,7 +19,9 @@ RSI_PERIOD = 14
 COMMISSION_PER_TRANSACTION = 0.006
 RSI_UPPER = 70
 RSI_LOWER = 30
-DATA_FILE = "examples/data/JFC_2010-01-01_2019-01-01_OHLCV.csv"
+DATA_FILE = resource_filename(
+    __name__, "../data/JFC_2010-01-01_2019-01-01_OHLCV.csv"
+)
 
 
 class RSIStrategy(bt.Strategy):

@@ -103,3 +103,6 @@ backtest('bbands', df, period=20, devfactor=2.0)
 # Final Portfolio Value: 97060.30
 ```
 ![](./docs/assets/bbands.png)
+
+
+See more examples [here](https://nbviewer.jupyter.org/github/enzoampil/fastquant/tree/master/examples/).
