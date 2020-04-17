@@ -150,7 +150,7 @@ class DisclosuresPSE:
         self.stock_data = data
         return data
 
-    def get_company_disclosures_page(self, page=1, page_count=False):
+    def get_company_disclosures_page(self, page=1):
         """
         Gets company disclosures for one page
 
@@ -249,10 +249,7 @@ class DisclosuresPSE:
         df["Announce Date and Time"] = pd.to_datetime(
             df["Announce Date and Time"]
         )
-        if page_count:
-            return df, page_count
-        else:
-            return df
+        return df
 
     def get_company_disclosures(self):
         """
@@ -267,7 +264,7 @@ class DisclosuresPSE:
         """
 
         first_page_df, page_count = self.get_company_disclosures_page(
-            page=self.start_page, page_count=True
+            page=self.start_page
         )
         print("{} pages detected!".format(page_count))
         if page_count == 1:
@@ -275,7 +272,7 @@ class DisclosuresPSE:
         else:
             page_dfs = [first_page_df]
             # We skip the first since we already have it
-            for page_num in range(2, page_count + 1):
+            for page_num in range(2, self.page_count + 1):
                 page_df = get_company_disclosures_page(self, page=page_num)
                 page_dfs.append(page_df)
             pages_df = pd.concat(page_dfs)
