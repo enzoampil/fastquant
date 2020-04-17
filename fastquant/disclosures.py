@@ -263,11 +263,11 @@ class DisclosuresPSE:
             Ending date of the disclosure data pull
         """
 
-        first_page_df, page_count = self.get_company_disclosures_page(
+        first_page_df = self.get_company_disclosures_page(
             page=self.start_page
         )
         print("{} pages detected!".format(page_count))
-        if page_count == 1:
+        if self.page_count == 1:
             disclosures_df = first_page_df
         else:
             page_dfs = [first_page_df]
