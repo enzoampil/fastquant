@@ -15,6 +15,7 @@ from pkg_resources import resource_filename
 from string import digits
 import requests
 import json
+import re
 
 # Import modules
 import numpy as np
@@ -59,6 +60,7 @@ class DisclosuresPSE:
         disclosure_type="all",
         start_date="1-1-2020",
         end_date=None,
+        start_page=1,
         verbose=True,
         clobber=False,
     ):
@@ -73,6 +75,8 @@ class DisclosuresPSE:
             start date with format %m-%d-%Y
         end_date : str
             end date with format %m-%d-%Y
+        start_page : int
+            first disclosure page to start with
         """
         self.symbol = symbol.upper()
         self.start_date = start_date
@@ -122,6 +126,7 @@ class DisclosuresPSE:
         errmsg += "Try {}.".format(self.disclosure_types)
         if self.disclosure_type != "all":
             assert self.disclosure_type in self.disclosure_types, errmsg
+        self.page_count, self.results_count = None, None
 
     def __repr__(self):
         """show class description after istantiation
@@ -144,14 +149,18 @@ class DisclosuresPSE:
         self.stock_data = data
         return data
 
-    def get_company_disclosures(self):
+    def get_company_disclosures_page(self, page=1):
         """
+        Gets company disclosures for one page
+
         symbol : str
             Ticker of the pse stock of choice
         start_date date : str (%m-%d-%Y)
             Beginning date of the disclosure data pull
         end_date : str (%m-%d-%Y)
             Ending date of the disclosure data pull
+        page_count : bool
+            Whether to return the total number of pages in the disclosure results
 
         FIXME:
         This can be loaded using:
@@ -174,6 +183,7 @@ class DisclosuresPSE:
         }
 
         data = {
+            "pageNo": page,
             "companyId": "",
             "keyword": self.symbol,
             "tmplNm": "",
@@ -195,6 +205,18 @@ class DisclosuresPSE:
         html = response.text
         # Indicating the parser (e.g.  lxml) removes the bs warning
         parsed_html = BeautifulSoup(html, "lxml")
+        current_page, page_count, results_count = re.findall(
+            "[^A-Za-z\[\]\/\s]+",
+            parsed_html.find("span", {"class": "count"}).text,
+        )
+        current_page, self.page_count, self.results_count = (
+            int(current_page),
+            int(page_count),
+            int(results_count),
+        )
+        assert (
+            int(current_page) == page
+        ), "Resulting page is not consistent with the requested page!"
         table = parsed_html.find("table", {"class": "list"})
         table_rows = table.find_all("tr")
         lines = []
@@ -227,6 +249,34 @@ class DisclosuresPSE:
             df["Announce Date and Time"]
         )
         return df
+
+    def get_company_disclosures(self):
+        """
+        Gets company disclosures for all pages
+
+        symbol : str
+            Ticker of the pse stock of choice
+        start_date date : str (%m-%d-%Y)
+            Beginning date of the disclosure data pull
+        end_date : str (%m-%d-%Y)
+            Ending date of the disclosure data pull
+        """
+
+        first_page_df = self.get_company_disclosures_page(
+            page=1
+        )
+        print("{} pages detected!".format(self.page_count))
+        if self.page_count == 1:
+            disclosures_df = first_page_df
+        else:
+            page_dfs = [first_page_df]
+            # We skip the first since we already have it
+            for page_num in range(2, self.page_count + 1):
+                page_df = self.get_company_disclosures_page(page=page_num)
+                page_dfs.append(page_df)
+            pages_df = pd.concat(page_dfs).reset_index(drop=True)
+            disclosures_df = pages_df
+        return disclosures_df
 
     def get_disclosure_file_id(self, edge_no):
         """
