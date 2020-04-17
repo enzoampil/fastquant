@@ -153,15 +153,6 @@ class DisclosuresPSE:
         """
         Gets company disclosures for one page
 
-        symbol : str
-            Ticker of the pse stock of choice
-        start_date date : str (%m-%d-%Y)
-            Beginning date of the disclosure data pull
-        end_date : str (%m-%d-%Y)
-            Ending date of the disclosure data pull
-        page_count : bool
-            Whether to return the total number of pages in the disclosure results
-
         FIXME:
         This can be loaded using:
         cols = ['Company Name', 'Template Name', 'PSE Form Number',
@@ -254,12 +245,6 @@ class DisclosuresPSE:
         """
         Gets company disclosures for all pages
 
-        symbol : str
-            Ticker of the pse stock of choice
-        start_date date : str (%m-%d-%Y)
-            Beginning date of the disclosure data pull
-        end_date : str (%m-%d-%Y)
-            Ending date of the disclosure data pull
         """
 
         first_page_df = self.get_company_disclosures_page(
