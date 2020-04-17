@@ -266,7 +266,7 @@ class DisclosuresPSE:
         first_page_df = self.get_company_disclosures_page(
             page=self.start_page
         )
-        print("{} pages detected!".format(page_count))
+        print("{} pages detected!".format(self.page_count))
         if self.page_count == 1:
             disclosures_df = first_page_df
         else:
