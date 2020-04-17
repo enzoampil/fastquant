@@ -275,7 +275,7 @@ class DisclosuresPSE:
             for page_num in range(2, self.page_count + 1):
                 page_df = self.get_company_disclosures_page(page=page_num)
                 page_dfs.append(page_df)
-            pages_df = pd.concat(page_dfs)
+            pages_df = pd.concat(page_dfs).reset_index(drop=True)
             disclosures_df = pages_df
         return disclosures_df
 
