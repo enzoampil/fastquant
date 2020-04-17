@@ -3,7 +3,7 @@
 """
 Created on Tue Apr 5, 2020
 
-@author: enzoampil & jpdeleon
+@authors: enzoampil & jpdeleon
 """
 # Import standard library
 import os
@@ -206,7 +206,7 @@ class DisclosuresPSE:
         # Indicating the parser (e.g.  lxml) removes the bs warning
         parsed_html = BeautifulSoup(html, "lxml")
         current_page, page_count, results_count = re.findall(
-            "[^A-Za-z\[\]\/\s]+",
+            r"[^A-Za-z\[\]\/\s]+",
             parsed_html.find("span", {"class": "count"}).text,
         )
         current_page, self.page_count, self.results_count = (
@@ -262,9 +262,7 @@ class DisclosuresPSE:
             Ending date of the disclosure data pull
         """
 
-        first_page_df = self.get_company_disclosures_page(
-            page=1
-        )
+        first_page_df = self.get_company_disclosures_page(page=1)
         print("{} pages detected!".format(self.page_count))
         if self.page_count == 1:
             disclosures_df = first_page_df
