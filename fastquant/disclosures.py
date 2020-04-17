@@ -81,7 +81,6 @@ class DisclosuresPSE:
         self.symbol = symbol.upper()
         self.start_date = start_date
         self.end_date = TODAY if end_date is None else end_date
-        self.start_page = start_page
         self.disclosure_type = disclosure_type
         self.stock_data = None
         self.verbose = verbose
@@ -264,7 +263,7 @@ class DisclosuresPSE:
         """
 
         first_page_df = self.get_company_disclosures_page(
-            page=self.start_page
+            page=1
         )
         print("{} pages detected!".format(self.page_count))
         if self.page_count == 1:
