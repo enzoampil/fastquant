@@ -273,7 +273,7 @@ class DisclosuresPSE:
             page_dfs = [first_page_df]
             # We skip the first since we already have it
             for page_num in range(2, self.page_count + 1):
-                page_df = get_company_disclosures_page(self, page=page_num)
+                page_df = self.get_company_disclosures_page(page=page_num)
                 page_dfs.append(page_df)
             pages_df = pd.concat(page_dfs)
             disclosures_df = pages_df
