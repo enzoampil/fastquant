@@ -3,32 +3,5 @@
 Downloads stock data of all symbols in company_names.csv
 """
 from datetime import datetime
-from pathlib import Path
-import pandas as pd
-from tqdm import tqdm
-from fastquant import DATA_PATH, get_pse_data_old
 
-date_today = datetime.now().date().strftime("%Y-%m-%d")
-
-ifp = Path(DATA_PATH, 'company_names.csv')
-names = pd.read_csv(ifp)
-
-data, unavailable = {}, []
-for symbol in tqdm(names.Symbol):
-    try:
-        df = get_pse_data_old(symbol, "2010-01-01", date_today)
-        data[symbol] = df
-    except Exception as e:
-        unavailable.append(symbol)
-        print(e)
-print("No data:\n", unavailable)
-import pdb; pdb.set_trace()
-#concatenate by column after sorting by date
-DF = pd.concat(data, axis=1, sort=True)
-DF.columns.names = ['Symbol', None]
-DF.index.name = 'dt'
-
-#save as csv
-ofp = Path(DATA_PATH, 'merged_stock_data.csv')
-DF.to_csv(ofp, index=True)
-print('Saved: ', ofp)
+update_pse_data_cache(start_date="2010-01-01", verbose=True)

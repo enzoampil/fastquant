@@ -227,14 +227,50 @@ def get_pse_data_by_date(symbol, date):
     return None
 
 
-def get_pse_data_cache(symbol=None, cache_fp=None):
+def update_pse_data_cache(start_date="2010-01-01", verbose=True):
+    """
+    """
+    if verbose:
+        print("Updating cache...")
+    date_today = datetime.now().date().strftime("%Y-%m-%d")
+
+    ifp = Path(DATA_PATH, "company_names.csv")
+    names = pd.read_csv(ifp)
+
+    data, unavailable = {}, []
+    for symbol in tqdm(names.Symbol):
+        try:
+            df = get_pse_data_old(symbol, start_date, date_today)
+            data[symbol] = df
+        except Exception as e:
+            unavailable.append(symbol)
+            print(e)
+    if verbose:
+        print("No data:\n", unavailable)
+
+    # concatenate by column after sorting by date
+    DF = pd.concat(data, axis=1, sort=True)
+    DF.columns.names = ["Symbol", None]
+    DF.index.name = "dt"
+
+    # save as csv
+    ofp = Path(DATA_PATH, "merged_stock_data.csv")
+    DF.to_csv(ofp, index=True)
+    if verbose:
+        print("Saved: ", ofp)
+    # return DF
+
+
+def get_pse_data_cache(symbol=None, cache_fp=None, update=False):
     """
     Loads cached historical data
     Returns all if symbol is None
     """
+    if update:
+        update_pse_data_cache()
     if cache_fp is None:
         cache_fp = Path(DATA_PATH, "merged_stock_data.csv")
-    errmsg = "Cache does not exist!"
+    errmsg = "Cache does not exist! Try update=True"
     assert cache_fp.exists(), errmsg
     df = pd.read_csv(cache_fp, index_col=0, header=[0, 1])
     df.index = pd.to_datetime(df.index)
@@ -318,51 +354,27 @@ def get_pse_data(
 
     pse_data_df["dt"] = pd.to_datetime(pse_data_df.dt)
     idx = (start <= pse_data_df["dt"]) & (pse_data_df["dt"] <= end)
-    return pse_data_df[idx]
+    return pse_data_df[idx].drop_duplicates()
 
 
 def get_yahoo_data(symbol, start_date, end_date):
     """
     """
-    start = datestring_to_datetime(start_date)
-    end = datestring_to_datetime(end_date)
-
-    cache = get_pse_data_cache(symbol=symbol)
-    cache = cache.reset_index()
-    # oldest_date = cache["dt"].iloc[0]
-    newest_date = cache["dt"].iloc[-1]
-    if newest_date <= end:
-        # overwrite start date
-        start_date = newest_date.strftime(CALENDAR_FORMAT)
-        df = yf.download(symbol, start=start_date, end=end_date)
-        df = df.reset_index()
-        rename_dict = {
-            "Date": "dt",
-            "Open": "open",
-            "High": "high",
-            "Low": "low",
-            "Close": "close",
-            "Adj Close": "adj_close",
-            "Volume": "volume",
-        }
-        rename_list = [
-            "dt",
-            "open",
-            "high",
-            "low",
-            "close",
-            "adj_close",
-            "volume",
-        ]
-        df = df.rename(columns=rename_dict)[rename_list].drop_duplicates()
-        if not df.empty:
-            df = pd.concat([cache, df], ignore_index=True)
-    else:
-        df = cache.copy()
-
+    df = yf.download(symbol, start=start_date, end=end_date)
+    df = df.reset_index()
+    rename_dict = {
+        "Date": "dt",
+        "Open": "open",
+        "High": "high",
+        "Low": "low",
+        "Close": "close",
+        "Adj Close": "adj_close",
+        "Volume": "volume",
+    }
+    rename_list = ["dt", "open", "high", "low", "close", "adj_close", "volume"]
+    df = df.rename(columns=rename_dict)[rename_list].drop_duplicates()
     df["dt"] = pd.to_datetime(df.dt)
-    idx = (start <= df["dt"]) & (df["dt"] <= end)
-    return df[idx]
+    return df
 
 
 def get_stock_data(
