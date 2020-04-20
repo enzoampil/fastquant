@@ -2,6 +2,12 @@
 """
 Downloads stock data of all symbols in company_names.csv
 """
-from datetime import datetime
+import argparse
+from fastquant import update_pse_data_cache
 
-update_pse_data_cache(start_date="2010-01-01", verbose=True)
+parser = argparse.ArgumentParser(
+    description="update pse stock data cache"
+)
+parser.add_argument("--start_date", type=str, help="date in YYYY-MM-DD (default=2010-01-01)", default="2010-01-01")
+args = parser.parse_args()
+update_pse_data_cache(start_date=args.start_date, verbose=True)
