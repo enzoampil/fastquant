@@ -254,14 +254,16 @@ def update_pse_data_cache(start_date="2010-01-01", verbose=True):
     DF.index.name = "dt"
 
     # save as csv
-    ofp = Path(DATA_PATH, "merged_stock_data.csv")
+    ofp = Path(DATA_PATH, "merged_stock_data.zip")
     DF.to_csv(ofp, index=True)
     if verbose:
         print("Saved: ", ofp)
     # return DF
 
 
-def get_pse_data_cache(symbol=None, cache_fp=None, update=False):
+def get_pse_data_cache(
+    symbol=None, cache_fp=None, update=False, verbose=False
+):
     """
     Loads cached historical data
     Returns all if symbol is None
@@ -269,7 +271,9 @@ def get_pse_data_cache(symbol=None, cache_fp=None, update=False):
     if update:
         update_pse_data_cache()
     if cache_fp is None:
-        cache_fp = Path(DATA_PATH, "merged_stock_data.csv")
+        cache_fp = Path(DATA_PATH, "merged_stock_data.zip")
+    if verbose:
+        print("Loaded: ", cache_fp)
     errmsg = "Cache does not exist! Try update=True"
     assert cache_fp.exists(), errmsg
     df = pd.read_csv(cache_fp, index_col=0, header=[0, 1])
