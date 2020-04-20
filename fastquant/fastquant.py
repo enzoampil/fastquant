@@ -358,7 +358,7 @@ def get_pse_data(
 
     pse_data_df["dt"] = pd.to_datetime(pse_data_df.dt)
     idx = (start <= pse_data_df["dt"]) & (pse_data_df["dt"] <= end)
-    return pse_data_df[idx].drop_duplicates()
+    return pse_data_df[idx].drop_duplicates("dt")
 
 
 def get_yahoo_data(symbol, start_date, end_date):
