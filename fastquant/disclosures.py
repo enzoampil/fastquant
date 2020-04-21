@@ -39,7 +39,8 @@ COOKIES = {
     "JSESSIONID": "r2CYuOovD47c6FDnDoxHKW60.server-ep",
 }
 
-TODAY = datetime.now().date().strftime("%m-%d-%Y")
+CALENDAR_FORMAT = "%m-%d-%Y"
+TODAY = datetime.now().date().strftime(CALENDAR_FORMAT)
 
 __all__ = ["DisclosuresPSE", "DisclosuresInvestagrams"]
 
@@ -60,7 +61,6 @@ class DisclosuresPSE:
         disclosure_type="all",
         start_date="1-1-2020",
         end_date=None,
-        start_page=1,
         verbose=True,
         clobber=False,
     ):
@@ -75,8 +75,6 @@ class DisclosuresPSE:
             start date with format %m-%d-%Y
         end_date : str
             end date with format %m-%d-%Y
-        start_page : int
-            first disclosure page to start with
         """
         self.symbol = symbol.upper()
         self.start_date = start_date
@@ -137,11 +135,19 @@ class DisclosuresPSE:
 
     def get_stock_data(self):
         """overwrites get_stock_data
+
+        Note that stock data requires YYYY-MM-DD
         """
+        start_date = format_date(
+            self.start_date, informat=CALENDAR_FORMAT, outformat="%Y-%m-%d"
+        )
+        end_date = format_date(
+            self.end_date, informat=CALENDAR_FORMAT, outformat="%Y-%m-%d"
+        )
         if self.verbose:
             print("Pulling {} stock data...".format(self.symbol))
         data = get_stock_data(
-            self.symbol, start_date=self.start_date, end_date=self.end_date
+            self.symbol, start_date=start_date, end_date=end_date
         )
         data["dt"] = pd.to_datetime(data.dt)
         # set dt as index
@@ -431,6 +437,7 @@ class DisclosuresPSE:
         errmsg = "No cache file found."
         assert len(self.files) > 0, errmsg
         data = pd.read_csv(self.files[0])
+        data = data.dropna(subset=["Announce Date and Time"])
         newest_date = data["Announce Date and Time"].iloc[1]
         oldest_date = data["Announce Date and Time"].iloc[-1]
         disclosure_details = {}
@@ -442,7 +449,7 @@ class DisclosuresPSE:
         idxs1 = np.argwhere(older).flatten()
         if older.sum() > 0:
             for idx in tqdm(idxs1):
-                edge_no = self.company_disclosures.loc[idx, "edge_no"]
+                edge_no = self.company_disclosures.iloc[idx]["edge_no"]
                 df = self.get_disclosure_tables(edge_no)
                 disclosure_details[edge_no] = df
 
@@ -466,7 +473,7 @@ class DisclosuresPSE:
         # append newer disclosures
         if newer.sum() > 0:
             for idx in tqdm(idxs2):
-                edge_no = self.company_disclosures.loc[idx, "edge_no"]
+                edge_no = self.company_disclosures.iloc[idx]["edge_no"]
                 df = self.get_disclosure_tables(edge_no)
                 disclosure_details[edge_no] = df
         if self.verbose:
@@ -627,7 +634,9 @@ class DisclosuresInvestagrams:
         self.from_date = from_date
         self.to_date = to_date
         self.disclosures_json = self.get_disclosures_json()
-        self.disclosures_df = self.get_disclosures_df()
+        self.disclosures_dict = self.get_disclosures_df()
+        self.earnings = self.disclosures_dict["E"]
+        self.dividends = self.disclosures_dict["D"]
 
     def get_disclosures_json(self):
         headers = {
@@ -726,8 +735,12 @@ def _remove_amend(x):
         return x
 
 
-def date_to_epoch(date):
-    return int(datetime.strptime(date, "%Y-%m-%d").timestamp())
+def format_date(date, informat="%Y-%m-%d", outformat="%%m-%d-%Y"):
+    return datetime.strptime(date, informat).strftime(outformat)
+
+
+def date_to_epoch(date, format="%Y-%m-%d"):
+    return int(datetime.strptime(date, format).timestamp())
 
 
 def remove_digits(string):

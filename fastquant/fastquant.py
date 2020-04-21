@@ -125,7 +125,9 @@ def fill_gaps(df):
     return df_filled
 
 
-def get_pse_data_old(symbol, start_date, end_date, stock_table_fp=None):
+def get_pse_data_old(
+    symbol, start_date, end_date, stock_table_fp=None, verbose=True
+):
 
     """Returns pricing data for a specified stock.
 
@@ -149,8 +151,9 @@ def get_pse_data_old(symbol, start_date, end_date, stock_table_fp=None):
         stock_table_fp = Path(DATA_PATH, "stock_table.csv")
 
     if stock_table_fp.exists():
-        # print("Reading {} ...".format(stock_table_fp))
         stock_table = pd.read_csv(stock_table_fp)
+        if verbose:
+            print("Loaded: ", stock_table_fp)
     else:
         stock_table = get_stock_table(stock_table_fp=stock_table_fp)
 
@@ -240,7 +243,9 @@ def update_pse_data_cache(start_date="2010-01-01", verbose=True):
     data, unavailable = {}, []
     for symbol in tqdm(names.Symbol):
         try:
-            df = get_pse_data_old(symbol, start_date, date_today)
+            df = get_pse_data_old(
+                symbol, start_date, date_today, verbose=False
+            )
             data[symbol] = df
         except Exception as e:
             unavailable.append(symbol)
@@ -285,7 +290,7 @@ def get_pse_data(
     symbol, start_date, end_date, save=False, max_straight_nones=10
 ):
 
-    """Returns pricing data for a specified stock.
+    """Returns pricing data for a PHISIX stock symbol.
 
     Parameters
     ----------
@@ -299,7 +304,7 @@ def get_pse_data(
     Returns
     -------
     pandas.DataFrame
-        Stock data (in CV format if cv = True) for the specified company and date range
+        Stock data (in CV format) for the specified company and date range
     """
     start = datestring_to_datetime(start_date)
     end = datestring_to_datetime(end_date)
@@ -362,7 +367,22 @@ def get_pse_data(
 
 
 def get_yahoo_data(symbol, start_date, end_date):
-    """
+    """Returns pricing data for a YAHOO stock symbol.
+
+    Parameters
+    ----------
+    symbol : str
+        Symbol of the stock in the Yahoo. You can refer to this link:
+        https://www.nasdaq.com/market-activity/stocks/screener?exchange=nasdaq.
+    start_date : str
+        Starting date (YYYY-MM-DD) of the period that you want to get data on
+    end_date : str
+        Ending date (YYYY-MM-DD) of the period you want to get data on
+
+    Returns
+    -------
+    pandas.DataFrame
+        Stock data (in OHLCAV format) for the specified company and date range
     """
     df = yf.download(symbol, start=start_date, end=end_date)
     df = df.reset_index()
@@ -381,22 +401,25 @@ def get_yahoo_data(symbol, start_date, end_date):
     return df
 
 
-def get_stock_data(
-    symbol, start_date, end_date, source="phisix", format="dcv"
-):
+def get_stock_data(symbol, start_date, end_date, source="phisix", format="dc"):
 
-    """Returns pricing data for a specified stock.
+    """Returns pricing data for a specified stock and source.
 
     Parameters
     ----------
     symbol : str
-        Symbol of the stock in the PSE. You can refer to this link: https://www.pesobility.com/stock.
+        Symbol of the stock in the PSE or Yahoo.
+        You can refer to these links:
+        PHISIX: https://www.pesobility.com/stock
+        YAHOO: https://www.nasdaq.com/market-activity/stocks/screener?exchange=nasdaq
     start_date : str
         Starting date (YYYY-MM-DD) of the period that you want to get data on
     end_date : str
         Ending date (YYYY-MM-DD) of the period you want to get data on
     source : str
-        First source to query from ("pse", "yahoo"). If the stock is not found in the first source, the query is run on the other source.
+        First source to query from ("pse", "yahoo").
+        If the stock is not found in the first source,
+        the query is run on the other source.
     format : str
         Format of the output data
 
@@ -484,5 +507,8 @@ def tweepy_api(consumer_key, consumer_secret, access_token, access_secret):
     return api
 
 
-def datestring_to_datetime(date):
-    return datetime(*(map(int, date.split("-"))))
+def datestring_to_datetime(date, sep="-"):
+    ymd = date.split(sep)
+    errmsg = "date format must be YYYY-MM-DD"
+    assert len(ymd[0]) == 4, errmsg
+    return datetime(*map(int, ymd))
