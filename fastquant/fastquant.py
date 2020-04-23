@@ -219,19 +219,29 @@ def process_phisix_date_dict(phisix_dict):
 
 
 def get_pse_data_by_date(symbol, date):
-    url = "http://phisix-api2.appspot.com/stocks/{}.{}.json".format(
-        symbol, date
-    )
+    """
+    Requests data in json format from phisix API
+
+    Note: old API endpoint http://phisix-api2.appspot.com/stocks/
+    has been deprecated
+    """
+    base_url = "http://1.phisix-api.appspot.com/stocks/"
+    url = base_url + "{}.{}.json".format(symbol, date)
     res = requests.get(url)
     if res.status_code == 200:
         unprocessed_dict = res.json()
         processed_dict = process_phisix_date_dict(unprocessed_dict)
         return processed_dict
-    return None
+    elif res.status_code == 500:
+        raise Exception("phisix server error")
+    else:
+        return None
 
 
 def update_pse_data_cache(start_date="2010-01-01", verbose=True):
     """
+    Downloads DOHLC data of all PSE comapnies using get_pse_old
+    and saves as .zip in /data to be used as cache
     """
     if verbose:
         print("Updating cache...")
@@ -286,10 +296,70 @@ def get_pse_data_cache(
     return df if symbol is None else df[symbol]
 
 
-def get_pse_data(
+def get_phisix_data(
     symbol, start_date, end_date, save=False, max_straight_nones=10
 ):
+    """Returns pricing data for a PHISIX stock symbol.
 
+    Parameters
+    ----------
+    symbol : str
+        Symbol of the stock in the PSE. You can refer to this link: https://www.pesobility.com/stock.
+    start_date : str
+        Starting date (YYYY-MM-DD) of the period that you want to get data on
+    end_date : str
+        Ending date (YYYY-MM-DD) of the period you want to get data on
+
+    Returns
+    -------
+    pandas.DataFrame
+        Stock data (in CV format) for the specified company and date range
+    """
+    date_range = (
+        pd.period_range(start_date, end_date, freq="D")
+        .to_series()
+        .astype(str)
+        .values
+    )
+
+    max_straight_nones = min(max_straight_nones, len(date_range))
+    pse_data_list = []
+    straight_none_count = 0
+    for i, date in tqdm(enumerate(date_range)):
+        iter_num = i + 1
+        pse_data_1day = get_pse_data_by_date(symbol, date)
+
+        # Return None if the first `max_straight_nones` phisix iterations return Nones (status_code != 200)
+        if pse_data_1day is None:
+            if iter_num < max_straight_nones:
+                straight_none_count += 1
+            else:
+                straight_none_count += 1
+                if straight_none_count >= max_straight_nones:
+                    print(
+                        "{} not found in phisix after the first {} date iterations!".format(
+                            symbol, straight_none_count
+                        )
+                    )
+                    return None
+            continue
+        else:
+            # Refresh straight none count when phisix returns
+            straight_none_count = 0
+        pse_data_list.append(pse_data_1day)
+    pse_data_df = pd.DataFrame(pse_data_list)
+    pse_data_df = pse_data_df[["dt", "close", "volume"]]
+    return pse_data_df
+
+
+def get_pse_data(
+    symbol,
+    start_date,
+    end_date,
+    save=False,
+    max_straight_nones=10,
+    format="dohlc",
+):
     """Returns pricing data for a PHISIX stock symbol.
 
     Parameters
@@ -309,61 +379,42 @@ def get_pse_data(
     start = datestring_to_datetime(start_date)
     end = datestring_to_datetime(end_date)
 
-    cache = get_pse_data_cache(symbol=symbol)
-    cache = cache.reset_index()
-    # oldest_date = cache["dt"].iloc[0]
-    newest_date = cache["dt"].iloc[-1]
-    if newest_date <= end:
-        # overwrite start date
-        start_date = newest_date.strftime(CALENDAR_FORMAT)
+    fp = Path(
+        DATA_PATH, "{}_stock_{}_{}.csv".format(symbol, start_date, end_date)
+    )
 
-        date_range = (
-            pd.period_range(start_date, end_date, freq="D")
-            .to_series()
-            .astype(str)
-            .values
-        )
-
-        max_straight_nones = min(max_straight_nones, len(date_range))
-        pse_data_list = []
-        straight_none_count = 0
-        for i, date in tqdm(enumerate(date_range)):
-            iter_num = i + 1
-            pse_data_1day = get_pse_data_by_date(symbol, date)
-
-            # Return None if the first `max_straight_nones` phisix iterations return Nones (status_code != 200)
-            if pse_data_1day is None:
-                if iter_num < max_straight_nones:
-                    straight_none_count += 1
-                else:
-                    straight_none_count += 1
-                    if straight_none_count >= max_straight_nones:
-                        print(
-                            "Symbol {} not found in phisix after the first {} date iterations!"
-                        )
-                        return None
-                continue
-            else:
-                # Refresh straight none count when phisix returns
-                straight_none_count = 0
-            pse_data_list.append(pse_data_1day)
-        pse_data_df = pd.DataFrame(pse_data_list)
-        pse_data_df = pse_data_df[["dt", "close", "volume"]]
-        if not pse_data_df.empty:
-            pse_data_df = pd.concat([cache, pse_data_df], ignore_index=True)
+    if "v" in format:
+        if fp.exists():
+            pse_data_df = pd.read_csv(fp)
+        else:
+            pse_data_df = get_phisix_data(
+                symbol, start_date, end_date, save=False, max_straight_nones=10
+            )
     else:
-        pse_data_df = cache.copy()
-    if save:
-        fp = Path(
-            DATA_PATH,
-            "{}_stock_{}_{}.csv".format(symbol, start_date, end_date),
-        )
-        pse_data_df.to_csv(fp, index=False)
-        print(f"Saved: ", fp)
+        cache = get_pse_data_cache(symbol=symbol)
+        cache = cache.reset_index()
+        # oldest_date = cache["dt"].iloc[0]
+        newest_date = cache["dt"].iloc[-1]
+        if newest_date <= end:
+            # overwrite start date
+            start_date = newest_date.strftime(CALENDAR_FORMAT)
+            pse_data_df = get_phisix_data(
+                symbol, start_date, end_date, save=False, max_straight_nones=10
+            )
+            if not pse_data_df.empty:
+                pse_data_df = pd.concat(
+                    [cache, pse_data_df], ignore_index=True
+                )
+        else:
+            pse_data_df = cache.copy()
 
     pse_data_df["dt"] = pd.to_datetime(pse_data_df.dt)
     idx = (start <= pse_data_df["dt"]) & (pse_data_df["dt"] <= end)
-    return pse_data_df[idx].drop_duplicates("dt")
+    pse_data_df = pse_data_df[idx].drop_duplicates("dt")
+    if save:
+        pse_data_df.to_csv(fp, index=False)
+        print(f"Saved: ", fp)
+    return pse_data_df
 
 
 def get_yahoo_data(symbol, start_date, end_date):
@@ -432,7 +483,7 @@ def get_stock_data(symbol, start_date, end_date, source="phisix", format="dc"):
     df_columns = [DATA_FORMAT_COLS[c] for c in format]
     if source == "phisix":
         # The query is run on 'phisix', but if the symbol isn't found, the same query is run on 'yahoo'.
-        df = get_pse_data(symbol, start_date, end_date)
+        df = get_pse_data(symbol, start_date, end_date, format=format)
         if df is None:
             df = get_yahoo_data(symbol, start_date, end_date)
     elif source == "yahoo":
