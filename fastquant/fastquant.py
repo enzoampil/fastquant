@@ -218,24 +218,36 @@ def process_phisix_date_dict(phisix_dict):
     }
 
 
-def get_pse_data_by_date(symbol, date):
+def get_phisix_data_by_date(symbol, date):
     """
     Requests data in json format from phisix API
 
-    Note: old API endpoint http://phisix-api2.appspot.com/stocks/
-    has been deprecated
+    Note: new API endpoint is now used, with fallback to old API
     """
-    base_url = "http://1.phisix-api.appspot.com/stocks/"
-    url = base_url + "{}.{}.json".format(symbol, date)
+
+    new_endpoint = "http://1.phisix-api.appspot.com/stocks/"
+    url = new_endpoint + "{}.{}.json".format(symbol, date)
     res = requests.get(url)
-    if res.status_code == 200:
+    if res.ok:
         unprocessed_dict = res.json()
         processed_dict = process_phisix_date_dict(unprocessed_dict)
         return processed_dict
-    elif res.status_code == 500:
-        raise Exception("phisix server error")
     else:
-        return None
+        # fallback to old endpoint
+        old_endpoint = "http://phisix-api2.appspot.com/stocks/"
+        url = old_endpoint + "{}.{}.json".format(symbol, date)
+        res = requests.get(url)
+        if res.ok:
+            unprocessed_dict = res.json()
+            processed_dict = process_phisix_date_dict(unprocessed_dict)
+            return processed_dict
+        else:
+            if res.status_code == 500:
+                # server error
+                res.raise_for_status()
+            else:
+                # non-trading day
+                return None
 
 
 def update_pse_data_cache(start_date="2010-01-01", verbose=True):
@@ -327,7 +339,7 @@ def get_phisix_data(
     straight_none_count = 0
     for i, date in tqdm(enumerate(date_range)):
         iter_num = i + 1
-        pse_data_1day = get_pse_data_by_date(symbol, date)
+        pse_data_1day = get_phisix_data_by_date(symbol, date)
 
         # Return None if the first `max_straight_nones` phisix iterations return Nones (status_code != 200)
         if pse_data_1day is None:
@@ -360,7 +372,7 @@ def get_pse_data(
     max_straight_nones=10,
     format="dohlc",
 ):
-    """Returns pricing data for a PHISIX stock symbol.
+    """Returns pricing data for a PHISIX stock symbol with caching.
 
     Parameters
     ----------
