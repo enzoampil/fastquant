@@ -39,24 +39,39 @@ get_pse_data <- function(sym, s_date, e_date) {
   assert_that(!is.na(parse_date_time(e_date, orders = "ymd")),
               msg = "e_date is not in YYYY-mm-dd format")
 
+  # TODO Check /data if the symbol exists as a file
+  # TODO Check /data if the symbol exists for the time frame
+  # TODO Cut relevant rows from dataset
+  # TODO Change s_date and e_date as applicable
+
   res <- tibble(symbol = sym,
                 dt = seq(as.Date(s_date), as.Date(e_date), by = "days")) %>%
          mutate(data = map2(symbol, dt, get_pse_data_by_date)) %>%
          unnest(data) %>%
          filter(!is.na(name))
-
-  # TODO Add caching
-
   return(res)
 }
 
 
 # Utility function for getting single ticker data for symbol, date
 get_pse_data_by_date <- function(symbol, date){
-  req <- paste0("http://phisix-api2.appspot.com/stocks/",
+  if (paste0("http://1.phisix-api.appspot.com/stocks/",
                 symbol, ".", date, ".json") %>%
     GET() %>%
-    content(type="application/json")
+    content(type="application/json") %>%
+    is.null()) {
+
+    req <- paste0("http://phisix-api.appspot.com/stocks/",
+                  symbol, ".", date, ".json") %>%
+      GET() %>%
+      content(type="application/json")
+
+  } else {
+    req <- paste0("http://1.phisix-api.appspot.com/stocks/",
+                  symbol, ".", date, ".json") %>%
+      GET() %>%
+      content(type="application/json")
+  }
 
   if (is.null(req)) {
     return(as.data.frame(list(name = NA_character_,
