@@ -48,7 +48,7 @@ get_pse_data <- function(sym, s_date, e_date) {
                 dt = seq(as.Date(s_date), as.Date(e_date), by = "days")) %>%
          mutate(data = map2(symbol, dt, get_pse_data_by_date)) %>%
          unnest(data) %>%
-         filter(!is.na(name))
+         filter(!is.na(symbol))
   return(res)
 }
 
