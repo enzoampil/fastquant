@@ -19,7 +19,7 @@
 #'
 #' @importFrom lubridate parse_date_time
 #' @importFrom assertthat assert_that
-#' @importFrom dplyr tibble mutate
+#' @importFrom dplyr tibble mutate filter
 #' @importFrom tidyr unnest
 #' @importFrom purrr map2
 #' @importFrom httr GET content
@@ -48,7 +48,7 @@ get_pse_data <- function(sym, s_date, e_date) {
                 dt = seq(as.Date(s_date), as.Date(e_date), by = "days")) %>%
          mutate(data = map2(symbol, dt, get_pse_data_by_date)) %>%
          unnest(data) %>%
-         filter(!is.na(symbol))
+         filter(!is.na(name))
   return(res)
 }
 

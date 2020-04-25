@@ -2,6 +2,7 @@
 
 export(get_pse_data)
 importFrom(assertthat,assert_that)
+importFrom(dplyr,filter)
 importFrom(dplyr,mutate)
 importFrom(dplyr,tibble)
 importFrom(httr,GET)
