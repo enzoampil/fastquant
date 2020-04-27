@@ -3,7 +3,7 @@
 """
 Created on Tue Jun 25 19:48:03 2019
 
-@author: enzoampil
+@authors: enzoampil & jpdeleon
 """
 # Import standard library
 import os
@@ -43,11 +43,16 @@ DATA_FORMAT_COLS = {
     "i": "openinterest",
 }
 
+CALENDAR_FORMAT = "%Y-%m-%d"
 
-def get_stock_table(stock_table_fp="stock_table.csv"):
+
+def get_stock_table(stock_table_fp=None):
     """
     Returns dataframe containing info about PSE listed stocks while also saving it
     """
+    if stock_table_fp is None:
+        stock_table_fp = Path(DATA_PATH, "stock_table.csv")
+
     stock_table = pd.DataFrame(
         columns=[
             "Company Name",
@@ -121,7 +126,7 @@ def fill_gaps(df):
 
 
 def get_pse_data_old(
-    symbol, start_date, end_date, stock_table_fp="stock_table.csv"
+    symbol, start_date, end_date, stock_table_fp=None, verbose=True
 ):
 
     """Returns pricing data for a specified stock.
@@ -142,11 +147,13 @@ def get_pse_data_old(
     pandas.DataFrame
         Stock data (in OHLCV format) for the specified company and date range
     """
+    if stock_table_fp is None:
+        stock_table_fp = Path(DATA_PATH, "stock_table.csv")
 
-    if Path(DATA_PATH, stock_table_fp).exists():
-        print("Stock table exists!")
-        print("Reading {} ...".format(stock_table_fp))
+    if stock_table_fp.exists():
         stock_table = pd.read_csv(stock_table_fp)
+        if verbose:
+            print("Loaded: ", stock_table_fp)
     else:
         stock_table = get_stock_table(stock_table_fp=stock_table_fp)
 
@@ -161,10 +168,10 @@ def get_pse_data_old(
                 stock_table["Stock Symbol"] == symbol
             ].values[0]
         ),
-        "startDate": datetime.strptime(start_date, "%Y-%m-%d").strftime(
+        "startDate": datetime.strptime(start_date, CALENDAR_FORMAT).strftime(
             "%m-%d-%Y"
         ),
-        "endDate": datetime.strptime(end_date, "%Y-%m-%d").strftime(
+        "endDate": datetime.strptime(end_date, CALENDAR_FORMAT).strftime(
             "%m-%d-%Y"
         ),
     }
@@ -183,13 +190,14 @@ def get_pse_data_old(
     }
     rename_list = ["dt", "open", "high", "low", "close", "value"]
     df = df.rename(columns=rename_dict)[rename_list].drop_duplicates()
-
+    df.dt = pd.to_datetime(df.dt)
+    df = df.set_index("dt")
     return df
 
 
 def process_phisix_date_dict(phisix_dict):
     date = datetime.strftime(
-        pd.to_datetime(phisix_dict["as_of"]).date(), "%Y-%m-%d"
+        pd.to_datetime(phisix_dict["as_of"]).date(), CALENDAR_FORMAT
     )
     stock_dict = phisix_dict["stock"][0]
     stock_price_dict = stock_dict["price"]
@@ -210,23 +218,100 @@ def process_phisix_date_dict(phisix_dict):
     }
 
 
-def get_pse_data_by_date(symbol, date):
-    url = "http://phisix-api2.appspot.com/stocks/{}.{}.json".format(
-        symbol, date
-    )
+def get_phisix_data_by_date(symbol, date):
+    """
+    Requests data in json format from phisix API
+
+    Note: new API endpoint is now used, with fallback to old API
+    """
+
+    new_endpoint = "http://1.phisix-api.appspot.com/stocks/"
+    url = new_endpoint + "{}.{}.json".format(symbol, date)
     res = requests.get(url)
-    if res.status_code == 200:
+    if res.ok:
         unprocessed_dict = res.json()
         processed_dict = process_phisix_date_dict(unprocessed_dict)
         return processed_dict
-    return None
+    else:
+        # fallback to old endpoint
+        old_endpoint = "http://phisix-api2.appspot.com/stocks/"
+        url = old_endpoint + "{}.{}.json".format(symbol, date)
+        res = requests.get(url)
+        if res.ok:
+            unprocessed_dict = res.json()
+            processed_dict = process_phisix_date_dict(unprocessed_dict)
+            return processed_dict
+        else:
+            if res.status_code == 500:
+                # server error
+                res.raise_for_status()
+            else:
+                # non-trading day
+                return None
 
 
-def get_pse_data(
-    symbol, start_date, end_date, save=True, max_straight_nones=10
+def update_pse_data_cache(start_date="2010-01-01", verbose=True):
+    """
+    Downloads DOHLC data of all PSE comapnies using get_pse_old
+    and saves as .zip in /data to be used as cache
+    """
+    if verbose:
+        print("Updating cache...")
+    date_today = datetime.now().date().strftime("%Y-%m-%d")
+
+    ifp = Path(DATA_PATH, "company_names.csv")
+    names = pd.read_csv(ifp)
+
+    data, unavailable = {}, []
+    for symbol in tqdm(names.Symbol):
+        try:
+            df = get_pse_data_old(
+                symbol, start_date, date_today, verbose=False
+            )
+            data[symbol] = df
+        except Exception as e:
+            unavailable.append(symbol)
+            print(e)
+    if verbose:
+        print("No data:\n", unavailable)
+
+    # concatenate by column after sorting by date
+    DF = pd.concat(data, axis=1, sort=True)
+    DF.columns.names = ["Symbol", None]
+    DF.index.name = "dt"
+
+    # save as csv
+    ofp = Path(DATA_PATH, "merged_stock_data.zip")
+    DF.to_csv(ofp, index=True)
+    if verbose:
+        print("Saved: ", ofp)
+    # return DF
+
+
+def get_pse_data_cache(
+    symbol=None, cache_fp=None, update=False, verbose=False
 ):
+    """
+    Loads cached historical data
+    Returns all if symbol is None
+    """
+    if update:
+        update_pse_data_cache()
+    if cache_fp is None:
+        cache_fp = Path(DATA_PATH, "merged_stock_data.zip")
+    if verbose:
+        print("Loaded: ", cache_fp)
+    errmsg = "Cache does not exist! Try update=True"
+    assert cache_fp.exists(), errmsg
+    df = pd.read_csv(cache_fp, index_col=0, header=[0, 1])
+    df.index = pd.to_datetime(df.index)
+    return df if symbol is None else df[symbol]
 
-    """Returns pricing data for a specified stock.
+
+def get_phisix_data(
+    symbol, start_date, end_date, save=False, max_straight_nones=10
+):
+    """Returns pricing data for a PHISIX stock symbol.
 
     Parameters
     ----------
@@ -240,29 +325,21 @@ def get_pse_data(
     Returns
     -------
     pandas.DataFrame
-        Stock data (in CV format if cv = True) for the specified company and date range
+        Stock data (in CV format) for the specified company and date range
     """
-
-    file_name = "{}_{}_{}.csv".format(symbol, start_date, end_date)
-    fp = Path(DATA_PATH, file_name)
-    if fp.exists():
-        print("Reading cached file found: ", fp)
-        pse_data_df = pd.read_csv(fp)
-        pse_data_df["dt"] = pd.to_datetime(pse_data_df.dt)
-        return pse_data_df
-
     date_range = (
         pd.period_range(start_date, end_date, freq="D")
         .to_series()
         .astype(str)
         .values
     )
+
     max_straight_nones = min(max_straight_nones, len(date_range))
     pse_data_list = []
     straight_none_count = 0
     for i, date in tqdm(enumerate(date_range)):
         iter_num = i + 1
-        pse_data_1day = get_pse_data_by_date(symbol, date)
+        pse_data_1day = get_phisix_data_by_date(symbol, date)
 
         # Return None if the first `max_straight_nones` phisix iterations return Nones (status_code != 200)
         if pse_data_1day is None:
@@ -272,7 +349,9 @@ def get_pse_data(
                 straight_none_count += 1
                 if straight_none_count >= max_straight_nones:
                     print(
-                        "Symbol {} not found in phisix after the first {} date iterations!"
+                        "{} not found in phisix after the first {} date iterations!".format(
+                            symbol, straight_none_count
+                        )
                     )
                     return None
             continue
@@ -282,15 +361,92 @@ def get_pse_data(
         pse_data_list.append(pse_data_1day)
     pse_data_df = pd.DataFrame(pse_data_list)
     pse_data_df = pse_data_df[["dt", "close", "volume"]]
+    return pse_data_df
 
-    if save:
-        pse_data_df.to_csv(fp, index=False)
+
+def get_pse_data(
+    symbol,
+    start_date,
+    end_date,
+    save=False,
+    max_straight_nones=10,
+    format="dohlc",
+):
+    """Returns pricing data for a PHISIX stock symbol with caching.
+
+    Parameters
+    ----------
+    symbol : str
+        Symbol of the stock in the PSE. You can refer to this link: https://www.pesobility.com/stock.
+    start_date : str
+        Starting date (YYYY-MM-DD) of the period that you want to get data on
+    end_date : str
+        Ending date (YYYY-MM-DD) of the period you want to get data on
+
+    Returns
+    -------
+    pandas.DataFrame
+        Stock data (in CV format) for the specified company and date range
+    """
+    start = datestring_to_datetime(start_date)
+    end = datestring_to_datetime(end_date)
+
+    fp = Path(
+        DATA_PATH, "{}_stock_{}_{}.csv".format(symbol, start_date, end_date)
+    )
+
+    if "v" in format:
+        if fp.exists():
+            pse_data_df = pd.read_csv(fp)
+        else:
+            pse_data_df = get_phisix_data(
+                symbol, start_date, end_date, save=False, max_straight_nones=10
+            )
+    else:
+        cache = get_pse_data_cache(symbol=symbol)
+        cache = cache.reset_index()
+        # oldest_date = cache["dt"].iloc[0]
+        newest_date = cache["dt"].iloc[-1]
+        if newest_date <= end:
+            # overwrite start date
+            start_date = newest_date.strftime(CALENDAR_FORMAT)
+            pse_data_df = get_phisix_data(
+                symbol, start_date, end_date, save=False, max_straight_nones=10
+            )
+            if not pse_data_df.empty:
+                pse_data_df = pd.concat(
+                    [cache, pse_data_df], ignore_index=True
+                )
+        else:
+            pse_data_df = cache.copy()
 
     pse_data_df["dt"] = pd.to_datetime(pse_data_df.dt)
+    idx = (start <= pse_data_df["dt"]) & (pse_data_df["dt"] <= end)
+    pse_data_df = pse_data_df[idx].drop_duplicates("dt")
+    if save:
+        pse_data_df.to_csv(fp, index=False)
+        print(f"Saved: ", fp)
     return pse_data_df
 
 
 def get_yahoo_data(symbol, start_date, end_date):
+    """Returns pricing data for a YAHOO stock symbol.
+
+    Parameters
+    ----------
+    symbol : str
+        Symbol of the stock in the Yahoo. You can refer to this link:
+        https://www.nasdaq.com/market-activity/stocks/screener?exchange=nasdaq.
+    start_date : str
+        Starting date (YYYY-MM-DD) of the period that you want to get data on
+    end_date : str
+        Ending date (YYYY-MM-DD) of the period you want to get data on
+
+    Returns
+    -------
+    pandas.DataFrame
+        Stock data (in OHLCAV format) for the specified company and date range
+    """
     df = yf.download(symbol, start=start_date, end=end_date)
     df = df.reset_index()
     rename_dict = {
@@ -304,34 +460,31 @@ def get_yahoo_data(symbol, start_date, end_date):
     }
     rename_list = ["dt", "open", "high", "low", "close", "adj_close", "volume"]
     df = df.rename(columns=rename_dict)[rename_list].drop_duplicates()
-    return df if not df.empty else None
+    df["dt"] = pd.to_datetime(df.dt)
+    return df
 
 
-def get_stock_data(
-    symbol,
-    start_date,
-    end_date,
-    source="phisix",
-    format="dcv",
-    stock_table_fp="stock_table.csv",
-):
+def get_stock_data(symbol, start_date, end_date, source="phisix", format="dc"):
 
-    """Returns pricing data for a specified stock.
+    """Returns pricing data for a specified stock and source.
 
     Parameters
     ----------
     symbol : str
-        Symbol of the stock in the PSE. You can refer to this link: https://www.pesobility.com/stock.
+        Symbol of the stock in the PSE or Yahoo.
+        You can refer to these links:
+        PHISIX: https://www.pesobility.com/stock
+        YAHOO: https://www.nasdaq.com/market-activity/stocks/screener?exchange=nasdaq
     start_date : str
         Starting date (YYYY-MM-DD) of the period that you want to get data on
     end_date : str
         Ending date (YYYY-MM-DD) of the period you want to get data on
     source : str
-        First source to query from ("pse", "yahoo"). If the stock is not found in the first source, the query is run on the other source.
+        First source to query from ("pse", "yahoo").
+        If the stock is not found in the first source,
+        the query is run on the other source.
     format : str
         Format of the output data
-    stock_table_fp : str
-        File path of an existing stock table or where a newly downloaded table will be saved. Only relevant when source='pse'.
 
     Returns
     -------
@@ -342,7 +495,7 @@ def get_stock_data(
     df_columns = [DATA_FORMAT_COLS[c] for c in format]
     if source == "phisix":
         # The query is run on 'phisix', but if the symbol isn't found, the same query is run on 'yahoo'.
-        df = get_pse_data(symbol, start_date, end_date)
+        df = get_pse_data(symbol, start_date, end_date, format=format)
         if df is None:
             df = get_yahoo_data(symbol, start_date, end_date)
     elif source == "yahoo":
@@ -369,10 +522,12 @@ def pse_data_to_csv(
     symbol,
     start_date,
     end_date,
-    pse_dir="",
-    stock_table_fp="stock_table.csv",
+    pse_dir=DATA_PATH,
+    stock_table_fp=None,
     disclosures=False,
 ):
+    """
+    """
     pse = get_pse_data(
         symbol,
         start_date,
@@ -380,24 +535,23 @@ def pse_data_to_csv(
         stock_table_fp=stock_table_fp,
         disclosures=disclosures,
     )
+    fp = Path(
+        pse_dir, "{}_{}_{}_OHLCV.csv".format(symbol, start_date, end_date)
+    )
     if isinstance(pse, pd.DataFrame):
-        pse.to_csv(
-            "{}{}_{}_{}_OHLCV.csv".format(
-                pse_dir, symbol, start_date, end_date
-            )
-        )
+        pse.to_csv(fp)
     else:
-        pse[0].to_csv(
-            "{}{}_{}_{}_OHLCV.csv".format(
-                pse_dir, symbol, start_date, end_date
-            )
-        )
+        pse[0].to_csv(fp)
         performance_dict = pse[1]
         performance_dict["D"].to_csv(
-            "{}{}_{}_{}_D.csv".format(pse_dir, symbol, start_date, end_date)
+            Path(
+                pse_dir, "{}_{}_{}_D.csv".format(symbol, start_date, end_date)
+            )
         )
         performance_dict["E"].to_csv(
-            "{}{}_{}_{}_E.csv".format(pse_dir, symbol, start_date, end_date)
+            Path(
+                pse_dir, "{}_{}_{}_E.csv".format(symbol, start_date, end_date)
+            )
         )
 
 
@@ -414,3 +568,10 @@ def tweepy_api(consumer_key, consumer_secret, access_token, access_secret):
     auth.set_access_token(access_token, access_secret)
     api = tweepy.API(auth)
     return api
+
+
+def datestring_to_datetime(date, sep="-"):
+    ymd = date.split(sep)
+    errmsg = "date format must be YYYY-MM-DD"
+    assert len(ymd[0]) == 4, errmsg
+    return datetime(*map(int, ymd))
