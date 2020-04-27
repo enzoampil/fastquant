@@ -133,7 +133,7 @@ class DisclosuresPSE:
         values = ", ".join(repr(getattr(self, f)) for f in fields)
         return "{}({})".format(type(self).__name__, values)
 
-    def get_stock_data(self):
+    def get_stock_data(self, format="dohlc"):
         """overwrites get_stock_data
 
         Note that stock data requires YYYY-MM-DD
@@ -147,7 +147,10 @@ class DisclosuresPSE:
         if self.verbose:
             print("Pulling {} stock data...".format(self.symbol))
         data = get_stock_data(
-            self.symbol, start_date=start_date, end_date=end_date
+            self.symbol,
+            start_date=start_date,
+            end_date=end_date,
+            format=format,
         )
         data["dt"] = pd.to_datetime(data.dt)
         # set dt as index
@@ -254,7 +257,8 @@ class DisclosuresPSE:
         df["Announce Date and Time"] = pd.to_datetime(
             df["Announce Date and Time"]
         )
-        return df
+        # ensure index starts at 0
+        return df.reset_index(drop=True)
 
     def get_company_disclosures(self):
         """
@@ -359,7 +363,7 @@ class DisclosuresPSE:
 
     def get_company_summary(self, edge_no):
         """
-        Return the company summary (at the top) given edge_no
+        Return the company summary (at the top of edge.pse page) given edge_no
         """
         file_id = self.get_disclosure_file_id(edge_no)
         parsed_html = self.get_disclosure_parsed_html(file_id)
@@ -415,7 +419,7 @@ class DisclosuresPSE:
 
     def get_disclosure_tables(self, edge_no):
         """
-        Returns the disclosure details (at the bottom page) given edge_no
+        Returns the disclosure details (at the bottom of edge.pse page) given edge_no
         """
         file_id = self.get_disclosure_file_id(edge_no)
         parsed_html = self.get_disclosure_parsed_html(file_id)
@@ -479,7 +483,7 @@ class DisclosuresPSE:
         if self.verbose:
             print("Loaded: {}".format(self.files[0]))
 
-        if (older.sum() > 0) or (newer.sum() > 0):
+        if (older.sum() > 1) or (newer.sum() > 1):
             # remove older file
             os.remove(self.files[0])
             if self.verbose:
@@ -541,6 +545,7 @@ class DisclosuresPSE:
                 self.disclosure_subjects,
             ],
             axis=1,
+            ignore_index=False,
         )
 
         if (len(self.files) == 0) or self.clobber:
@@ -549,7 +554,34 @@ class DisclosuresPSE:
                 print("Saved: {}".format(self.fp))
         return df
 
-    def plot_disclosures(self, disclosure_type=None, data_type="close"):
+    def filter_disclosures(self, data_type="close", operation="max"):
+        """
+        get disclosures co-incident to an extremum in percent change
+        """
+        # remove NaN
+        df = self.disclosures_combined.copy()
+        df.dropna(subset=["Announce Date and Time"], inplace=True)
+
+        disclosure_dates = df["Announce Date and Time"].apply(
+            lambda x: x.date()
+        )
+
+        if self.stock_data is None:
+            _ = self.get_stock_data()
+
+        df2 = self.stock_data[data_type].pct_change()
+        idx2 = df2.index.isin(disclosure_dates)
+        if operation == "max":
+            date = disclosure_dates.iloc[np.argmax(idx2)]
+        elif operation == "min":
+            date = disclosure_dates.iloc[np.argmin(idx2)]
+        else:
+            raise ValueError("operation=min,max")
+        return df[disclosure_dates == date]
+
+    def plot_disclosures(
+        self, disclosure_type=None, data_type="close", diff=True, percent=True
+    ):
         """
         Parameters
         ----------
@@ -557,7 +589,10 @@ class DisclosuresPSE:
             type of disclosure to highlight (default=all)
         data_type : str
             stock data to overplot (close or volume)
-
+        diff : bool
+            show previous trading day difference
+        percent : True
+            show percent change if diff=True
         Returns a figure instance
         """
         disclosure_type = (
@@ -576,12 +611,24 @@ class DisclosuresPSE:
         colors = mpl.cm.rainbow(np.linspace(0, 1, len(self.disclosure_types)))
         color_map = {n: colors[i] for i, n in enumerate(self.disclosure_types)}
 
-        ax = data[data_type].plot(c="k", zorder=1)
+        df, label = data[data_type], data_type
+        if diff:
+            df = data[data_type].diff()
+            label = data_type + " diff"
+            if percent:
+                df = data[data_type].pct_change()
+                label = label + " (%)"
+
+        ax = df.plot(c="k", zorder=1, label=label)
+        if diff:
+            # add horizontal line at zero
+            ax.axhline(0, 0, 1, color="k", zorder=0, alpha=0.1)
+
+        # add vertical line for each disclosure release date
         for key, row in self.company_disclosures.iterrows():
             date = row["Announce Date and Time"]
             template = _remove_amend(row["Template Name"])
             if template.lower() == disclosure_type.lower():
-                # vertical line
                 ax.axvline(
                     date,
                     0,
@@ -599,10 +646,11 @@ class DisclosuresPSE:
                     zorder=0,
                     label=template,
                 )
+        # show only unique legends
         handles, labels = ax.get_legend_handles_labels()
         by_label = dict(zip(labels, handles))
         ax.legend(by_label.values(), by_label.keys())
-        ax.set_ylabel(data_type.upper())
+        ax.set_ylabel(label.upper())
         ax.set_title(self.symbol)
         return fig
 
