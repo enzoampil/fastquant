@@ -1,10 +1,8 @@
-from pkg_resources import resource_filename
 import pandas as pd
-from fastquant import backtest, STRATEGY_MAPPING
+from pathlib import Path
+from fastquant import backtest, STRATEGY_MAPPING, DATA_PATH
 
-SAMPLE_CSV = resource_filename(
-    __name__, "../data/JFC_20180101_20190110_DCV.csv"
-)
+SAMPLE_CSV = Path(DATA_PATH, "JFC_20180101_20190110_DCV.csv")
 
 
 def test_backtest():

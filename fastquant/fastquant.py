@@ -20,7 +20,7 @@ from tqdm import tqdm
 import tweepy
 import yfinance as yf
 
-DATA_PATH = resource_filename(__name__, "../data")
+DATA_PATH = resource_filename(__name__, "data")
 
 PSE_TWITTER_ACCOUNTS = [
     "phstockexchange",
