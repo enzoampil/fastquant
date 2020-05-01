@@ -22,4 +22,5 @@ setuptools.setup(
         "Operating System :: OS Independent",
     ],
     install_requires=install_requires,
+    extras_requires={"networkx": ["networkx==2.4"]},
 )
