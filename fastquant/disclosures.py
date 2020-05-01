@@ -11,7 +11,6 @@ from inspect import signature
 from datetime import datetime
 import warnings
 from pathlib import Path
-from pkg_resources import resource_filename
 from string import digits
 import requests
 import json
@@ -27,9 +26,7 @@ import matplotlib.pyplot as pl
 import matplotlib as mpl
 
 # Import from package
-from fastquant import get_stock_data
-
-DATA_PATH = resource_filename(__name__, "../data")
+from fastquant import get_stock_data, DATA_PATH
 
 warnings.simplefilter("ignore")
 mpl.style.use("fivethirtyeight")
@@ -780,3 +777,8 @@ def remove_digits(string):
     remove_digits = str.maketrans("", "", digits)
     res = string.translate(remove_digits)
     return res
+
+
+if __name__ == "__main__":
+    dpse = DisclosuresPSE("JFC", start_date="04-01-2020")
+    print(dpse.disclosures_combined)
