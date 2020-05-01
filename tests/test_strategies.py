@@ -11,6 +11,8 @@ def test_backtest():
     """
     sample = pd.read_csv(SAMPLE_CSV, parse_dates=["dt"])
     for strategy in STRATEGY_MAPPING.keys():
-        assert backtest(
-            strategy, sample, plot=False
-        ), "Backtest encountered error for strategy '{}'!".format(strategy)
+        cerebro = backtest(strategy, sample, plot=False)
+        errmsg = "Backtest encountered error for strategy '{}'!".format(
+            strategy
+        )
+        assert cerebro is not None, errmsg
