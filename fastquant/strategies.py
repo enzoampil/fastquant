@@ -494,6 +494,7 @@ def backtest(
     init_cash=INIT_CASH,
     data_format="dcv",
     plot=True,
+    verbose=True,
     **kwargs
 ):
     """
@@ -507,13 +508,14 @@ def backtest(
     cerebro.addobserver(bt.observers.Trades)
     cerebro.addobserver(bt.observers.BuySell)
     cerebro.addstrategy(
-        STRATEGY_MAPPING[strategy], init_cash=init_cash, **kwargs
+        STRATEGY_MAPPING[strategy], init_cash=init_cash, transaction_logging=verbose, **kwargs
     )
     cerebro.broker.setcommission(commission=commission)
 
     # Treat `data` as a path if it's a string; otherwise, it's treated as a pandas dataframe
     if isinstance(data, str):
-        print("Reading path as pandas dataframe ...")
+        if verbose:
+            print("Reading path as pandas dataframe ...")
         data = pd.read_csv(data, header=0, parse_dates=["dt"])
 
     pd_data = bt.feeds.PandasData(
@@ -525,26 +527,28 @@ def backtest(
     # Allows us to set buy price based on next day closing
     # (technically impossible, but reasonable assuming you use all your money to buy market at the end of the next day)
     cerebro.broker.set_coc(True)
-    print("Starting Portfolio Value: %.2f" % cerebro.broker.getvalue())
+    if verbose:
+        print("Starting Portfolio Value: %.2f" % cerebro.broker.getvalue())
     cerebro.run()
-    print("Final Portfolio Value: %.2f" % cerebro.broker.getvalue())
+    if verbose:
+        print("Final Portfolio Value: %.2f" % cerebro.broker.getvalue())
     if plot:
         cerebro.plot(figsize=(30, 15))
     # True indicates the backtest finished with no errors
-    return True
+    return cerebro
 
 
 if __name__ == "__main__":
     print("Testing RSI strategy with csv ...")
-    backtest("rsi", DATA_FILE, plot=False)
+    _ = backtest("rsi", DATA_FILE, plot=False)
     print("Testing RSI strategy with dataframe ...")
     data = pd.read_csv(DATA_FILE, header=0, parse_dates=["dt"])
-    backtest("rsi", data, plot=True)
+    _ = backtest("rsi", data, plot=True)
 
     print("Testing SMAC strategy with dataframe ...")
     data = pd.read_csv(DATA_FILE, header=0, parse_dates=["dt"])
-    backtest("smac", data, plot=False)
+    _ = backtest("smac", data, plot=False)
 
     print("Testing Base strategy with dataframe ...")
     data = pd.read_csv(DATA_FILE, header=0, parse_dates=["dt"])
-    backtest("base", data, plot=False)
+    _ = backtest("base", data, plot=False)
