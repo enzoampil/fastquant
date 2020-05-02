@@ -9,23 +9,17 @@ Created on Tue Apr 28, 2020
 import itertools
 from datetime import datetime
 from pathlib import Path
-from pkg_resources import resource_filename
 
 # Import modules
 import matplotlib.pyplot as pl
 import numpy as np
 import pandas as pd
-
-try:
-    import networkx as nx
-except Exception:
-    raise ModuleNotFoundError("pip install networkx")
+import networkx as nx
 
 # Import from package
-from fastquant import get_pse_data_cache
+from fastquant import get_pse_data_cache, DATA_PATH
 
 pl.style.use("fivethirtyeight")
-DATA_PATH = resource_filename(__name__, "../data")
 CALENDAR_FORMAT = "%m-%d-%Y"
 TODAY = datetime.now().date().strftime(CALENDAR_FORMAT)
 

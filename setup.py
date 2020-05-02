@@ -15,7 +15,7 @@ setuptools.setup(
     long_description_content_type="text/markdown",
     url="https://github.com/enzoampil/fastquant",
     packages=setuptools.find_packages(exclude=["docs", "tests"]),
-    package_data={'fastquant': ['data/*']},
+    package_data={"fastquant": ["data/*"]},
     include_package_data=True,
     scripts=["scripts/get_disclosures", "scripts/update_cache"],
     classifiers=[
@@ -24,5 +24,4 @@ setuptools.setup(
         "Operating System :: OS Independent",
     ],
     install_requires=install_requires,
-    extras_requires={"networkx": ["networkx==2.4"]},
 )
