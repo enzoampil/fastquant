@@ -20,7 +20,7 @@ from tqdm import tqdm
 import tweepy
 import yfinance as yf
 
-DATA_PATH = resource_filename(__name__, "../data")
+DATA_PATH = resource_filename(__name__, "data")
 
 PSE_TWITTER_ACCOUNTS = [
     "phstockexchange",
@@ -299,13 +299,17 @@ def get_pse_data_cache(
         update_pse_data_cache()
     if cache_fp is None:
         cache_fp = Path(DATA_PATH, "merged_stock_data.zip")
-    if verbose:
-        print("Loaded: ", cache_fp)
-    errmsg = "Cache does not exist! Try update=True"
-    assert cache_fp.exists(), errmsg
-    df = pd.read_csv(cache_fp, index_col=0, header=[0, 1])
-    df.index = pd.to_datetime(df.index)
-    return df if symbol is None else df[symbol]
+
+    if cache_fp.exists():
+        df = pd.read_csv(cache_fp, index_col=0, header=[0, 1])
+        df.index = pd.to_datetime(df.index)
+        if verbose:
+            print("Loaded: ", cache_fp)
+        return df if symbol is None else df[symbol]
+    else:
+        errmsg = "Cache does not exist! Try update=True"
+        print(errmsg)
+        return None
 
 
 def get_phisix_data(
@@ -518,23 +522,10 @@ def get_stock_data(symbol, start_date, end_date, source="phisix", format="dc"):
     return df[df_columns]
 
 
-def pse_data_to_csv(
-    symbol,
-    start_date,
-    end_date,
-    pse_dir=DATA_PATH,
-    stock_table_fp=None,
-    disclosures=False,
-):
+def pse_data_to_csv(symbol, start_date, end_date, pse_dir=DATA_PATH):
     """
     """
-    pse = get_pse_data(
-        symbol,
-        start_date,
-        end_date,
-        stock_table_fp=stock_table_fp,
-        disclosures=disclosures,
-    )
+    pse = get_pse_data(symbol, start_date, end_date)
     fp = Path(
         pse_dir, "{}_{}_{}_OHLCV.csv".format(symbol, start_date, end_date)
     )

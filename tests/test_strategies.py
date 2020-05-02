@@ -1,10 +1,8 @@
-from pkg_resources import resource_filename
 import pandas as pd
-from fastquant import backtest, STRATEGY_MAPPING
+from pathlib import Path
+from fastquant import backtest, STRATEGY_MAPPING, DATA_PATH
 
-SAMPLE_CSV = resource_filename(
-    __name__, "../data/JFC_20180101_20190110_DCV.csv"
-)
+SAMPLE_CSV = Path(DATA_PATH, "JFC_20180101_20190110_DCV.csv")
 
 
 def test_backtest():
@@ -13,6 +11,8 @@ def test_backtest():
     """
     sample = pd.read_csv(SAMPLE_CSV, parse_dates=["dt"])
     for strategy in STRATEGY_MAPPING.keys():
-        assert backtest(
-            strategy, sample, plot=False
-        ), "Backtest encountered error for strategy '{}'!".format(strategy)
+        cerebro = backtest(strategy, sample, plot=False)
+        errmsg = "Backtest encountered error for strategy '{}'!".format(
+            strategy
+        )
+        assert cerebro is not None, errmsg
