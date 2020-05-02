@@ -508,7 +508,7 @@ def backtest(
     cerebro.addobserver(bt.observers.Trades)
     cerebro.addobserver(bt.observers.BuySell)
     cerebro.addstrategy(
-        STRATEGY_MAPPING[strategy], init_cash=init_cash, **kwargs
+        STRATEGY_MAPPING[strategy], init_cash=init_cash, transaction_logging=verbose, **kwargs
     )
     cerebro.broker.setcommission(commission=commission)
 
