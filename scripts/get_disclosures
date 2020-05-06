@@ -12,7 +12,7 @@ import argparse
 from pathlib import Path
 import matplotlib.pyplot as pl
 
-from fastquant import CompanyDisclosures
+from fastquant import DisclosuresPSE
 from fastquant import DATA_PATH
 
 parser = argparse.ArgumentParser(
@@ -67,7 +67,7 @@ parser.add_argument(
 # print help if no arguments supplied
 args = parser.parse_args(None if sys.argv[1:] else ["-h"])
 if __name__ == "__main__":
-    cd = CompanyDisclosures(
+    cd = DisclosuresPSE(
         args.symbol,
         start_date=args.start_date,
         end_date=args.end_date,

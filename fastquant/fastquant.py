@@ -254,6 +254,8 @@ def update_pse_data_cache(start_date="2010-01-01", verbose=True):
     """
     Downloads DOHLC data of all PSE comapnies using get_pse_old
     and saves as .zip in /data to be used as cache
+
+    NOTE: useful to add sector in column
     """
     if verbose:
         print("Updating cache...")
