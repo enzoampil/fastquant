@@ -512,18 +512,11 @@ def backtest(
     cerebro.addobserver(bt.observers.Trades)
     cerebro.addobserver(bt.observers.BuySell)
 
-    # Apply grid search if at least one of the parameters is a list
-    grid_search = any([isinstance(v, list) for v in kwargs.values()])
-    if grid_search:
-        # Make sure all parameter values are lists
-        kwargs = {k: v if isinstance(v, list) else [v] for k, v in kwargs.items()}
-        cerebro.optstrategy(
-            STRATEGY_MAPPING[strategy], init_cash=[init_cash], transaction_logging=[verbose], **kwargs
-        )
-    else:
-        cerebro.addstrategy(
-            STRATEGY_MAPPING[strategy], init_cash=init_cash, transaction_logging=verbose, **kwargs
-        )
+    # Make sure all parameter values are lists
+    kwargs = {k: v if isinstance(v, list) else [v] for k, v in kwargs.items()}
+    cerebro.optstrategy(
+        STRATEGY_MAPPING[strategy], init_cash=[init_cash], transaction_logging=[verbose], **kwargs
+    )
 
     # Apply Total, Average, Compound and Annualized Returns calculated using a logarithmic approach
     cerebro.addanalyzer(btanalyzers.Returns, _name='returns')
@@ -585,9 +578,6 @@ def backtest(
 
     # print out the result
     print('Time used:', str(tend - tstart))
-        
-    if not grid_search:
-        print("Final Portfolio Value: %.2f" % cerebro.broker.getvalue())
 
     if plot:
         cerebro.plot(figsize=(30, 15))
