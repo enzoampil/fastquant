@@ -12,7 +12,9 @@ import sys
 # Import modules
 import backtrader as bt
 import backtrader.feeds as btfeed
+import backtrader.analyzers as btanalyzers
 import pandas as pd
+import time
 
 # Global arguments
 INIT_CASH = 100000
@@ -503,13 +505,30 @@ def backtest(
     {0}
     """
 
-    cerebro = bt.Cerebro(stdstats=False)
+    # Setting inital support for 1 cpu
+    # Return the full strategy object to get all run information
+    cerebro = bt.Cerebro(stdstats=False, maxcpus=1, optreturn=False)
     cerebro.addobserver(bt.observers.Broker)
     cerebro.addobserver(bt.observers.Trades)
     cerebro.addobserver(bt.observers.BuySell)
-    cerebro.addstrategy(
-        STRATEGY_MAPPING[strategy], init_cash=init_cash, transaction_logging=verbose, **kwargs
-    )
+
+    # Apply grid search if at least one of the parameters is a list
+    grid_search = any([isinstance(v, list) for v in kwargs.values()])
+    if grid_search:
+        # Make sure all parameter values are lists
+        kwargs = {k: v if isinstance(v, list) else [v] for k, v in kwargs.items()}
+        cerebro.optstrategy(
+            STRATEGY_MAPPING[strategy], init_cash=[init_cash], transaction_logging=[verbose], **kwargs
+        )
+    else:
+        cerebro.addstrategy(
+            STRATEGY_MAPPING[strategy], init_cash=init_cash, transaction_logging=verbose, **kwargs
+        )
+
+    # Apply Total, Average, Compound and Annualized Returns calculated using a logarithmic approach
+    cerebro.addanalyzer(btanalyzers.Returns, _name='returns')
+    cerebro.addanalyzer(btanalyzers.SharpeRatio, _name='mysharpe')
+
     cerebro.broker.setcommission(commission=commission)
 
     # Treat `data` as a path if it's a string; otherwise, it's treated as a pandas dataframe
@@ -529,26 +548,64 @@ def backtest(
     cerebro.broker.set_coc(True)
     if verbose:
         print("Starting Portfolio Value: %.2f" % cerebro.broker.getvalue())
-    cerebro.run()
+
+    # clock the start of the process
+    tstart = time.clock()
+    stratruns = cerebro.run()
+
+    # clock the end of the process
+    tend = time.clock()
+
+    params = []
+    metrics = []
     if verbose:
+        print('==================================================')
+    for stratrun in stratruns:
+        if verbose:
+            print('**************************************************')
+        for strat in stratrun:
+            p = strat.p._getkwargs()
+            p = {k: v for k, v in p.items() if k not in ['periodic_logging', 'transaction_logging']}
+            returns = strat.analyzers.returns.get_analysis()
+            sharpe = strat.analyzers.mysharpe.get_analysis()
+            # Combine dicts for returns and sharpe
+            m = {**returns, **sharpe}
+
+            params.append(p)
+            metrics.append(m)
+            if verbose:
+                print('--------------------------------------------------')
+                print(p)
+                print(returns)
+                print(sharpe)
+                print("Final Portfolio Value: %.2f" % strat.broker.getvalue())
+                
+    params_df = pd.DataFrame(params)
+    metrics_df = pd.DataFrame(metrics)    
+
+    # print out the result
+    print('Time used:', str(tend - tstart))
+        
+    if not grid_search:
         print("Final Portfolio Value: %.2f" % cerebro.broker.getvalue())
+
     if plot:
         cerebro.plot(figsize=(30, 15))
     # True indicates the backtest finished with no errors
-    return cerebro
+    return params_df, metrics_df
 
 
 if __name__ == "__main__":
     print("Testing RSI strategy with csv ...")
-    _ = backtest("rsi", DATA_FILE, plot=False)
+    _, _ = backtest("rsi", DATA_FILE, plot=False)
     print("Testing RSI strategy with dataframe ...")
     data = pd.read_csv(DATA_FILE, header=0, parse_dates=["dt"])
-    _ = backtest("rsi", data, plot=True)
+    _, _ = backtest("rsi", data, plot=True)
 
     print("Testing SMAC strategy with dataframe ...")
     data = pd.read_csv(DATA_FILE, header=0, parse_dates=["dt"])
-    _ = backtest("smac", data, plot=False)
+    _, _ = backtest("smac", data, plot=False)
 
     print("Testing Base strategy with dataframe ...")
     data = pd.read_csv(DATA_FILE, header=0, parse_dates=["dt"])
-    _ = backtest("base", data, plot=False)
+    _, _ = backtest("base", data, plot=False)
