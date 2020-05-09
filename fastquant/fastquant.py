@@ -432,7 +432,7 @@ def get_pse_data(
     if save:
         pse_data_df.to_csv(fp, index=False)
         print(f"Saved: ", fp)
-    return pse_data_df
+    return pse_data_df.set_index('dt')
 
 
 def get_yahoo_data(symbol, start_date, end_date):
@@ -467,7 +467,7 @@ def get_yahoo_data(symbol, start_date, end_date):
     rename_list = ["dt", "open", "high", "low", "close", "adj_close", "volume"]
     df = df.rename(columns=rename_dict)[rename_list].drop_duplicates()
     df["dt"] = pd.to_datetime(df.dt)
-    return df
+    return df.set_index("dt")
 
 
 def get_stock_data(symbol, start_date, end_date, source="phisix", format="dc"):
