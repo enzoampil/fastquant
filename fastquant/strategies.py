@@ -14,6 +14,7 @@ import backtrader as bt
 import backtrader.feeds as btfeed
 import backtrader.analyzers as btanalyzers
 import pandas as pd
+import numpy as np
 import time
 
 # Global arguments
@@ -153,6 +154,11 @@ class BaseStrategy(bt.Strategy):
             self.log("Cash %s Value %s" % (cash, value))
         self.cash = cash
         self.value = value
+
+    def stop(self):
+        # Saving to self so it's accessible later during optimization
+        self.pnl = round(self.broker.getvalue() - self.init_cash, 2)
+        print("Final PnL: {}".format(self.pnl))
 
     def next(self):
         if self.periodic_logging:
@@ -497,6 +503,7 @@ def backtest(
     data_format="dcv",
     plot=True,
     verbose=True,
+    sort_by="rnorm",
     **kwargs
 ):
     """
@@ -562,7 +569,7 @@ def backtest(
             returns = strat.analyzers.returns.get_analysis()
             sharpe = strat.analyzers.mysharpe.get_analysis()
             # Combine dicts for returns and sharpe
-            m = {**returns, **sharpe}
+            m = {**returns, **sharpe, "pnl": strat.pnl}
 
             params.append(p)
             metrics.append(m)
@@ -571,10 +578,14 @@ def backtest(
                 print(p)
                 print(returns)
                 print(sharpe)
-                print("Final Portfolio Value: %.2f" % strat.broker.getvalue())
+                #print("Final Portfolio Value: %.2f" % strat.broker.getvalue())
                 
     params_df = pd.DataFrame(params)
-    metrics_df = pd.DataFrame(metrics)    
+    metrics_df = pd.DataFrame(metrics)
+    # Get indices based on
+    optim_idxs = np.argsort(metrics_df[sort_by].values)[:: -1]
+    sorted_params_df = params_df.iloc[optim_idxs]
+    sorted_metrics_df = metrics_df.iloc[optim_idxs]
 
     # print out the result
     print('Time used:', str(tend - tstart))
@@ -582,7 +593,7 @@ def backtest(
     if plot:
         cerebro.plot(figsize=(30, 15))
     # True indicates the backtest finished with no errors
-    return params_df, metrics_df
+    return sorted_params_df, sorted_metrics_df
 
 
 if __name__ == "__main__":
