@@ -544,6 +544,11 @@ def backtest(
             print("Reading path as pandas dataframe ...")
         data = pd.read_csv(data, header=0, parse_dates=["dt"])
 
+    # If data has `dt` as the index, set `dt` as the first column
+    # This means `backtest` supports the dataframe whether `dt` is the index or a column
+    if data.index.name == 'dt':
+        data = data.reset_index()
+
     pd_data = bt.feeds.PandasData(
         dataname=data, **DATA_FORMAT_MAPPING[data_format]
     )
@@ -557,11 +562,11 @@ def backtest(
         print("Starting Portfolio Value: %.2f" % cerebro.broker.getvalue())
 
     # clock the start of the process
-    tstart = time.clock()
+    tstart = time.time()
     stratruns = cerebro.run()
 
     # clock the end of the process
-    tend = time.clock()
+    tend = time.time()
 
     params = []
     metrics = []
@@ -599,7 +604,7 @@ def backtest(
     sorted_metrics_df = metrics_df.iloc[optim_idxs].reset_index(drop=True)
 
     # print out the result
-    print("Time used:", str(tend - tstart))
+    print("Time used (seconds):", str(tend - tstart))
 
     # Save optimal parameters as dictionary
     optim_params = sorted_params_df.iloc[0].to_dict()
