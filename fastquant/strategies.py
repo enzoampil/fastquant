@@ -622,5 +622,5 @@ def backtest(
                 sort_by=sort_by,
                 **optim_params
             )
-    # True indicates the backtest finished with no errors
+
     return sorted_params_df, sorted_metrics_df
