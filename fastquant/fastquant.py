@@ -34,7 +34,6 @@ PSE_TWITTER_ACCOUNTS = [
 ]
 
 DATA_FORMAT_COLS = {
-    "d": "dt",
     "o": "open",
     "h": "high",
     "l": "low",
@@ -432,7 +431,7 @@ def get_pse_data(
     if save:
         pse_data_df.to_csv(fp, index=False)
         print(f"Saved: ", fp)
-    return pse_data_df.set_index('dt')
+    return pse_data_df.set_index("dt")
 
 
 def get_yahoo_data(symbol, start_date, end_date):
@@ -470,7 +469,7 @@ def get_yahoo_data(symbol, start_date, end_date):
     return df.set_index("dt")
 
 
-def get_stock_data(symbol, start_date, end_date, source="phisix", format="dc"):
+def get_stock_data(symbol, start_date, end_date, source="phisix", format="c"):
 
     """Returns pricing data for a specified stock and source.
 
