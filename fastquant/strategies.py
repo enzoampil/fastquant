@@ -617,7 +617,9 @@ def backtest(
 
     # Save optimal parameters as dictionary
     optim_params = sorted_params_df.iloc[0].to_dict()
+    optim_metrics = sorted_metrics_df.iloc[0].to_dict()
     print("Optimal parameters:", optim_params)
+    print("Optimal metrics:", optim_metrics)
 
     if plot:
         # Plot only with the optimal parameters when multiple strategy runs are required
