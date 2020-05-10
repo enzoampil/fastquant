@@ -622,9 +622,10 @@ def backtest(
     print("Optimal metrics:", optim_metrics)
 
     if plot:
+        has_volume = DATA_FORMAT_MAPPING[data_format]["volume"] is not None
         # Plot only with the optimal parameters when multiple strategy runs are required
         if params_df.shape[0] == 1:
-            cerebro.plot(figsize=(30, 15))
+            cerebro.plot(volume=has_volume, figsize=(30, 15))
         else:
             print("=============================================")
             print("Plotting backtest for optimal parameters ...")
