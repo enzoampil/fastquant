@@ -43,7 +43,7 @@ DATA_FORMAT_MAPPING = {
         "close": 1,
         "volume": None,
         "openinterest": None,
-    }
+    },
 }
 
 
@@ -167,7 +167,8 @@ class BaseStrategy(bt.Strategy):
 
     def stop(self):
         # Saving to self so it's accessible later during optimization
-        self.pnl = round(self.broker.getvalue() - self.init_cash, 2)
+        self.final_value = self.broker.getvalue()
+        self.pnl = round(self.final_value - self.init_cash, 2)
         print("Final PnL: {}".format(self.pnl))
 
     def next(self):
@@ -555,7 +556,7 @@ def backtest(
 
     # If data has `dt` as the index, set `dt` as the first column
     # This means `backtest` supports the dataframe whether `dt` is the index or a column
-    if data.index.name == 'dt':
+    if data.index.name == "dt":
         data = data.reset_index()
 
     pd_data = bt.feeds.PandasData(
@@ -594,7 +595,12 @@ def backtest(
             returns = strat.analyzers.returns.get_analysis()
             sharpe = strat.analyzers.mysharpe.get_analysis()
             # Combine dicts for returns and sharpe
-            m = {**returns, **sharpe, "pnl": strat.pnl}
+            m = {
+                **returns,
+                **sharpe,
+                "pnl": strat.pnl,
+                "final_value": strat.final_value,
+            }
 
             params.append(p)
             metrics.append(m)
