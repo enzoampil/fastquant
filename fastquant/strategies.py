@@ -26,13 +26,22 @@ DATA_FILE = resource_filename(__name__, "data/JFC_20180101_20190110_DCV.csv")
 BUY_PROP = 1
 SELL_PROP = 1
 DATA_FORMAT_MAPPING = {
-    "dcv": {
+    "cv": {
         "datetime": 0,
         "open": None,
         "high": None,
         "low": None,
         "close": 1,
         "volume": 2,
+        "openinterest": None,
+    },
+    "c": {
+        "datetime": 0,
+        "open": None,
+        "high": None,
+        "low": None,
+        "close": 1,
+        "volume": None,
         "openinterest": None,
     }
 }
@@ -501,7 +510,7 @@ def backtest(
     data,  # Treated as csv path is str, and dataframe of pd.DataFrame
     commission=COMMISSION_PER_TRANSACTION,
     init_cash=INIT_CASH,
-    data_format="dcv",
+    data_format="c",
     plot=True,
     verbose=True,
     sort_by="rnorm",
