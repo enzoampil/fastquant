@@ -593,10 +593,6 @@ def backtest(
     params_df = pd.DataFrame(params)
     metrics_df = pd.DataFrame(metrics)
 
-    # Automatically turn off plotting when multiple strategy runs are required
-    if params_df.shape[0] > 1:
-        plot = False
-
     # Get indices based on `sort_by` metric
     optim_idxs = np.argsort(metrics_df[sort_by].values)[::-1]
     sorted_params_df = params_df.iloc[optim_idxs].reset_index(drop=True)
@@ -607,8 +603,24 @@ def backtest(
 
     # Save optimal parameters as dictionary
     optim_params = sorted_params_df.iloc[0].to_dict()
+    print("Optimal parameters:", optim_params)
 
     if plot:
-        cerebro.plot(figsize=(30, 15))
+        # Plot only with the optimal parameters when multiple strategy runs are required
+        if params_df.shape[0] == 1:
+            cerebro.plot(figsize=(30, 15))
+        else:
+            print("=============================================")
+            print("Plotting backtest for optimal parameters ...")
+            backtest(
+                strategy,
+                data,  # Treated as csv path is str, and dataframe of pd.DataFrame
+                commission=commission,
+                data_format=data_format,
+                plot=plot,
+                verbose=verbose,
+                sort_by=sort_by,
+                **optim_params
+            )
     # True indicates the backtest finished with no errors
     return sorted_params_df, sorted_metrics_df
