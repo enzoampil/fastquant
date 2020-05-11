@@ -12,7 +12,11 @@ import sys
 # Import modules
 import backtrader as bt
 import backtrader.feeds as btfeed
+import backtrader.analyzers as btanalyzers
 import pandas as pd
+import numpy as np
+from collections.abc import Iterable
+import time
 
 # Global arguments
 INIT_CASH = 100000
@@ -22,7 +26,7 @@ DATA_FILE = resource_filename(__name__, "data/JFC_20180101_20190110_DCV.csv")
 BUY_PROP = 1
 SELL_PROP = 1
 DATA_FORMAT_MAPPING = {
-    "dcv": {
+    "cv": {
         "datetime": 0,
         "open": None,
         "high": None,
@@ -30,7 +34,16 @@ DATA_FORMAT_MAPPING = {
         "close": 1,
         "volume": 2,
         "openinterest": None,
-    }
+    },
+    "c": {
+        "datetime": 0,
+        "open": None,
+        "high": None,
+        "low": None,
+        "close": 1,
+        "volume": None,
+        "openinterest": None,
+    },
 }
 
 
@@ -151,6 +164,12 @@ class BaseStrategy(bt.Strategy):
             self.log("Cash %s Value %s" % (cash, value))
         self.cash = cash
         self.value = value
+
+    def stop(self):
+        # Saving to self so it's accessible later during optimization
+        self.final_value = self.broker.getvalue()
+        self.pnl = round(self.final_value - self.init_cash, 2)
+        print("Final PnL: {}".format(self.pnl))
 
     def next(self):
         if self.periodic_logging:
@@ -492,9 +511,10 @@ def backtest(
     data,  # Treated as csv path is str, and dataframe of pd.DataFrame
     commission=COMMISSION_PER_TRANSACTION,
     init_cash=INIT_CASH,
-    data_format="dcv",
+    data_format="c",
     plot=True,
     verbose=True,
+    sort_by="rnorm",
     **kwargs
 ):
     """
@@ -503,13 +523,29 @@ def backtest(
     {0}
     """
 
-    cerebro = bt.Cerebro(stdstats=False)
+    # Setting inital support for 1 cpu
+    # Return the full strategy object to get all run information
+    cerebro = bt.Cerebro(stdstats=False, maxcpus=1, optreturn=False)
     cerebro.addobserver(bt.observers.Broker)
     cerebro.addobserver(bt.observers.Trades)
     cerebro.addobserver(bt.observers.BuySell)
-    cerebro.addstrategy(
-        STRATEGY_MAPPING[strategy], init_cash=init_cash, transaction_logging=verbose, **kwargs
+
+    # Convert all non iterables and strings into lists
+    kwargs = {
+        k: v if isinstance(v, Iterable) and not isinstance(v, str) else [v]
+        for k, v in kwargs.items()
+    }
+    cerebro.optstrategy(
+        STRATEGY_MAPPING[strategy],
+        init_cash=[init_cash],
+        transaction_logging=[verbose],
+        **kwargs
     )
+
+    # Apply Total, Average, Compound and Annualized Returns calculated using a logarithmic approach
+    cerebro.addanalyzer(btanalyzers.Returns, _name="returns")
+    cerebro.addanalyzer(btanalyzers.SharpeRatio, _name="mysharpe")
+
     cerebro.broker.setcommission(commission=commission)
 
     # Treat `data` as a path if it's a string; otherwise, it's treated as a pandas dataframe
@@ -517,6 +553,11 @@ def backtest(
         if verbose:
             print("Reading path as pandas dataframe ...")
         data = pd.read_csv(data, header=0, parse_dates=["dt"])
+
+    # If data has `dt` as the index, set `dt` as the first column
+    # This means `backtest` supports the dataframe whether `dt` is the index or a column
+    if data.index.name == "dt":
+        data = data.reset_index()
 
     pd_data = bt.feeds.PandasData(
         dataname=data, **DATA_FORMAT_MAPPING[data_format]
@@ -529,26 +570,81 @@ def backtest(
     cerebro.broker.set_coc(True)
     if verbose:
         print("Starting Portfolio Value: %.2f" % cerebro.broker.getvalue())
-    cerebro.run()
+
+    # clock the start of the process
+    tstart = time.time()
+    stratruns = cerebro.run()
+
+    # clock the end of the process
+    tend = time.time()
+
+    params = []
+    metrics = []
     if verbose:
-        print("Final Portfolio Value: %.2f" % cerebro.broker.getvalue())
+        print("==================================================")
+    for stratrun in stratruns:
+        if verbose:
+            print("**************************************************")
+        for strat in stratrun:
+            p = strat.p._getkwargs()
+            p = {
+                k: v
+                for k, v in p.items()
+                if k not in ["periodic_logging", "transaction_logging"]
+            }
+            returns = strat.analyzers.returns.get_analysis()
+            sharpe = strat.analyzers.mysharpe.get_analysis()
+            # Combine dicts for returns and sharpe
+            m = {
+                **returns,
+                **sharpe,
+                "pnl": strat.pnl,
+                "final_value": strat.final_value,
+            }
+
+            params.append(p)
+            metrics.append(m)
+            if verbose:
+                print("--------------------------------------------------")
+                print(p)
+                print(returns)
+                print(sharpe)
+
+    params_df = pd.DataFrame(params)
+    metrics_df = pd.DataFrame(metrics)
+
+    # Get indices based on `sort_by` metric
+    optim_idxs = np.argsort(metrics_df[sort_by].values)[::-1]
+    sorted_params_df = params_df.iloc[optim_idxs].reset_index(drop=True)
+    sorted_metrics_df = metrics_df.iloc[optim_idxs].reset_index(drop=True)
+    sorted_combined_df = pd.concat([sorted_params_df, sorted_metrics_df], axis=1)
+
+    # print out the result
+    print("Time used (seconds):", str(tend - tstart))
+
+    # Save optimal parameters as dictionary
+    optim_params = sorted_params_df.iloc[0].to_dict()
+    optim_metrics = sorted_metrics_df.iloc[0].to_dict()
+    print("Optimal parameters:", optim_params)
+    print("Optimal metrics:", optim_metrics)
+
     if plot:
-        cerebro.plot(figsize=(30, 15))
-    # True indicates the backtest finished with no errors
-    return cerebro
+        has_volume = DATA_FORMAT_MAPPING[data_format]["volume"] is not None
+        # Plot only with the optimal parameters when multiple strategy runs are required
+        if params_df.shape[0] == 1:
+            cerebro.plot(volume=has_volume, figsize=(30, 15))
+        else:
+            print("=============================================")
+            print("Plotting backtest for optimal parameters ...")
+            backtest(
+                strategy,
+                data,  # Treated as csv path is str, and dataframe of pd.DataFrame
+                commission=commission,
+                data_format=data_format,
+                plot=plot,
+                verbose=verbose,
+                sort_by=sort_by,
+                **optim_params
+            )
 
-
-if __name__ == "__main__":
-    print("Testing RSI strategy with csv ...")
-    _ = backtest("rsi", DATA_FILE, plot=False)
-    print("Testing RSI strategy with dataframe ...")
-    data = pd.read_csv(DATA_FILE, header=0, parse_dates=["dt"])
-    _ = backtest("rsi", data, plot=True)
-
-    print("Testing SMAC strategy with dataframe ...")
-    data = pd.read_csv(DATA_FILE, header=0, parse_dates=["dt"])
-    _ = backtest("smac", data, plot=False)
-
-    print("Testing Base strategy with dataframe ...")
-    data = pd.read_csv(DATA_FILE, header=0, parse_dates=["dt"])
-    _ = backtest("base", data, plot=False)
+    return sorted_combined_df
