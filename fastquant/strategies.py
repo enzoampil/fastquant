@@ -617,6 +617,7 @@ def backtest(
     optim_idxs = np.argsort(metrics_df[sort_by].values)[::-1]
     sorted_params_df = params_df.iloc[optim_idxs].reset_index(drop=True)
     sorted_metrics_df = metrics_df.iloc[optim_idxs].reset_index(drop=True)
+    sorted_combined_df = pd.concat([sorted_params_df, sorted_metrics_df], axis=1)
 
     # print out the result
     print("Time used (seconds):", str(tend - tstart))
@@ -646,4 +647,4 @@ def backtest(
                 **optim_params
             )
 
-    return sorted_params_df, sorted_metrics_df
+    return sorted_combined_df
