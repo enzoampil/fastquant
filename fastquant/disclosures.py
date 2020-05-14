@@ -435,7 +435,7 @@ class DisclosuresPSE:
         older = (
             oldest_date > self.company_disclosures["Announce Date and Time"]
         )
-        idxs1 = np.argwhere(older).flatten()
+        idxs1 = np.flatnonzero(older)
         if older.sum() > 0:
             for idx in tqdm(idxs1):
                 edge_no = self.company_disclosures.iloc[idx]["edge_no"]
@@ -458,7 +458,7 @@ class DisclosuresPSE:
         newer = (
             newest_date < self.company_disclosures["Announce Date and Time"]
         )
-        idxs2 = np.argwhere(newer).flatten()
+        idxs2 = np.flatnonzero(newer)
         # append newer disclosures
         if newer.sum() > 0:
             for idx in tqdm(idxs2):
