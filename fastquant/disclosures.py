@@ -232,6 +232,12 @@ class DisclosuresPSE:
 
         columns = [el.text for el in table.find_all("th")]
 
+        if lines[1][0] == "no data.":
+            errmsg = "No disclosures between {} & {}. ".format(
+                self.start_date, self.end_date
+            )
+            errmsg += "Try longer date interval."
+            raise ValueError(errmsg)
         df = pd.DataFrame(lines, columns=columns)
         # Filter to rows where not all columns are null
         df = df[df.isna().mean(axis=1) < 1]
