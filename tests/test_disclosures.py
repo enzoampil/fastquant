@@ -3,7 +3,7 @@ from fastquant import DisclosuresPSE, DisclosuresInvestagrams
 
 SYMBOL = "JFC"
 START_DATE = "1-1-2020"
-END_DATE = "4-1-2020"
+END_DATE = "2-1-2020"
 
 
 def test_diclosures_pse():
