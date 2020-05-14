@@ -130,7 +130,7 @@ class DisclosuresPSE:
         values = ", ".join(repr(getattr(self, f)) for f in fields)
         return "{}({})".format(type(self).__name__, values)
 
-    def get_stock_data(self, format="dohlc"):
+    def get_stock_data(self, format="ohlc"):
         """overwrites get_stock_data
 
         Note that stock data requires YYYY-MM-DD
@@ -149,9 +149,6 @@ class DisclosuresPSE:
             end_date=end_date,
             format=format,
         )
-        data["dt"] = pd.to_datetime(data.dt)
-        # set dt as index
-        data = data.set_index("dt")
         self.stock_data = data
         return data
 
@@ -536,7 +533,7 @@ class DisclosuresPSE:
                 print("Saved: {}".format(self.fp))
         return df
 
-    def filter_disclosures(self, data_type="close", operation="max"):
+    def filter_disclosures(self, indicator="close", operation="max"):
         """
         get disclosures co-incident to an extremum in percent change
         """
@@ -551,7 +548,7 @@ class DisclosuresPSE:
         if self.stock_data is None:
             _ = self.get_stock_data()
 
-        df2 = self.stock_data[data_type].pct_change()
+        df2 = self.stock_data[indicator].pct_change()
         idx2 = df2.index.isin(disclosure_dates)
         if operation == "max":
             date = disclosure_dates.iloc[np.argmax(idx2)]
@@ -562,14 +559,14 @@ class DisclosuresPSE:
         return df[disclosure_dates == date]
 
     def plot_disclosures(
-        self, disclosure_type=None, data_type="close", diff=True, percent=True
+        self, disclosure_type=None, indicator="close", diff=True, percent=True
     ):
         """
         Parameters
         ----------
         disclosure_type : str
             type of disclosure to highlight (default=all)
-        data_type : str
+        indicator : str
             stock data to overplot (close or volume)
         diff : bool
             show previous trading day difference
@@ -593,12 +590,12 @@ class DisclosuresPSE:
         colors = mpl.cm.rainbow(np.linspace(0, 1, len(self.disclosure_types)))
         color_map = {n: colors[i] for i, n in enumerate(self.disclosure_types)}
 
-        df, label = data[data_type], data_type
+        df, label = data[indicator], indicator
         if diff:
-            df = data[data_type].diff()
-            label = data_type + " diff"
+            df = data[indicator].diff()
+            label = indicator + " diff"
             if percent:
-                df = data[data_type].pct_change()
+                df = data[indicator].pct_change()
                 label = label + " (%)"
 
         ax = df.plot(c="k", zorder=1, label=label)
