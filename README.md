@@ -52,9 +52,10 @@ backtest('smac', df, fast_period=15, slow_period=40)
 ## Automated parameter grid search
 
 ### Simple Moving Average Crossover (15 to 30 day MA vs 40 to 55 day MA)
+Daily Jollibee prices from 2018-01-01 to 2019-01-01
 
 ```
-
+from fastquant import backtest
 res = backtest("smac", df, fast_period=range(15, 30, 3), slow_period=range(40, 55, 3), verbose=False)
 
 # Optimal parameters: {'init_cash': 100000, 'buy_prop': 1, 'sell_prop': 1, 'execution_type': 'close', 'fast_period': 15, 'slow_period': 40}
