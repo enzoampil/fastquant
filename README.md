@@ -55,8 +55,8 @@ backtest('smac', df, fast_period=15, slow_period=40)
 | --- | --- | --- |
 | Relative Strength Index (RSI) | rsi | `rsi_period`, `rsi_upper`,  `rsi_lower` |
 | Simple moving average crossover (SMAC) | smac | `fast_period`, `slow_period` |
-| Exponential moving average crossover (EMAC) | macd | `fast_period`, `slow_period` |
-| Moving Average Convergence Divergence (MACD) | emac | `fast_perod`, `slow_upper`, `signal_period`, `sma_period`, `sma_dir_period` |
+| Exponential moving average crossover (EMAC) | emac | `fast_period`, `slow_period` |
+| Moving Average Convergence Divergence (MACD) | macd | `fast_perod`, `slow_upper`, `signal_period`, `sma_period`, `sma_dir_period` |
 | Bollinger Bands | bbands | `period`, `devfactor` |
 
 ### Relative Strength Index (RSI) Strategy
