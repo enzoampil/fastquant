@@ -26,12 +26,12 @@ from fastquant import get_stock_data
 df = get_stock_data("JFC", "2018-01-01", "2019-01-01")
 print(df.head())
 
-#           dt  close   volume
-#   2019-01-01  293.0   181410
-#   2019-01-02  292.0  1665440
-#   2019-01-03  309.0  1622480
-#   2019-01-06  323.0  1004160
-#   2019-01-07  321.0   623090
+#           dt  close
+#   2019-01-01  293.0
+#   2019-01-02  292.0
+#   2019-01-03  309.0
+#   2019-01-06  323.0
+#   2019-01-07  321.0
 ```
 
 *Note: Symbols from Yahoo Finance will return closing prices in USD, while symbols from PSE will return closing prices in PHP*
