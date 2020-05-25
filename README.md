@@ -49,6 +49,29 @@ backtest('smac', df, fast_period=15, slow_period=40)
 ```
 ![](./docs/assets/smac_sample.png)
 
+## Automated parameter grid search
+
+### Simple Moving Average Crossover (15 to 30 day MA vs 40 to 55 day MA)
+
+```
+
+res = backtest("smac", df, fast_period=range(15, 30, 3), slow_period=range(40, 55, 3), verbose=False)
+
+# Optimal parameters: {'init_cash': 100000, 'buy_prop': 1, 'sell_prop': 1, 'execution_type': 'close', 'fast_period': 15, 'slow_period': 40}
+# Optimal metrics: {'rtot': 0.022, 'ravg': 9.25e-05, 'rnorm': 0.024, 'rnorm100': 2.36, 'sharperatio': None, 'pnl': 2272.9, 'final_value': 102272.90}
+
+print(res[['fast_period', 'slow_period', 'final_value']].head())
+
+#	fast_period	slow_period	final_value
+#0	15	        40	        102272.90
+#1	21	        40	         98847.00
+#2	21	        52	         98796.09
+#3	24	        46	         98008.79
+#4	15	        46	         97452.92
+
+```
+
+
 ## Library of trading strategies
 
 | Strategy | Alias | Parameters |
