@@ -512,8 +512,11 @@ class BuyAndHoldStrategy(BaseStrategy):
         return self.buy_and_hold_sell
 
     def stop(self):
-        super().stop()
         self.buy_and_hold_sell = True
+        # Saving to self so it's accessible later during optimization
+        self.final_value = self.broker.getvalue()
+        self.pnl = round(self.final_value - self.init_cash, 2)
+        print("Final PnL: {}".format(self.pnl))
 
 
 STRATEGY_MAPPING = {
