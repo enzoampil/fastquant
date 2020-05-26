@@ -82,6 +82,7 @@ print(res[['fast_period', 'slow_period', 'final_value']].head())
 | Exponential moving average crossover (EMAC) | emac | `fast_period`, `slow_period` |
 | Moving Average Convergence Divergence (MACD) | macd | `fast_perod`, `slow_upper`, `signal_period`, `sma_period`, `sma_dir_period` |
 | Bollinger Bands | bbands | `period`, `devfactor` |
+| Buy and Hold | buynhold | `N/A` |
 
 ### Relative Strength Index (RSI) Strategy
 ```
