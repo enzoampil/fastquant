@@ -9,7 +9,7 @@
 
 ## Features
 1. Easily access historical stock data
-2. Backtest trading strategies with only 3 lines of code
+2. Backtest and optimize trading strategies with only 3 lines of code
 
 <sup>`*` - Both Yahoo Finance and Philippine stock data data are accessible straight from fastquant<sup>
 
@@ -49,7 +49,7 @@ backtest('smac', df, fast_period=15, slow_period=40)
 ```
 ![](./docs/assets/smac_sample.png)
 
-## Automated parameter grid search
+## Optimize trading strategies with automated grid search
 
 ### Simple Moving Average Crossover (15 to 30 day MA vs 40 to 55 day MA)
 Daily Jollibee prices from 2018-01-01 to 2019-01-01
