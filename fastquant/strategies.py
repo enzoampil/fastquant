@@ -509,11 +509,11 @@ class BuyAndHoldStrategy(BaseStrategy):
         return self.buy_and_hold
 
     def sell_signal(self):
-        if (self.bar_executed + len(self)) == self.len_data:
-            self.buy_and_hold_sell = True
-        else:
-            self.buy_and_hold_sell = False
         return self.buy_and_hold_sell
+
+    def stop(self):
+        super().stop()
+        self.buy_and_hold_sell = True
 
 
 STRATEGY_MAPPING = {
