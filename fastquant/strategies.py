@@ -501,6 +501,7 @@ class BuyAndHoldStrategy(BaseStrategy):
         super().__init__()
         # Strategy level variables
         self.buy_and_hold = None
+        self.buy_and_hold_sell = None
 
     def buy_signal(self):
         if not self.position:
@@ -508,7 +509,11 @@ class BuyAndHoldStrategy(BaseStrategy):
         return self.buy_and_hold
 
     def sell_signal(self):
-        return False
+        if (self.bar_executed + len(self)) == self.len_data:
+            self.buy_and_hold_sell = True
+        else:
+            self.buy_and_hold_sell = False
+        return self.buy_and_hold_sell
 
 
 STRATEGY_MAPPING = {
