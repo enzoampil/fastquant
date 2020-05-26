@@ -500,8 +500,8 @@ class BuyAndHoldStrategy(BaseStrategy):
         # Initialize global variables
         super().__init__()
         # Strategy level variables
-        self.buy_and_hold = False
-        self.buy_and_hold_sell = False
+        self.buy_and_hold = None
+        self.buy_and_hold_sell = None
 
     def buy_signal(self):
         if not self.position:
@@ -509,14 +509,11 @@ class BuyAndHoldStrategy(BaseStrategy):
         return self.buy_and_hold
 
     def sell_signal(self):
+        if (self.bar_executed) == self.len_data:
+            self.buy_and_hold_sell = True
+        else:
+            self.buy_and_hold_sell = False
         return self.buy_and_hold_sell
-
-    def stop(self):
-        self.buy_and_hold_sell = True
-        # Saving to self so it's accessible later during optimization
-        self.final_value = self.broker.getvalue()
-        self.pnl = round(self.final_value - self.init_cash, 2)
-        print("Final PnL: {}".format(self.pnl))
 
 
 STRATEGY_MAPPING = {
