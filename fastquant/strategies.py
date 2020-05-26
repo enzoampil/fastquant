@@ -491,6 +491,31 @@ class BBandsStrategy(BaseStrategy):
         return self.dataclose[0] > self.top
 
 
+class BuyAndHoldStrategy(BaseStrategy):
+    """
+    Buy and Hold Strategy
+    """
+
+    def _init_(self):
+        # Initialize global variables
+        super().__init__()
+        # Strategy level variables
+        self.buy_and_hold = None
+        self.buy_and_hold_sell = None
+
+    def buy_signal(self):
+        if not self.position:
+            self.buy_and_hold = True
+        return self.buy_and_hold
+
+    def sell_signal(self):
+        if (len(self) + 2) >= self.len_data:
+            self.buy_and_hold_sell = True
+        else:
+            self.buy_and_hold_sell = False
+        return self.buy_and_hold_sell
+
+
 STRATEGY_MAPPING = {
     "rsi": RSIStrategy,
     "smac": SMACStrategy,
@@ -498,6 +523,7 @@ STRATEGY_MAPPING = {
     "macd": MACDStrategy,
     "emac": EMACStrategy,
     "bbands": BBandsStrategy,
+    "buynhold": BuyAndHoldStrategy,
 }
 
 strat_docs = "\nExisting strategies:\n\n" + "\n".join(
@@ -617,7 +643,9 @@ def backtest(
     optim_idxs = np.argsort(metrics_df[sort_by].values)[::-1]
     sorted_params_df = params_df.iloc[optim_idxs].reset_index(drop=True)
     sorted_metrics_df = metrics_df.iloc[optim_idxs].reset_index(drop=True)
-    sorted_combined_df = pd.concat([sorted_params_df, sorted_metrics_df], axis=1)
+    sorted_combined_df = pd.concat(
+        [sorted_params_df, sorted_metrics_df], axis=1
+    )
 
     # print out the result
     print("Time used (seconds):", str(tend - tstart))
