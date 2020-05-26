@@ -500,8 +500,8 @@ class BuyAndHoldStrategy(BaseStrategy):
         # Initialize global variables
         super().__init__()
         # Strategy level variables
-        self.buy_and_hold = None
-        self.buy_and_hold_sell = None
+        self.buy_and_hold = False
+        self.buy_and_hold_sell = False
 
     def buy_signal(self):
         if not self.position:
