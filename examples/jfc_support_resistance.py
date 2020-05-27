@@ -1,15 +1,25 @@
-from __future__ import absolute_import, division, print_function, unicode_literals
-
+# Import standard library
+from __future__ import (
+    absolute_import,
+    division,
+    print_function,
+    unicode_literals,
+)
 import datetime
 import os.path
 import sys
+from pkg_resources import resource_filename
+
+# Import modules
 import backtrader as bt
 import backtrader.feeds as btfeed
 
 INIT_CASH = 100000
 BAND_PERIOD = 30
 COMMISSION_PER_TRANSACTION = 0.006
-DATA_FILE = "examples/data/JFC_2010-01-01_2019-01-01_OHLCV.csv"
+DATA_FILE = resource_filename(
+    __name__, "../data/JFC_2010-01-01_2019-01-01_OHLCV.csv"
+)
 
 
 class MinMaxSupportResistance(bt.Strategy):
@@ -34,7 +44,11 @@ class MinMaxSupportResistance(bt.Strategy):
             if order.isbuy():
                 self.log(
                     "BUY EXECUTED, Price: %.2f, Cost: %.2f, Comm %.2f"
-                    % (order.executed.price, order.executed.value, order.executed.comm)
+                    % (
+                        order.executed.price,
+                        order.executed.value,
+                        order.executed.comm,
+                    )
                 )
 
                 self.buyprice = order.executed.price
@@ -42,7 +56,11 @@ class MinMaxSupportResistance(bt.Strategy):
             else:  # Sell
                 self.log(
                     "SELL EXECUTED, Price: %.2f, Cost: %.2f, Comm %.2f"
-                    % (order.executed.price, order.executed.value, order.executed.comm)
+                    % (
+                        order.executed.price,
+                        order.executed.value,
+                        order.executed.comm,
+                    )
                 )
 
             self.bar_executed = len(self)
@@ -63,7 +81,10 @@ class MinMaxSupportResistance(bt.Strategy):
         if not trade.isclosed:
             return
 
-        self.log("OPERATION PROFIT, GROSS %.2f, NET %.2f" % (trade.pnl, trade.pnlcomm))
+        self.log(
+            "OPERATION PROFIT, GROSS %.2f, NET %.2f"
+            % (trade.pnl, trade.pnlcomm)
+        )
 
     def next(self):
         self.log("Close, %.2f" % self.dataclose[0])

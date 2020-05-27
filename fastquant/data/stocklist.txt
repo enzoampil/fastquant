@@ -1,0 +1,300 @@
+2GO	2GO Group, Inc.
+AAA	Asia Amalgamated Holdings Corp.
+AB	Atok-Big Wedge Company, Inc.
+ABA	AbaCore Capital Holdings, Inc.
+ABG	Asiabest Group International, Inc.
+ABS	ABS-CBN Corporation
+ABSP	ABS-CBN Holdings Corporation "PDR"
+AC	Ayala Corporation
+ACE	Acesite (Phils.) Hotel Corp.
+ACEPH	AC Energy Philippines, Inc.
+ACEX	ACE Enexor, Inc.
+ACPA	Ayala Corporation Preferred Class "A"
+ACR	Alsons Consolidated Resources, Inc.
+AEV	Aboitiz Equity Ventures, Inc.
+AGI	Alliance Global Group, Inc.
+ALCO	Arthaland Corporation
+ALCPB	Arthaland Corp. Perpetual Pref "B"
+ALHI	Anchor Land Holdings, Inc.
+ALI	Ayala Land, Inc.
+ALLHC	AyalaLand Logistics Holdings Corp.
+ANI	AgriNurture, Inc.
+ANS	A. Soriano Corporation
+AP	Aboitiz Power Corporation
+APC	APC Group, Inc.
+APL	Apollo Global Capital, Inc.
+APO	Anglo-Philippine Holdings Corporation
+APX	Apex Mining Company, Inc.
+AR	Abra Mining and Industrial Corp.
+ARA	Araneta Properties, Inc.
+AT	Atlas Cons. Mining and Dev't Corp.
+ATI	Asian Terminals, Inc.
+ATN	ATN Holdings, Inc. "A"
+ATNB	ATN Holdings, Inc. "B"
+AUB	Asia United Bank Corporation
+AXLM	Axelum Resources Corp.
+BC	Benguet Corporation "A"
+BCB	Benguet Corporation "B"
+BCOR	Berjaya Philippines, Inc.
+BCP	Benguet Corporation Conv. Pref. "A"
+BDO	BDO Unibank, Inc.
+BEL	Belle Corporation
+BH	BHI Holdings, Inc.
+BHI	Boulevard Holdings, Inc.
+BKR	Bright Kindle Res. and Investments, Inc.
+BLFI	BDO Leasing and Finance, Inc.
+BLOOM	Bloomberry Resorts Corporation
+BMM	Bogo Medellin Milling Company
+BPI	Bank of the Philippine Islands
+BRN	A Brown Company, Inc.
+BSC	Basic Energy Corporation
+C	Chelsea Logistics and Infra Hdgs Corp.
+CA	Concrete Aggregates Corp. "A"
+CAB	Concrete Aggregates Corp. "B"
+CAT	Central Azucarera De Tarlac
+CDC	Cityland Development Corporation
+CEB	Cebu Air, Inc.
+CEI	Crown Equities, Inc.
+CEU	Centro Escolar University
+CHI	Cebu Holdings, Inc.
+CHIB	China Banking Corporation
+CHP	Cemex Holdings Philippines, Inc.
+CIC	Concepcion Industrial Corporation
+CIP	Chemical Industries of the Phils.
+CLI	Cebu Landmasters, Inc.
+CNPF	Century Pacific Food, Inc.
+COAL	Coal Asia Holdings, Inc.
+COL	COL Financial Group, Inc.
+COSCO	Cosco Capital, Inc.
+CPG	Century Properties Group, Inc.
+CPM	Century Peak Holdings Corporation
+CPV	Cebu Property Venture and Dev't Corp."A"
+CPVB	Cebu Property Venture and Dev't Corp."B"
+CROWN	Crown Asia Chemicals Corporation
+CSB	Citystate Savings Bank
+CYBR	Cyber Bay Corporation
+DAVIN	Da Vinci Capital Holdings, Inc.
+DD	DoubleDragon Properties Corp.
+DDPR	DoubleDragon Properties Corp. Pref.
+DELM	Del Monte Pacific Limited
+DFNN	DFNN, Inc.
+DITO	DITO CME Holdings Corp.
+DIZ	Dizon Copper Silver Mines, Inc.
+DMC	DMCI Holdings, Inc.
+DMW	D.M. Wenceslao and Associates, Inc.
+DNA	Philab Holdings Corp.
+DNL	D and L Industries, Inc.
+DWC	Discovery World Corporation
+EAGLE	Eagle Cement Corporation
+ECP	Easycall Comm. Phils., Inc.
+EEI	EEI Corporation
+EG	IP E-Game Ventures Inc.
+ELI	Empire East Land Holdings, Inc.
+EMP	Emperador Inc.
+EURO	Euro-Med Laboratories Phil., Inc.
+EVER	Ever Gotesco Resources and Hold'gs, Inc.
+EW	East West Banking Corporation
+FAF	First Abacus Financial Holdings Corp.
+FB	San Miguel Food and Beverage, Inc.
+FBP	San Miguel Food and Beverage Pref
+FBP2	San Miguel Food and Beverage Perp Pref 2
+FDC	Filinvest Development Corporation
+FERRO	Ferronoux Holdings, Inc.
+FEU	Far Eastern University, Inc.
+FFI	Filipino Fund, Inc.
+FGEN	First Gen Corporation
+FGENG	First Gen Corporation - Series G Pref.
+FJP	F and J Prince Holdings Corp. "A"
+FJPB	F and J Prince Holdings Corp. "B"
+FLI	Filinvest Land, Inc.
+FMETF	First Metro Philippine Equity ETF
+FNI	Global Ferronickel Holdings, Inc.
+FOOD	Alliance Select Foods Int'l, Inc.
+FPH	First Phil. Holdings Corp.
+FPI	Forum Pacific, Inc.
+FRUIT	Fruitas Holdings, Inc.
+GEO	GEOGRACE Resources Philippines, Inc.
+GERI	Global-Estate Resorts, Inc.
+GLO	Globe Telecom, Inc.
+GLOPA	Globe Telecom, Inc - Preferred "A"
+GLOPP	Globe Telecom, Inc. - Perpetual Pref.
+GMA7	GMA Network, Inc.
+GMAP	GMA Holdings, Inc. "PDR"
+GPH	Grand Plaza Hotel Corporation
+GREEN	Greenergy Holdings, Inc.
+GSMI	Ginebra San Miguel Inc.
+GTCAP	GT Capital Holdings, Inc.
+GTPPA	GT Capital Non-Voting Perpetual Pref "A"
+GTPPB	GT Capital Non-Voting Perpetual Pref "B"
+HI	House of Investments, Inc.
+HLCM	Holcim Philippines, Inc.
+HOME	AllHome Corp.
+HOUSE	8990 Holdings, Inc.
+HVN	Golden Bria Holdings, Inc.
+I	I-Remit, Inc.
+ICT	Int'l Container Terminal Services, Inc.
+IDC	Italpinas Development Corporation
+IMI	Integrated Micro-Electronics, Inc.
+IMP	Imperial Resources, Inc.
+ION	Ionics, Inc.
+IPM	IPM Holdings, Inc.
+IPO	iPeople, Inc.
+IRC	Philippine Infradev Holdings Inc.
+IS	Island Information and Technology, Inc.
+JAS	Jackstones, Inc.
+JFC	Jollibee Foods Corporation
+JGS	JG Summit Holdings, Inc.
+JOH	Jolliville Holdings Corporation
+KEP	Keppel Philippines Properties, Inc.
+KPH	Keppel Philippines Holdings, Inc. "A"
+KPHB	Keppel Philippines Holdings, Inc. "B"
+KPPI	Kepwealth Property Phils., Inc.
+LAND	City and Land Developers, Inc.
+LBC	LBC Express Holdings, Inc.
+LC	Lepanto Consolidated Mining Co. "A"
+LCB	Lepanto Consolidated Mining Co. "B"
+LFM	Liberty Flour Mills, Inc.
+LIHC	Lodestar Investment Hldgs Corp.
+LMG	LMG Chemicals Corporation
+LOTO	Pacific Online Systems Corporation
+LPZ	Lopez Holdings Corporation
+LR	Leisure and Resorts World Corporation
+LRP	Leisure and Resorts World Corp.-Pref
+LRW	Leisure and Resorts World Corp.-Warrants
+LSC	Lorenzo Shipping Corporation
+LTG	LT Group, Inc.
+MA	Manila Mining Corporation "A"
+MAB	Manila Mining Corporation "B"
+MAC	Macroasia Corporation
+MACAY	Macay Holdings, Inc.
+MAH	Metro Alliance Hold'gs and Eqts. "A"
+MAHB	Metro Alliance Hold'gs and Eqts. "B"
+MARC	Marcventures Holdings, Inc.
+MAXS	Max's Group, Inc.
+MB	Manila Bulletin Publishing Corp.
+MBC	Manila Broadcasting Company
+MBT	Metropolitan Bank and Trust Company
+MED	MEDCO Holdings, Inc.
+MEG	Megaworld Corporation
+MER	Manila Electric Company
+MFC	Manulife Financial Corporation
+MFIN	Makati Finance Corporation
+MG	Millenium Global Holdings, Inc.
+MHC	Mabuhay Holdings Corporation
+MJC	Manila Jockey Club, Inc.
+MJIC	MJC Investments Corporation
+MPI	Metro Pacific Investments Corporation
+MRC	MRC Allied, Inc.
+MRSGI	Metro Retail Stores Group, Inc.
+MVC	Mabuhay Vinyl Corporation
+MWC	Manila Water Company, Inc.
+MWIDE	Megawide Construction Corporation
+MWP	Megawide Const. Corp. - Perpetual Pref.
+NI	NiHAO Minerals Resources Int'l, Inc.
+NIKL	Nickel Asia Corporation
+NOW	Now Corporation
+NRCP	National Reinsurance Corp. of the Phils.
+OM	Omico Corporation
+OPM	Oriental Pet. and Minerals Corp. "A"
+OPMB	Oriental Pet. and Minerals Corp. "B"
+ORE	Oriental Peninsula Resources Group, Inc.
+OV	The Philodrill Corporation
+PA	Pacifica Holdings, Inc.
+PAL	PAL Holdings Inc.
+PAX	Paxys, Inc.
+PBB	Philippine Business Bank
+PBC	Philippine Bank of Communications
+PCOR	Petron Corporation
+PERC	Petroenergy Resources Corporation
+PGOLD	Puregold Price Club, Inc.
+PHA	Premiere Horizon Alliance Corporation
+PHES	Phil. Estates Corporation
+PHN	Phinma Corporation
+PHR	PH Resorts Group Holdings, Inc.
+PIP	Pepsi-Cola Products Philippines, Inc.
+PIZZA	Shakey's Pizza Asia Ventures, Inc.
+PLC	Premium Leisure Corp.
+PMPC	Panasonic Manufacturing Phils. Corp.
+PNB	Philippine National Bank
+PNX	Phoenix Petroleum Philippines, Inc.
+PNX3A	Phoenix Petroleum - Non-Voting Pref. 3A
+PNX3B	Phoenix Petroleum - Non-Voting Pref. 3B
+PNXP	Phoenix Petroleum - Perpetual Pref.
+PORT	Globalport 900, Inc.
+PPC	Pryce Corporation
+PRC	Philippine Racing Club, Inc.
+PRF2A	Petron Corp. - Perpetual Pref. Series 2A
+PRF2B	Petron Corp. - Perpetual Pref. Series 2B
+PRF3B	Petron Corp. - Perpetual Pref. Series 3B
+PRIM	Prime Media Holdings, Inc.
+PRMX	Primex Corporation
+PSB	Philippine Savings Bank
+PSE	The Philippine Stock Exchange, Inc
+PTC	Philippine Trust Company
+PX	Philex Mining Corporation
+PXP	PXP Energy Corporation
+RCB	Rizal Commercial Banking Corp.
+RCI	Roxas and Company, Inc.
+REG	Republic Glass Holdings Corp.
+RFM	RFM Corporation
+RLC	Robinson Land Corporation
+RLT	Philippine Realty and Holdings Corp.
+ROCK	Rockwell Land Corporation
+ROX	Roxas Holdings, Inc.
+RRHI	Robinsons Retail Holdings, Inc.
+SBS	SBS Philippines Corporation
+SCC	Semirara Mining and Power Corporation
+SECB	Security Bank Corporation
+SEVN	Philippine Seven Corporation
+SFI	Swift Foods, Inc.
+SFIP	Swift Foods, Inc. Conv. Pref.
+SGI	Solid Group, Inc.
+SGP	Synergy Grid and Dev't Phils., Inc.
+SHLPH	Pilipinas Shell Petroleum Corporation
+SHNG	Shang Properties, Inc.
+SLF	Sun Life Financial, Inc.
+SLI	Sta. Lucia Land, Inc.
+SM	SM Investments Corporation
+SMC	San Miguel Corporation
+SMC2A	San Miguel Corporation Series 2-A Pref.
+SMC2B	San Miguel Corporation Series 2-B Pref.
+SMC2C	San Miguel Corporation Series 2-C Pref.
+SMC2D	San Miguel Corporation Series 2-D Pref.
+SMC2E	San Miguel Corporation Series 2-E Pref.
+SMC2F	San Miguel Corporation Series 2-F Pref.
+SMC2G	San Miguel Corporation Series 2-G Pref.
+SMC2H	San Miguel Corporation Series 2-H Pref.
+SMC2I	San Miguel Corporation Series 2-I Pref.
+SMPH	SM Prime Holdings, Inc.
+SOC	SOCResources, Inc.
+SPC	SPC Power Corporation
+SPM	Seafront Resources Corporation
+SRDC	Supercity Realty Development Corporation
+SSI	SSI Group, Inc.
+SSP	SFA Semicon Philippines Corporation
+STI	STI Education Systems Holdings, Inc.
+STR	Vistamalls, Inc.
+SUN	Suntrust Home Developers, Inc.
+T	TKC Metals Corporation
+TBGI	Transpacific Broadband Group Int'l. Inc.
+TECH	Cirtek Holdings Philippines Corporation
+TEL	PLDT, Inc.
+TFC	PTFC Redevelopment Corporation
+TFHI	Top Frontier Investment Holdings, Inc.
+TUGS	Harbor Star Shipping Services, Inc.
+UBP	Union Bank of the Philippines
+UNI	Unioil Resources and Holdings Co., Inc.
+UPM	United Paragon Mining Corporation
+URC	Universal Robina Corporation
+V	Vantage Equities, Inc.
+VITA	Vitarich Corporation
+VLL	Vista Land and Lifescapes, Inc.
+VMC	Victorias Milling Company, Inc.
+VUL	Vulcan Industrial and Mining Corporation
+VVT	Vivant Corporation
+WEB	Philweb Corporation
+WIN	Wellex Industries, Inc.
+WLCON	Wilcon Depot, Inc.
+WPI	Waterfront Philippines, Inc.
+X	Xurpas Inc.
+ZHI	Zeus Holdings, Inc.
