@@ -1,0 +1,30 @@
+DMC	DMCI Holdings, Inc.
+SCC	Semirara Mining and Power Corporation
+AGI	Alliance Global Group, Inc.
+LTG	LT Group, Inc.
+MPI	Metro Pacific Investments Corporation
+MEG	Megaworld Corporation
+FGEN	First Gen Corporation
+GTCAP	GT Capital Holdings, Inc.
+MBT	Metropolitan Bank and Trust Company
+RLC	Robinson Land Corporation
+PCOR	Petron Corporation
+SECB	Security Bank Corporation
+AP	Aboitiz Power Corporation
+AC	Ayala Corporation
+RRHI	Robinsons Retail Holdings, Inc.
+AEV	Aboitiz Equity Ventures, Inc.
+BPI	Bank of the Philippine Islands
+TEL	PLDT, Inc.
+MER	Manila Electric Company
+BDO	BDO Unibank, Inc.
+SMC	San Miguel Corporation
+JFC	Jollibee Foods Corporation
+GLO	Globe Telecom, Inc.
+ALI	Ayala Land, Inc.
+PGOLD	Puregold Price Club, Inc.
+ICT	Int'l Container Terminal Services, Inc.
+JGS	JG Summit Holdings, Inc.
+SMPH	SM Prime Holdings, Inc.
+SM	SM Investments Corporation
+URC	Universal Robina Corporation
