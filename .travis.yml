@@ -1,0 +1,13 @@
+matrix:
+  include:
+    - language: python
+      before_script:
+        - cd python
+      script:
+        - pytest tests
+    - language: r
+      before_script:
+        - cd R
+      script:
+        - R CMD build .
+        - R CMD check *tar.gz
