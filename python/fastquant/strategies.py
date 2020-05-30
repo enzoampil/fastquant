@@ -660,7 +660,14 @@ def backtest(
         has_volume = DATA_FORMAT_MAPPING[data_format]["volume"] is not None
         # Plot only with the optimal parameters when multiple strategy runs are required
         if params_df.shape[0] == 1:
-            cerebro.plot(volume=has_volume, figsize=(30, 15))
+            # This handles the Colab Plotting
+            # Simple Check if we are in Colab
+            try:
+                from google.colab import drive
+                iplot=False
+            except:
+                iplot=True
+            cerebro.plot(volume=has_volume, figsize=(30, 15), iplot=iplot)
         else:
             print("=============================================")
             print("Plotting backtest for optimal parameters ...")
