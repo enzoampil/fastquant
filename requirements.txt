@@ -1,4 +1,4 @@
-backtrader==1.9.74.123
+backtrader==1.9.75.123
 beautifulsoup4==4.8.2
 black==19.10b0
 bs4==0.0.1
