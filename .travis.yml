@@ -8,6 +8,5 @@ matrix:
     - language: r
       before_script:
         - cd R
-      script:
-        - R CMD build .
-        - R CMD check *tar.gz
+      sudo: false
+      cache: packages
