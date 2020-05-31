@@ -14,8 +14,21 @@
 <sup>`*` - Both Yahoo Finance and Philippine stock data data are accessible straight from fastquant<sup>
 
 ## Installation
+
+#### Python
+
 ```
 pip install fastquant
+```
+
+#### R
+
+R support is pending development, but you may install the R package by typing the following 
+
+```
+# install.packages("remotes")
+
+remotes::install_github("enzoampil/fastquant", subdir = "R")
 ```
 
 ## Get stock data
