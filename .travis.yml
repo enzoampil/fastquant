@@ -1,4 +1,7 @@
 language: python
+install:
+  - pip install --upgrade pip
+  - pip install -U -r python/requirements.txt
 before_script:
   - cd python
 script:
