@@ -1,13 +1,5 @@
-matrix:
-  include:
-    - language: python
-      before_script:
-        - cd python
-      script:
-        - pytest tests
-    - language: r
-      before_script:
-        - cd R
-      warnings_are_errors: false
-      sudo: false
-      cache: packages
+language: python
+before_script:
+  - cd python
+script:
+  - pytest tests
