@@ -14,12 +14,27 @@
 <sup>`*` - Both Yahoo Finance and Philippine stock data data are accessible straight from fastquant<sup>
 
 ## Installation
+
+### Python
+
 ```
 pip install fastquant
 ```
 
+### R
+
+R support is pending development, but you may install the R package by typing the following 
+
+```
+# install.packages("remotes")
+
+remotes::install_github("enzoampil/fastquant", subdir = "R")
+```
+
 ## Get stock data
 All symbols from [Yahoo Finance](https://finance.yahoo.com/) and Philippine Stock Exchange ([PSE](https://www.pesobility.com/stock)) are accessible via `get_stock_data`.
+
+### Python
 
 ```
 from fastquant import get_stock_data
@@ -34,9 +49,19 @@ print(df.head())
 #   2019-01-07  321.0
 ```
 
-*Note: Symbols from Yahoo Finance will return closing prices in USD, while symbols from PSE will return closing prices in PHP*
+### R
+
+```
+library(fastquant)
+
+get_pse_data("JFC", "2018-01-01", "2019-01-01")
+```
+
+*Note: Python has Yahoo Finance and phisix support. R only has phisix support. Symbols from Yahoo Finance will return closing prices in USD, while symbols from PSE will return closing prices in PHP*
 
 ## Backtest trading strategies
+
+*Note: Support for backtesting in R is pending*
 
 ### Simple Moving Average Crossover (15 day MA vs 40 day MA)
 Daily Jollibee prices from 2018-01-01 to 2019-01-01
