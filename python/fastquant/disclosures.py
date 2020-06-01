@@ -39,7 +39,11 @@ COOKIES = {
 CALENDAR_FORMAT = "%m-%d-%Y"
 TODAY = datetime.now().date().strftime(CALENDAR_FORMAT)
 
-__all__ = ["DisclosuresPSE", "DisclosuresInvestagrams"]
+__all__ = [
+    "DisclosuresPSE",
+    "DisclosuresInvestagrams",
+    "get_company_disclosures",
+]
 
 
 class DisclosuresPSE:
@@ -780,6 +784,12 @@ def remove_digits(string):
     remove_digits = str.maketrans("", "", digits)
     res = string.translate(remove_digits)
     return res
+
+
+def get_company_disclosures(*args, **kwargs):
+    errmsg = "This function is deprecated. Use `DisclosuresPSE` class instead."
+    warnings.warn(errmsg, DeprecationWarning)
+    print(errmsg)
 
 
 if __name__ == "__main__":
