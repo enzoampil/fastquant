@@ -108,6 +108,7 @@ print(res[['fast_period', 'slow_period', 'final_value']].head())
 | Moving Average Convergence Divergence (MACD) | macd | `fast_perod`, `slow_upper`, `signal_period`, `sma_period`, `sma_dir_period` |
 | Bollinger Bands | bbands | `period`, `devfactor` |
 | Buy and Hold | buynhold | `N/A` |
+| Sentiment Strategy | sentiment | `keyword` , `page_nums`, `senti` |
 
 ### Relative Strength Index (RSI) Strategy
 ```
@@ -153,6 +154,18 @@ backtest('bbands', df, period=20, devfactor=2.0)
 # Final Portfolio Value: 97060.30
 ```
 ![](./docs/assets/bbands.png)
+
+### News Sentiment Strategy
+use Tesla (TSLA) stock from yahoo finance and news articles from [Business Times](https://www.businesstimes.com.sg/)
+```
+from fastquant import get_yahoo_data
+df = get_yahoo_data("TSLA", "2019-01-01", "2020-06-10")
+backtest("sentiment", df, keyword="tesla", page_nums=10, senti=0.4)
+
+# Starting Portfolio Value: 100000.00
+# Final Portfolio Value: 348536.99
+```
+![](./docs/assets/sentiment.png)
 
 
 See more examples [here](https://nbviewer.jupyter.org/github/enzoampil/fastquant/tree/master/examples/).
