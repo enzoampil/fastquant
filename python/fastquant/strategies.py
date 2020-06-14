@@ -17,6 +17,8 @@ import pandas as pd
 import numpy as np
 from collections.abc import Iterable
 import time
+from custom_indicators import Sentiment
+from senti_scraper import get_bt_news
 
 # Global arguments
 INIT_CASH = 100000
@@ -515,6 +517,53 @@ class BuyAndHoldStrategy(BaseStrategy):
             self.buy_and_hold_sell = False
         return self.buy_and_hold_sell
 
+class SentimentStrategy(BaseStrategy):
+    """
+    SentimentStrategy
+    Implementation of sentiment strategy using nltk/textblob pre-built sentiment models
+
+    Parameters
+    ----------
+    keyword : int
+        The keyword you wanted to search for in Business Times page.
+    page_nums : int
+        The number of iteration of pages you want to scrape.
+    senti : float
+        The sentiment score threshold to indicate when to buy/sell e.g
+        senti = 0.5
+        buy if sentiment >= senti
+        sell if sentiment <= senti
+
+    TODO: Textblob implementation in the custom_indicators for Sentiment indicator
+
+    """
+
+    params = (
+        ("keyword", None),
+        ("page_nums", 1),
+        ("senti", 0.2),  
+    )
+
+    def __init__(self):
+        # Initialize global variables
+        super().__init__()
+        # Strategy level variables
+        self.keyword = self.params.keyword
+        self.page_nums = self.params.page_nums
+        self.senti = self.params.senti
+
+        print("===Strategy level arguments===")
+        print("keyword :", self.keyword)
+        print("page_nums :", self.page_nums)
+        print("senti :", self.senti)
+        self.agg_sentiment = get_bt_news(keyword=self.keyword, page_nums=self.page_nums)
+        self.sentiment = Sentiment(agg_sentiment=self.agg_sentiment)
+
+    def buy_signal(self):
+        return self.sentiment[0] >= self.senti
+
+    def sell_signal(self):
+        return self.sentiment[0] <= self.senti
 
 STRATEGY_MAPPING = {
     "rsi": RSIStrategy,
@@ -524,6 +573,7 @@ STRATEGY_MAPPING = {
     "emac": EMACStrategy,
     "bbands": BBandsStrategy,
     "buynhold": BuyAndHoldStrategy,
+    "sentiment": SentimentStrategy,
 }
 
 strat_docs = "\nExisting strategies:\n\n" + "\n".join(
