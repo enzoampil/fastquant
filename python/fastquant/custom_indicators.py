@@ -16,7 +16,9 @@ import os
 from datetime import datetime
 import backtrader as bt
 
+
 class Sentiment(bt.Indicator):
+
     """
     Sentiment Custom Indicator
     Implementation of sentiment custom indicator using nltk/textblob pre-built sentiment models
@@ -27,13 +29,13 @@ class Sentiment(bt.Indicator):
         The scraped dictionary with key, value pair of date, sentiment score. This is handled automatically by get_bt_news in senti_scraper.
 
     """
-    lines = ('sentiment',)
-    params = (('agg_sentiment', None),)
+
+    lines = ("sentiment",)
+    params = (("agg_sentiment", None),)
 
     plotinfo = dict(
-        plotymargin=0.15,
-        plothlines=[0],
-        plotyticks=[1.0, 0, -1.0])
+        plotymargin=0.15, plothlines=[0], plotyticks=[1.0, 0, -1.0]
+    )
 
     def next(self):
         date = self.datas[0].datetime.date(0)
