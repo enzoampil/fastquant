@@ -517,6 +517,7 @@ class BuyAndHoldStrategy(BaseStrategy):
             self.buy_and_hold_sell = False
         return self.buy_and_hold_sell
 
+
 class SentimentStrategy(BaseStrategy):
     """
     SentimentStrategy
@@ -529,10 +530,7 @@ class SentimentStrategy(BaseStrategy):
     page_nums : int
         The number of iteration of pages you want to scrape.
     senti : float
-        The sentiment score threshold to indicate when to buy/sell e.g
-        senti = 0.5
-        buy if sentiment >= senti
-        sell if sentiment <= senti
+        The sentiment score threshold to indicate when to buy/sell
 
     TODO: Textblob implementation in the custom_indicators for Sentiment indicator
 
@@ -541,7 +539,7 @@ class SentimentStrategy(BaseStrategy):
     params = (
         ("keyword", None),
         ("page_nums", 1),
-        ("senti", 0.2),  
+        ("senti", 0.2),
     )
 
     def __init__(self):
@@ -556,7 +554,9 @@ class SentimentStrategy(BaseStrategy):
         print("keyword :", self.keyword)
         print("page_nums :", self.page_nums)
         print("senti :", self.senti)
-        self.agg_sentiment = get_bt_news(keyword=self.keyword, page_nums=self.page_nums)
+        self.agg_sentiment = get_bt_news(
+            keyword=self.keyword, page_nums=self.page_nums
+        )
         self.sentiment = Sentiment(agg_sentiment=self.agg_sentiment)
 
     def buy_signal(self):
@@ -564,6 +564,7 @@ class SentimentStrategy(BaseStrategy):
 
     def sell_signal(self):
         return self.sentiment[0] <= self.senti
+
 
 STRATEGY_MAPPING = {
     "rsi": RSIStrategy,
@@ -714,9 +715,10 @@ def backtest(
             # Simple Check if we are in Colab
             try:
                 from google.colab import drive
-                iplot=False
-            except:
-                iplot=True
+
+                iplot = False
+            except Exception:
+                iplot = True
             cerebro.plot(volume=has_volume, figsize=(30, 15), iplot=iplot)
         else:
             print("=============================================")
