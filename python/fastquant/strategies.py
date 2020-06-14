@@ -18,6 +18,7 @@ import numpy as np
 from collections.abc import Iterable
 import time
 from fastquant import get_bt_news
+from .indicators import Sentiment
 
 # Global arguments
 INIT_CASH = 100000
@@ -517,49 +518,6 @@ class BuyAndHoldStrategy(BaseStrategy):
         return self.buy_and_hold_sell
 
 
-class Sentiment(bt.Indicator):
-
-    """
-    Sentiment Custom Indicator
-    Implementation of sentiment custom indicator using nltk/textblob pre-built sentiment models
-
-    Parameters
-    ----------
-    agg_sentiment : dict
-        The scraped dictionary with key, value pair of date, sentiment score. This is handled automatically by get_bt_news in senti_scraper.
-
-    """
-
-    lines = ("sentiment",)
-    params = (("agg_sentiment", None),)
-
-    plotinfo = dict(
-        plotymargin=0.15, plothlines=[0], plotyticks=[1.0, 0, -1.0]
-    )
-
-    plotlines = dict(
-        sentiment=dict(
-            _method="bar",
-            alpha=0.85,
-            width=1.0,
-            _plotvalue=True,
-            _plotvaluetag=False,
-            _name=" ",
-            _skipnan=True,
-            _samecolor=False,
-        )
-    )
-
-    def _plotlabel(self):
-        return
-
-    def next(self):
-        date = self.datas[0].datetime.date(0)
-        agg_sentiment = self.params.agg_sentiment
-        if date in agg_sentiment:
-            self.lines.sentiment[0] = agg_sentiment[date]
-
-
 class SentimentStrategy(BaseStrategy):
     """
     SentimentStrategy
@@ -567,7 +525,7 @@ class SentimentStrategy(BaseStrategy):
 
     Parameters
     ----------
-    keyword : int
+    keyword : str
         The keyword you wanted to search for in Business Times page.
     page_nums : int
         The number of iteration of pages you want to scrape.
@@ -579,23 +537,30 @@ class SentimentStrategy(BaseStrategy):
     """
 
     params = (
-        ("keyword", None),
         ("page_nums", 1),
         ("senti", 0.2),
     )
 
-    def __init__(self):
+    def __init__(self, keyword):
         # Initialize global variables
         super().__init__()
         # Strategy level variables
-        self.keyword = self.params.keyword
+        self.keyword = keyword
+        errmsg = "provide `keyword` used for news article scraping"
+        assert keyword is not None, errmsg
+
         self.page_nums = self.params.page_nums
         self.senti = self.params.senti
 
         print("===Strategy level arguments===")
-        print("keyword :", self.keyword)
-        print("page_nums :", self.page_nums)
-        print("senti :", self.senti)
+        print("keyword for news scraping:", self.keyword)
+        print(
+            "page numbers to scrape in https://www.businesstimes.com.sg/search/{}? : ".format(
+                self.keyword
+            ),
+            self.page_nums,
+        )
+        print("sentiment threshold :", self.senti)
         self.agg_sentiment = get_bt_news(
             keyword=self.keyword, page_nums=self.page_nums
         )

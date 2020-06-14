@@ -574,7 +574,7 @@ def datestring_to_datetime(date, sep="-"):
     return datetime(*map(int, ymd))
 
 
-def get_bt_news(keyword=None, page_nums=None):
+def get_bt_news(keyword, page_nums=None):
     """
     This function scrapes Business Times (https://www.businesstimes.com.sg) articles by giving
     a specific keyword e.g "facebook, jollibee" and number of pages that you needed.
@@ -594,12 +594,6 @@ def get_bt_news(keyword=None, page_nums=None):
 
     nltk.download("vader_lexicon", quiet=True)  # download vader lexicon
 
-    # Check for keyword
-    if keyword is None:
-        print(
-            "keyword is set to None, please type in keyword or company name that you wanted to scrape e.g jollibee, facebook etc."
-        )
-        raise TypeError
     if page_nums is None:
         page_nums = 1
         print("no page numbers indicated, setting this variable to 1")
@@ -609,7 +603,9 @@ def get_bt_news(keyword=None, page_nums=None):
 
     for i in tqdm(range(1, page_nums + 1)):
         page = urlopen(
-            f"https://www.businesstimes.com.sg/search/{keyword}?page={str(i)}"
+            "https://www.businesstimes.com.sg/search/{}?page={}".format(
+                keyword.replace(" ", "%20"), str(i)
+            )
         ).read()
         soup = BeautifulSoup(page, features="html.parser")
         posts = soup.findAll("div", {"class": "media-body"})
