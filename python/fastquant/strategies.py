@@ -537,6 +537,22 @@ class Sentiment(bt.Indicator):
         plotymargin=0.15, plothlines=[0], plotyticks=[1.0, 0, -1.0]
     )
 
+    plotlines = dict(
+        sentiment=dict(
+            _method="bar",
+            alpha=0.85,
+            width=1.0,
+            _plotvalue=True,
+            _plotvaluetag=False,
+            _name=" ",
+            _skipnan=True,
+            _samecolor=False,
+        )
+    )
+
+    def _plotlabel(self):
+        return
+
     def next(self):
         date = self.datas[0].datetime.date(0)
         agg_sentiment = self.params.agg_sentiment
