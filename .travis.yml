@@ -5,4 +5,4 @@ install:
 before_script:
   - cd python
 script:
-  - pytest python/tests
+  - pytest tests
