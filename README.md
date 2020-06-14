@@ -155,7 +155,7 @@ backtest('bbands', df, period=20, devfactor=2.0)
 ```
 ![](./docs/assets/bbands.png)
 
-### News Sentment Strategy
+### News Sentiment Strategy
 use Tesla (TSLA) stock from yahoo finance and news articles from [Business Times](https://www.businesstimes.com.sg/)
 ```
 from fastquant import get_yahoo_data
