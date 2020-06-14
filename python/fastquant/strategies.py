@@ -19,7 +19,7 @@ import pandas as pd
 import numpy as np
 from collections.abc import Iterable
 import time
-from fastquant import get_bt_news
+from .fastquant import get_bt_news
 from .indicators import Sentiment
 
 # Global arguments
