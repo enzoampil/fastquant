@@ -154,5 +154,17 @@ backtest('bbands', df, period=20, devfactor=2.0)
 ```
 ![](./docs/assets/bbands.png)
 
+### News Sentment Strategy
+use Tesla (TSLA) stock from yahoo finance and news articles from [Business Times](https://www.businesstimes.com.sg/)
+```
+from fastquant import get_yahoo_data
+df = get_yahoo_data("TSLA", "2019-01-01", "2020-06-10")
+backtest("sentiment", df, keyword="tesla", page_nums=10, senti=0.4)
+
+# Starting Portfolio Value: 100000.00
+# Final Portfolio Value: 348536.99
+```
+![](./docs/assets/sentiment.png)
+
 
 See more examples [here](https://nbviewer.jupyter.org/github/enzoampil/fastquant/tree/master/examples/).
