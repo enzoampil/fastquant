@@ -17,8 +17,7 @@ import pandas as pd
 import numpy as np
 from collections.abc import Iterable
 import time
-from custom_indicators import Sentiment
-from senti_scraper import get_bt_news
+from fastquant import get_bt_news
 
 # Global arguments
 INIT_CASH = 100000
@@ -516,6 +515,33 @@ class BuyAndHoldStrategy(BaseStrategy):
         else:
             self.buy_and_hold_sell = False
         return self.buy_and_hold_sell
+
+
+class Sentiment(bt.Indicator):
+
+    """
+    Sentiment Custom Indicator
+    Implementation of sentiment custom indicator using nltk/textblob pre-built sentiment models
+
+    Parameters
+    ----------
+    agg_sentiment : dict
+        The scraped dictionary with key, value pair of date, sentiment score. This is handled automatically by get_bt_news in senti_scraper.
+
+    """
+
+    lines = ("sentiment",)
+    params = (("agg_sentiment", None),)
+
+    plotinfo = dict(
+        plotymargin=0.15, plothlines=[0], plotyticks=[1.0, 0, -1.0]
+    )
+
+    def next(self):
+        date = self.datas[0].datetime.date(0)
+        agg_sentiment = self.params.agg_sentiment
+        if date in agg_sentiment:
+            self.lines.sentiment[0] = agg_sentiment[date]
 
 
 class SentimentStrategy(BaseStrategy):
