@@ -516,6 +516,41 @@ class BuyAndHoldStrategy(BaseStrategy):
         return self.buy_and_hold_sell
 
 
+class MultiStrategy(BaseStrategy):
+    """
+    Multi strategy
+    Strategy that aggregates signals from multiple strategies.
+    This is similar to the approach described here: https://community.backtrader.com/topic/1337/running-multiple-strategies-combining-the-output/4
+
+    Parameters
+    ----------
+    join : str
+        How to aggregate decisions from multiple strategies ("and", "or")
+    """
+
+    params = (("join", "or"),)
+
+    def _init_(self):
+        # Initialize global variables
+        super().__init__()
+        self.buy_signals = []
+        self.sell_signals = []
+        self.join = self.params.join
+        assert self.join in ["and", "or"], 'join has to be in ["and", "or"]'
+
+    def buy_signal(self):
+        if self.join == "and":
+            return all(self.buy_signals)
+        else:
+            return any(self.buy_signals)
+
+    def sell_signal(self):
+        if self.join == "and":
+            return all(self.sell_signals)
+        else:
+            return any(self.sell_signals)
+
+
 STRATEGY_MAPPING = {
     "rsi": RSIStrategy,
     "smac": SMACStrategy,
@@ -664,9 +699,10 @@ def backtest(
             # Simple Check if we are in Colab
             try:
                 from google.colab import drive
-                iplot=False
+
+                iplot = False
             except:
-                iplot=True
+                iplot = True
             cerebro.plot(volume=has_volume, figsize=(30, 15), iplot=iplot)
         else:
             print("=============================================")
