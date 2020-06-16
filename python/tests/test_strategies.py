@@ -36,6 +36,7 @@ def test_multi_backtest():
     """
     Test multi-strategy
     """
+    sample = pd.read_csv(SAMPLE_CSV, parse_dates=["dt"])
     cerebro = backtest("multi", sample, strats=SAMPLE_STRAT_DICT, plot=False)
     assert (
         cerebro is not None
