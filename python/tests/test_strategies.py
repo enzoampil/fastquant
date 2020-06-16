@@ -1,6 +1,6 @@
 import pandas as pd
 from pathlib import Path
-from fastquant import backtest, STRATEGY_MAPPING, DATA_PATH
+from fastquant import backtest, STRATEGY_MAPPING, DATA_PATH, get_yahoo_data
 
 SAMPLE_CSV = Path(DATA_PATH, "JFC_20180101_20190110_DCV.csv")
 SAMPLE_STRAT_DICT = {
@@ -15,13 +15,27 @@ def test_backtest():
     """
     sample = pd.read_csv(SAMPLE_CSV, parse_dates=["dt"])
     for strategy in STRATEGY_MAPPING.keys():
-        cerebro = backtest(strategy, sample, plot=False)
-        errmsg = "Backtest encountered error for strategy '{}'!".format(
-            strategy
-        )
-        assert cerebro is not None, errmsg
+        if strategy == "sentiment":
+            data = get_yahoo_data("TSLA", "2020-01-01", "2020-06-10")
+            cerebro = backtest(
+                strategy, data, keyword="tesla", page_nums=2, senti=0.4
+            )
+            errmsg = "Backtest encountered error for strategy '{}'!".format(
+                strategy
+            )
+            assert cerebro is not None, errmsg
+        else:
+            cerebro = backtest(strategy, sample, plot=False)
+            errmsg = "Backtest encountered error for strategy '{}'!".format(
+                strategy
+            )
+            assert cerebro is not None, errmsg
 
-    # Test multi-strategy
+
+def test_multi_backtest():
+    """
+    Test multi-strategy
+    """
     cerebro = backtest("multi", sample, strats=SAMPLE_STRAT_DICT, plot=False)
     assert (
         cerebro is not None

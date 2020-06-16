@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 # Import standard library
 from __future__ import (
     absolute_import,
@@ -17,6 +19,8 @@ import pandas as pd
 import numpy as np
 from collections.abc import Iterable
 import time
+from .fastquant import get_bt_news
+from .indicators import Sentiment
 
 # Global arguments
 INIT_CASH = 100000
@@ -517,6 +521,61 @@ class BuyAndHoldStrategy(BaseStrategy):
         return self.buy_and_hold_sell
 
 
+class SentimentStrategy(BaseStrategy):
+    """
+    SentimentStrategy
+    Implementation of sentiment strategy using nltk/textblob pre-built sentiment models
+
+    Parameters
+    ----------
+    keyword : str
+        The keyword you wanted to search for in Business Times page.
+    page_nums : int
+        The number of iteration of pages you want to scrape.
+    senti : float
+        The sentiment score threshold to indicate when to buy/sell
+
+    TODO: Textblob implementation in the custom_indicators for Sentiment indicator
+
+    """
+
+    params = (
+        ("page_nums", 1),
+        ("senti", 0.2),
+    )
+
+    def __init__(self, keyword):
+        # Initialize global variables
+        super().__init__()
+        # Strategy level variables
+        self.keyword = keyword
+        errmsg = "provide `keyword` used for news article scraping"
+        assert keyword is not None, errmsg
+
+        self.page_nums = self.params.page_nums
+        self.senti = self.params.senti
+
+        print("===Strategy level arguments===")
+        print("keyword for news scraping:", self.keyword)
+        print(
+            "page numbers to scrape in https://www.businesstimes.com.sg/search/{}? : ".format(
+                self.keyword
+            ),
+            self.page_nums,
+        )
+        print("sentiment threshold :", self.senti)
+        self.agg_sentiment = get_bt_news(
+            keyword=self.keyword, page_nums=self.page_nums
+        )
+        self.sentiment = Sentiment(agg_sentiment=self.agg_sentiment)
+
+    def buy_signal(self):
+        return self.sentiment[0] >= self.senti
+
+    def sell_signal(self):
+        return self.sentiment[0] <= self.senti
+
+
 STRATEGY_MAPPING = {
     "rsi": RSIStrategy,
     "smac": SMACStrategy,
@@ -525,6 +584,7 @@ STRATEGY_MAPPING = {
     "emac": EMACStrategy,
     "bbands": BBandsStrategy,
     "buynhold": BuyAndHoldStrategy,
+    "sentiment": SentimentStrategy,
 }
 
 strat_docs = "\nExisting strategies:\n\n" + "\n".join(
@@ -698,7 +758,8 @@ def backtest(
                 from google.colab import drive
 
                 iplot = False
-            except:
+
+            except Exception:
                 iplot = True
             cerebro.plot(volume=has_volume, figsize=(30, 15), iplot=iplot)
         else:
