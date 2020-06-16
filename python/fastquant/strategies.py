@@ -517,56 +517,6 @@ class BuyAndHoldStrategy(BaseStrategy):
         return self.buy_and_hold_sell
 
 
-class MultiStrategy(BaseStrategy):
-    """
-    Multi strategy
-    Strategy that aggregates signals from multiple strategies.
-    This is similar to the approach described here: https://community.backtrader.com/topic/1337/running-multiple-strategies-combining-the-output/4
-
-    Parameters
-    ----------
-    join : str
-        How to aggregate decisions from multiple strategies ("and", "or")
-    """
-
-    params = (("join", "or"),)
-
-    def _init_(self):
-        # Initialize global variables
-        super().__init__()
-        self.buy_signals = []
-        self.sell_signals = []
-        self.join = self.params.join
-        assert self.join in ["and", "or"], 'join has to be in ["and", "or"]'
-
-    def buy_signal(self):
-        if self.join == "and":
-            return all(self.buy_signals)
-        else:
-            return any(self.buy_signals)
-
-    def sell_signal(self):
-        if self.join == "and":
-            return all(self.sell_signals)
-        else:
-            return any(self.sell_signals)
-
-
-STRATEGY_MAPPING = {
-    "rsi": RSIStrategy,
-    "smac": SMACStrategy,
-    "base": BaseStrategy,
-    "macd": MACDStrategy,
-    "emac": EMACStrategy,
-    "bbands": BBandsStrategy,
-    "buynhold": BuyAndHoldStrategy,
-}
-
-strat_docs = "\nExisting strategies:\n\n" + "\n".join(
-    [key + "\n" + value.__doc__ for key, value in STRATEGY_MAPPING.items()]
-)
-
-
 @docstring_parameter(strat_docs)
 def backtest(
     strategy,
@@ -577,7 +527,7 @@ def backtest(
     plot=True,
     verbose=True,
     sort_by="rnorm",
-    strats=None, # Only used when strategy = "multi"
+    strats=None,  # Only used when strategy = "multi"
     **kwargs
 ):
     """
@@ -667,22 +617,33 @@ def backtest(
         if verbose:
             print("**************************************************")
         for i, strat in enumerate(stratrun):
-            p = strat.p._getkwargs()
-            p = {
-                "{}.{}".format(strat_names[i], k) if k not in GLOBAL_PARAMS else k: v
-                for k, v in p.items()
-                if k not in ["periodic_logging", "transaction_logging"]
-            }
+            p_raw = strat.p._getkwargs()
+            p = {}
+            for k, v in p_raw.items():
+                if k not in ["periodic_logging", "transaction_logging"]:
+                    # Make sure the parameters are mapped to the corresponding strategy
+                    if strategy == "multi":
+                        key = (
+                            "{}.{}".format(strat_names[i], k)
+                            if k not in GLOBAL_PARAMS
+                            else k
+                        )
+                    else:
+                        key = k
+                    p[key] = v
+
             strats_params = {**strats_params, **p}
-            returns = strat.analyzers.returns.get_analysis()
-            sharpe = strat.analyzers.mysharpe.get_analysis()
-            # Combine dicts for returns and sharpe
-            m = {
-                **returns,
-                **sharpe,
-                "pnl": strat.pnl,
-                "final_value": strat.final_value,
-            }
+
+        # We run metrics on the last strat since all the metrics will be the same for all strats
+        returns = strat.analyzers.returns.get_analysis()
+        sharpe = strat.analyzers.mysharpe.get_analysis()
+        # Combine dicts for returns and sharpe
+        m = {
+            **returns,
+            **sharpe,
+            "pnl": strat.pnl,
+            "final_value": strat.final_value,
+        }
 
         params.append(strats_params)
         metrics.append(m)
