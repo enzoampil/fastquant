@@ -517,6 +517,21 @@ class BuyAndHoldStrategy(BaseStrategy):
         return self.buy_and_hold_sell
 
 
+STRATEGY_MAPPING = {
+    "rsi": RSIStrategy,
+    "smac": SMACStrategy,
+    "base": BaseStrategy,
+    "macd": MACDStrategy,
+    "emac": EMACStrategy,
+    "bbands": BBandsStrategy,
+    "buynhold": BuyAndHoldStrategy,
+}
+
+strat_docs = "\nExisting strategies:\n\n" + "\n".join(
+    [key + "\n" + value.__doc__ for key, value in STRATEGY_MAPPING.items()]
+)
+
+
 @docstring_parameter(strat_docs)
 def backtest(
     strategy,
