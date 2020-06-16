@@ -49,6 +49,7 @@ DATA_FORMAT_MAPPING = {
         "openinterest": None,
     },
 }
+GLOBAL_PARAMS = ["init_cash", "buy_prop", "sell_prop", "execution_type"]
 
 
 def docstring_parameter(*sub):
@@ -601,6 +602,7 @@ def backtest(
     plot=True,
     verbose=True,
     sort_by="rnorm",
+    strats=None,  # Only used when strategy = "multi"
     **kwargs
 ):
     """
@@ -621,12 +623,25 @@ def backtest(
         k: v if isinstance(v, Iterable) and not isinstance(v, str) else [v]
         for k, v in kwargs.items()
     }
-    cerebro.optstrategy(
-        STRATEGY_MAPPING[strategy],
-        init_cash=[init_cash],
-        transaction_logging=[verbose],
-        **kwargs
-    )
+
+    strat_names = []
+    if strategy == "multi" and strats is not None:
+        for strat, params in strats.items():
+            cerebro.optstrategy(
+                STRATEGY_MAPPING[strat],
+                init_cash=[init_cash],
+                transaction_logging=[verbose],
+                **params
+            )
+            strat_names.append(strat)
+    else:
+        cerebro.optstrategy(
+            STRATEGY_MAPPING[strategy],
+            init_cash=[init_cash],
+            transaction_logging=[verbose],
+            **kwargs
+        )
+        strat_names.append(STRATEGY_MAPPING[strategy])
 
     # Apply Total, Average, Compound and Annualized Returns calculated using a logarithmic approach
     cerebro.addanalyzer(btanalyzers.Returns, _name="returns")
@@ -668,33 +683,50 @@ def backtest(
     metrics = []
     if verbose:
         print("==================================================")
+        print("Number of strat runs:", len(stratruns))
+        print("Number of strats per run:", len(stratruns[0]))
+        print("Strat names:", strat_names)
     for stratrun in stratruns:
+        strats_params = {}
+
         if verbose:
             print("**************************************************")
-        for strat in stratrun:
-            p = strat.p._getkwargs()
-            p = {
-                k: v
-                for k, v in p.items()
-                if k not in ["periodic_logging", "transaction_logging"]
-            }
-            returns = strat.analyzers.returns.get_analysis()
-            sharpe = strat.analyzers.mysharpe.get_analysis()
-            # Combine dicts for returns and sharpe
-            m = {
-                **returns,
-                **sharpe,
-                "pnl": strat.pnl,
-                "final_value": strat.final_value,
-            }
+        for i, strat in enumerate(stratrun):
+            p_raw = strat.p._getkwargs()
+            p = {}
+            for k, v in p_raw.items():
+                if k not in ["periodic_logging", "transaction_logging"]:
+                    # Make sure the parameters are mapped to the corresponding strategy
+                    if strategy == "multi":
+                        key = (
+                            "{}.{}".format(strat_names[i], k)
+                            if k not in GLOBAL_PARAMS
+                            else k
+                        )
+                    else:
+                        key = k
+                    p[key] = v
 
-            params.append(p)
-            metrics.append(m)
-            if verbose:
-                print("--------------------------------------------------")
-                print(p)
-                print(returns)
-                print(sharpe)
+            strats_params = {**strats_params, **p}
+
+        # We run metrics on the last strat since all the metrics will be the same for all strats
+        returns = strat.analyzers.returns.get_analysis()
+        sharpe = strat.analyzers.mysharpe.get_analysis()
+        # Combine dicts for returns and sharpe
+        m = {
+            **returns,
+            **sharpe,
+            "pnl": strat.pnl,
+            "final_value": strat.final_value,
+        }
+
+        params.append(strats_params)
+        metrics.append(m)
+        if verbose:
+            print("--------------------------------------------------")
+            print(strats_params)
+            print(returns)
+            print(sharpe)
 
     params_df = pd.DataFrame(params)
     metrics_df = pd.DataFrame(metrics)
@@ -716,7 +748,7 @@ def backtest(
     print("Optimal parameters:", optim_params)
     print("Optimal metrics:", optim_metrics)
 
-    if plot:
+    if plot and strategy != "multi":
         has_volume = DATA_FORMAT_MAPPING[data_format]["volume"] is not None
         # Plot only with the optimal parameters when multiple strategy runs are required
         if params_df.shape[0] == 1:
@@ -726,6 +758,7 @@ def backtest(
                 from google.colab import drive
 
                 iplot = False
+
             except Exception:
                 iplot = True
             cerebro.plot(volume=has_volume, figsize=(30, 15), iplot=iplot)
