@@ -1,5 +1,5 @@
 Package: fastquant
-Title: What the Package Does (One Line, Title Case)
+Title: Backtest investment strategies with 3 lines of code
 Version: 0.0.0.9000
 Authors@R: 
     person(given = "First",
@@ -7,7 +7,9 @@ Authors@R:
            role = c("aut", "cre"),
            email = "first.last@example.com",
            comment = c(ORCID = "YOUR-ORCID-ID"))
-Description: What the package does (one paragraph).
+Description: fastquant allows you to easily backtest investment strategies with 
+  as few as 3 lines of python code. Its goal is to promote data driven 
+  investments by making quantitative analysis in finance accessible to everyone.
 License: MIT + file LICENSE
 Imports: 
     dplyr,
