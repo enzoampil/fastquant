@@ -19,11 +19,13 @@
 #'
 #' @importFrom lubridate parse_date_time
 #' @importFrom assertthat assert_that
-#' @importFrom dplyr tibble mutate filter
+#' @importFrom dplyr tibble mutate filter rename_with
 #' @importFrom tidyr unnest
 #' @importFrom purrr map2
 #' @importFrom httr GET content
 #' @importFrom magrittr `%>%`
+#' @importFrom quantmod loadSymbols
+#' @importFrom tibble rownames_to_column
 #' @export
 get_pse_data <- function(sym, s_date, e_date) {
 
@@ -57,29 +59,15 @@ get_pse_data <- function(sym, s_date, e_date) {
 get_pse_data_by_date <- function(symbol, date){
   if (paste0("http://1.phisix-api.appspot.com/stocks/",
                 symbol, ".", date, ".json") %>%
-    GET() %>%
-    content(type="application/json") %>%
-    is.null()) {
+      GET() %>%
+      content(type="application/json") %>%
+      is.null()) {
 
     req <- paste0("http://phisix-api.appspot.com/stocks/",
                   symbol, ".", date, ".json") %>%
       GET() %>%
       content(type="application/json")
 
-  } else {
-    req <- paste0("http://1.phisix-api.appspot.com/stocks/",
-                  symbol, ".", date, ".json") %>%
-      GET() %>%
-      content(type="application/json")
-  }
-
-  if (is.null(req)) {
-    return(as.data.frame(list(name = NA_character_,
-                              currency = NA_character_,
-                              close = NA_real_,
-                              percent_change = NA_real_,
-                              volume = NA_real_)))
-  } else {
     return(as.data.frame(list(name = req$stock[[1]]$name,
                               currency = req$stock[[1]]$price$currency,
                               close = req$stock[[1]]$price$amount,
@@ -88,5 +76,48 @@ get_pse_data_by_date <- function(symbol, date){
                                 NA_real_,
                                 req$stock[[1]]$percent_change),
                               volume = req$stock[[1]]$volume)))
+
+  } else if (paste0("http://1.phisix-api.appspot.com/stocks/",
+                    symbol, ".", date, ".json") %>%
+             GET() %>%
+             content(type="application/json") %>%
+             !is.null()) {
+
+    req <- paste0("http://1.phisix-api.appspot.com/stocks/",
+                  symbol, ".", date, ".json") %>%
+      GET() %>%
+      content(type="application/json")
+
+    return(as.data.frame(list(name = req$stock[[1]]$name,
+                              currency = req$stock[[1]]$price$currency,
+                              close = req$stock[[1]]$price$amount,
+                              percent_change = ifelse(
+                                is.null(req$stock[[1]]$percent_change),
+                                NA_real_,
+                                req$stock[[1]]$percent_change),
+                              volume = req$stock[[1]]$volume)))
+
+  } else if (loadSymbols(symbol, env = NULL, from = date)[1] %>%
+             as.data.frame() %>%
+             rownames_to_column() %>%
+             `$`(rowname) == date) {
+
+    prereq <- loadSymbols(symbol, env = NULL, from = date)[1] %>%
+      as.data.frame() %>%
+      rownames_to_column() %>%
+      rename_with(~str_replace(., "^.*\\.(.*)$", "\\1"))
+
+    return(as.data.frame(list(name = symbol,
+                              currency = "FX",
+                              close = prereq$Close,
+                              percent_change = NA_real_,
+                              volume = prereq$Volume)))
+
+  } else {
+    return(as.data.frame(list(name = NA_character_,
+                              currency = NA_character_,
+                              close = NA_real_,
+                              percent_change = NA_real_,
+                              volume = NA_real_)))
   }
 }

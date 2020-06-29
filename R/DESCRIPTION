@@ -21,7 +21,9 @@ Imports:
     purrr,
     tidyr,
     lubridate,
-    assertthat
+    assertthat,
+    quantmod,
+    tibble
 Encoding: UTF-8
 LazyData: true
 RoxygenNote: 7.1.0
