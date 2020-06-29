@@ -15,7 +15,7 @@ Authors@R:
              role = c("aut"),
              email = "jpdeleon.bsap@gmail.com"))
 Description: fastquant allows you to easily backtest investment strategies with 
-  as few as 3 lines of python code. Its goal is to promote data driven 
+  as few as 3 lines of Python or R code. Its goal is to promote data driven 
   investments by making quantitative analysis in finance accessible to everyone.
 License: MIT + file LICENSE
 Imports: 
