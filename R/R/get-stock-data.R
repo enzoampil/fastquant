@@ -1,7 +1,8 @@
 #' Returns pricing data for a specified stock
 #'
-#' @param sym A string indicating the symbol of the stock in the PSE. For more
-#'   details, you can refer to this [link](https://www.pesobility.com/stock).
+#' @param sym A string indicating the symbol of the stock in the PSE and Yahoo
+#'   Finance. For more details, you can refer to this
+#'   [link](https://www.pesobility.com/stock).
 #' @param s_date A string indicating a date in the YYYY-mm-dd format, serves
 #'   as the start date of the period to get stock data
 #' @param e_date A string indicating a date in the YYYY-mm-dd format, serves
@@ -27,7 +28,7 @@
 #' @importFrom quantmod loadSymbols
 #' @importFrom tibble rownames_to_column
 #' @export
-get_pse_data <- function(sym, s_date, e_date) {
+get_stock_data <- function(sym, s_date, e_date) {
 
   assert_that(is.character(sym),
               msg = "`sym` must be character")
@@ -48,7 +49,7 @@ get_pse_data <- function(sym, s_date, e_date) {
 
   res <- tibble(symbol = sym,
                 dt = seq(as.Date(s_date), as.Date(e_date), by = "days")) %>%
-         mutate(data = map2(symbol, dt, get_pse_data_by_date)) %>%
+         mutate(data = map2(symbol, dt, get_stock_data_by_date)) %>%
          unnest(data) %>%
          filter(!is.na(name))
   return(res)
@@ -56,14 +57,13 @@ get_pse_data <- function(sym, s_date, e_date) {
 
 
 # Utility function for getting single ticker data for symbol, date
-get_pse_data_by_date <- function(symbol, date){
-  if (paste0("http://1.phisix-api.appspot.com/stocks/",
-                symbol, ".", date, ".json") %>%
-      GET() %>%
-      content(type="application/json") %>%
-      is.null()) {
+get_stock_data_by_date <- function(symbol, date){
+  if (!is.null(paste0("http://1.phisix-api.appspot.com/stocks/",
+               symbol, ".", date, ".json") %>%
+               GET() %>%
+               content(type="application/json"))) {
 
-    req <- paste0("http://phisix-api.appspot.com/stocks/",
+    req <- paste0("http://1.phisix-api.appspot.com/stocks/",
                   symbol, ".", date, ".json") %>%
       GET() %>%
       content(type="application/json")
@@ -77,13 +77,12 @@ get_pse_data_by_date <- function(symbol, date){
                                 req$stock[[1]]$percent_change),
                               volume = req$stock[[1]]$volume)))
 
-  } else if (paste0("http://1.phisix-api.appspot.com/stocks/",
-                    symbol, ".", date, ".json") %>%
-             GET() %>%
-             content(type="application/json") %>%
-             !is.null()) {
+  } else if (!is.null(paste0("http://phisix-api.appspot.com/stocks/",
+                      symbol, ".", date, ".json") %>%
+                      GET() %>%
+                      content(type="application/json"))) {
 
-    req <- paste0("http://1.phisix-api.appspot.com/stocks/",
+    req <- paste0("http://phisix-api.appspot.com/stocks/",
                   symbol, ".", date, ".json") %>%
       GET() %>%
       content(type="application/json")
