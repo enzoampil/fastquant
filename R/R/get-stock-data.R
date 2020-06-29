@@ -1,11 +1,11 @@
 #' Returns pricing data for a specified stock
 #'
-#' @param sym A string indicating the symbol of the stock in the PSE and Yahoo
+#' @param symbol A string indicating the symbol of the stock in the PSE and Yahoo
 #'   Finance. For more details, you can refer to this
 #'   [link](https://www.pesobility.com/stock).
-#' @param s_date A string indicating a date in the YYYY-mm-dd format, serves
+#' @param start_date A string indicating a date in the YYYY-mm-dd format, serves
 #'   as the start date of the period to get stock data
-#' @param e_date A string indicating a date in the YYYY-mm-dd format, serves
+#' @param end_date A string indicating a date in the YYYY-mm-dd format, serves
 #'   as the end date of the period to get stock data
 #'
 #' @return A tibble, with the following columns:
@@ -27,28 +27,35 @@
 #' @importFrom magrittr `%>%`
 #' @importFrom quantmod loadSymbols
 #' @importFrom tibble rownames_to_column
+#' @importFrom stringr str_replace
 #' @export
-get_stock_data <- function(sym, s_date, e_date) {
+get_stock_data <- function(symbol, start_date, end_date) {
 
-  assert_that(is.character(sym),
-              msg = "`sym` must be character")
+  assert_that(is.character(symbol),
+              msg = "`symbol` must be character")
 
-  assert_that(length(sym) == 1,
-              msg = "`sym` must be length 1")
+  assert_that(length(symbol) == 1,
+              msg = "`symbol` must be length 1")
 
-  assert_that(!is.na(parse_date_time(s_date, orders = "ymd")),
-              msg = "s_date is not in YYYY-mm-dd format")
+  assert_that(!is.na(parse_date_time(start_date, orders = "ymd")),
+              msg = "start_date is not in YYYY-mm-dd format")
 
-  assert_that(!is.na(parse_date_time(e_date, orders = "ymd")),
-              msg = "e_date is not in YYYY-mm-dd format")
+  assert_that(!is.na(parse_date_time(end_date, orders = "ymd")),
+              msg = "end_date is not in YYYY-mm-dd format")
 
   # TODO Check /data if the symbol exists as a file
   # TODO Check /data if the symbol exists for the time frame
   # TODO Cut relevant rows from dataset
-  # TODO Change s_date and e_date as applicable
+  # TODO Change start_date and end_date as applicable
 
-  res <- tibble(symbol = sym,
-                dt = seq(as.Date(s_date), as.Date(e_date), by = "days")) %>%
+  dt <- seq(as.Date(start_date), as.Date(end_date), by = "days")
+
+  data <- NULL
+
+  name <- NULL
+
+  res <- tibble(symbol = symbol,
+                dt = dt) %>%
          mutate(data = map2(symbol, dt, get_stock_data_by_date)) %>%
          unnest(data) %>%
          filter(!is.na(name))
@@ -99,7 +106,7 @@ get_stock_data_by_date <- function(symbol, date){
   } else if (loadSymbols(symbol, env = NULL, from = date)[1] %>%
              as.data.frame() %>%
              rownames_to_column() %>%
-             `$`(rowname) == date) {
+             `$`("rowname") == date) {
 
     prereq <- loadSymbols(symbol, env = NULL, from = date)[1] %>%
       as.data.frame() %>%

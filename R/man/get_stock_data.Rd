@@ -4,17 +4,17 @@
 \alias{get_stock_data}
 \title{Returns pricing data for a specified stock}
 \usage{
-get_stock_data(sym, s_date, e_date)
+get_stock_data(symbol, start_date, end_date)
 }
 \arguments{
-\item{sym}{A string indicating the symbol of the stock in the PSE and Yahoo
+\item{symbol}{A string indicating the symbol of the stock in the PSE and Yahoo
 Finance. For more details, you can refer to this
 \href{https://www.pesobility.com/stock}{link}.}
 
-\item{s_date}{A string indicating a date in the YYYY-mm-dd format, serves
+\item{start_date}{A string indicating a date in the YYYY-mm-dd format, serves
 as the start date of the period to get stock data}
 
-\item{e_date}{A string indicating a date in the YYYY-mm-dd format, serves
+\item{end_date}{A string indicating a date in the YYYY-mm-dd format, serves
 as the end date of the period to get stock data}
 }
 \value{
