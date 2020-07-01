@@ -14,6 +14,7 @@ Authors@R:
              family = "de Leon",
              role = c("aut"),
              email = "jpdeleon.bsap@gmail.com"))
+Maintainer: Jose Endrinal <francis.endrinal@gmail.com>
 Description: fastquant allows you to easily backtest investment strategies with 
   as few as 3 lines of Python or R code. Its goal is to promote data driven 
   investments by making quantitative analysis in finance accessible to everyone.
