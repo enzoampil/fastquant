@@ -2,14 +2,14 @@ Package: fastquant
 Title: Backtest Investment Strategies with 3 Lines of Code
 Version: 0.1.0
 Authors@R: 
-    c(person(given = "Lorenzo",
-             family = "Ampil",
-             role = c("aut", "cre"),
-             email = "lorenzo.ampil@gmail.com"), 
-      person(given = "Jose",
+    c(person(given = "Jose",
              family = "Endrinal",
+             role = c("aut", "cre"),
+             email = "francis.endrinal@gmail.com"),
+      person(given = "Lorenzo",
+             family = "Ampil",
              role = c("aut"),
-             email = "francis.endrinal@gmail.com"), 
+             email = "lorenzo.ampil@gmail.com"), 
       person(given = "Jerome",
              family = "de Leon",
              role = c("aut"),
