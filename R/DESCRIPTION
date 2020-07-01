@@ -1,5 +1,5 @@
 Package: fastquant
-Title: Backtest investment strategies with 3 lines of code
+Title: Backtest Investment Strategies with 3 Lines of Code
 Version: 0.1.0
 Authors@R: 
     c(person(given = "Lorenzo",
