@@ -537,6 +537,11 @@ def unix_time_millis(date):
 
 
 def get_crypto_data(ticker, start_date, end_date):
+    """
+    Get crypto data in OHLCV format
+
+    List of tickers here: https://coinmarketcap.com/exchanges/binance/
+    """
     start_date_epoch = unix_time_millis(start_date)
     binance = ccxt.binance({"verbose": False})
     ohlcv_lol = binance.fetch_ohlcv(ticker, "1d", since=start_date_epoch)
