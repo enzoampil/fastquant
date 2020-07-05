@@ -156,7 +156,7 @@ backtest('bbands', df, period=20, devfactor=2.0)
 ![](./docs/assets/bbands.png)
 
 ### News Sentiment Strategy
-use Tesla (TSLA) stock from yahoo finance and news articles from [Business Times](https://www.businesstimes.com.sg/)
+Use Tesla (TSLA) stock from yahoo finance and news articles from [Business Times](https://www.businesstimes.com.sg/)
 ```
 from fastquant import get_yahoo_data
 df = get_yahoo_data("TSLA", "2019-01-01", "2020-06-10")
@@ -167,5 +167,32 @@ backtest("sentiment", df, keyword="tesla", page_nums=10, senti=0.4)
 ```
 ![](./docs/assets/sentiment.png)
 
+### Multi Strategy
+
+Multiple registered strategies can be utilized together in an OR fashion, where buy or sell signals are applied when at least one of the strategies trigger them.
+
+```
+df = get_stock_data("JFC", "2018-01-01", "2019-01-01")
+
+# Utilize single set of parameters
+strats = { 
+    "smac": {"fast_period": 35, "slow_period": 50}, 
+    "rsi": {"rsi_lower": 30, "rsi_upper": 70} 
+} 
+res = backtest("multi", df, strats=strats)
+res.shape
+# (1, 16)
+
+
+# Utilize auto grid search
+strats_opt = { 
+    "smac": {"fast_period": 35, "slow_period": [40, 50]}, 
+    "rsi": {"rsi_lower": [15, 30], "rsi_upper": 70} 
+} 
+
+res_opt = backtest("multi", df, strats=strats_opt)
+res_opt.shape
+# (4, 16)
+```
 
 See more examples [here](https://nbviewer.jupyter.org/github/enzoampil/fastquant/tree/master/examples/).
