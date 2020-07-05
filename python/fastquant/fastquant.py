@@ -24,6 +24,7 @@ from nltk.sentiment.vader import SentimentIntensityAnalyzer
 import nltk
 from urllib.request import urlopen
 from bs4 import BeautifulSoup
+import ccxt
 
 DATA_PATH = resource_filename(__name__, "data")
 
@@ -526,6 +527,30 @@ def get_stock_data(symbol, start_date, end_date, source="phisix", format="c"):
         print("Missing columns filled w/ NaN:", missing_columns)
 
     return df[df_columns]
+
+
+def unix_time_millis(date):
+    epoch = datetime.utcfromtimestamp(0)
+    dt = datetime.strptime(date, "%Y-%m-%d")
+    # return int((dt - epoch).total_seconds() * 1000)
+    return int(dt.timestamp() * 1000)
+
+
+def get_crypto_data(ticker, start_date, end_date):
+    """
+    Get crypto data in OHLCV format
+
+    List of tickers here: https://coinmarketcap.com/exchanges/binance/
+    """
+    start_date_epoch = unix_time_millis(start_date)
+    binance = ccxt.binance({"verbose": False})
+    ohlcv_lol = binance.fetch_ohlcv(ticker, "1d", since=start_date_epoch)
+    ohlcv_df = pd.DataFrame(
+        ohlcv_lol, columns=["dt", "open", "high", "low", "close", "volume"]
+    )
+    ohlcv_df["dt"] = pd.to_datetime(ohlcv_df["dt"], unit="ms")
+    ohlcv_df = ohlcv_df[ohlcv_df.dt <= end_date]
+    return ohlcv_df.set_index("dt")
 
 
 def pse_data_to_csv(symbol, start_date, end_date, pse_dir=DATA_PATH):
