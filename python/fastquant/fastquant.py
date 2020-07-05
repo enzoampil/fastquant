@@ -24,6 +24,7 @@ from nltk.sentiment.vader import SentimentIntensityAnalyzer
 import nltk
 from urllib.request import urlopen
 from bs4 import BeautifulSoup
+import ccxt
 
 DATA_PATH = resource_filename(__name__, "data")
 
