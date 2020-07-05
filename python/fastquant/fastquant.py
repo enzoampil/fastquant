@@ -574,7 +574,7 @@ def datestring_to_datetime(date, sep="-"):
     return datetime(*map(int, ymd))
 
 
-def get_bt_news(keyword, page_nums=None):
+def get_bt_news_sentiment(keyword, page_nums=None):
     """
     This function scrapes Business Times (https://www.businesstimes.com.sg) articles by giving
     a specific keyword e.g "facebook, jollibee" and number of pages that you needed.
@@ -590,6 +590,8 @@ def get_bt_news(keyword, page_nums=None):
     ----------
     date_sentiments: dict
         The dictionary output of the scraped data in form of {date: sentiment score}
+
+    TO DO: change page_nums to a start_date (and end_date maybe)
     """
 
     nltk.download("vader_lexicon", quiet=True)  # download vader lexicon
