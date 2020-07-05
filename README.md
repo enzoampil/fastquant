@@ -59,6 +59,22 @@ get_pse_data("JFC", "2018-01-01", "2019-01-01")
 
 *Note: Python has Yahoo Finance and phisix support. R only has phisix support. Symbols from Yahoo Finance will return closing prices in USD, while symbols from PSE will return closing prices in PHP*
 
+## Get crypto data from Binance
+
+```
+from fastquant import get_crypto_data
+crypto = get_crypto_data("BTC/USDT", "2018-12-01", "2019-12-31")
+crypto.head()
+
+#             open    high     low     close    volume
+# dt                                                          
+# 2018-12-01  4041.27  4299.99  3963.01  4190.02  44840.073481
+# 2018-12-02  4190.98  4312.99  4103.04  4161.01  38912.154790
+# 2018-12-03  4160.55  4179.00  3827.00  3884.01  49094.369163
+# 2018-12-04  3884.76  4085.00  3781.00  3951.64  48489.551613
+# 2018-12-05  3950.98  3970.00  3745.00  3769.84  44004.799448
+```
+
 ## Backtest trading strategies
 
 *Note: Support for backtesting in R is pending*
