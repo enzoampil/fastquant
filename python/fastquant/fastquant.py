@@ -543,6 +543,7 @@ def get_crypto_data(ticker, start_date, end_date):
         ohlcv_lol, columns=["dt", "open", "high", "low", "close", "volume"]
     )
     ohlcv_df["dt"] = pd.to_datetime(ohlcv_df["dt"], unit="ms")
+    ohlcv_df = ohlcv_df[ohlcv_df.dt <= end_date]
     return ohlcv_df
 
 
