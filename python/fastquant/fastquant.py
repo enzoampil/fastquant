@@ -544,7 +544,7 @@ def get_crypto_data(ticker, start_date, end_date):
     )
     ohlcv_df["dt"] = pd.to_datetime(ohlcv_df["dt"], unit="ms")
     ohlcv_df = ohlcv_df[ohlcv_df.dt <= end_date]
-    return ohlcv_df
+    return ohlcv_df.set_index("dt")
 
 
 def pse_data_to_csv(symbol, start_date, end_date, pse_dir=DATA_PATH):
