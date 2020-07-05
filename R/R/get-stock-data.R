@@ -18,6 +18,10 @@
 #' * volume: The total value of shares traded of the stock at dt
 #' @md
 #'
+#' @examples
+#' get_stock_data("JFC", "2019-01-03", "2019-02-01") # PSE data
+#' get_stock_data("MSFT", "2019-01-03", "2019-02-01") # US data
+#'
 #' @importFrom lubridate parse_date_time
 #' @importFrom assertthat assert_that
 #' @importFrom dplyr tibble mutate filter rename_with
