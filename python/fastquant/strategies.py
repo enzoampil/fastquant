@@ -195,7 +195,6 @@ class BaseStrategy(bt.Strategy):
 
                 if self.transaction_logging:
                     self.log("BUY CREATE, %.2f" % self.dataclose[0])
-                #    self.log("SENTIMENT, %.2f" % self.datasentiment[0])
                 # Take a 10% long position every time it's a buy signal (or whatever is afforded by the current cash position)
                 # "size" refers to the number of stocks to purchase
                 # Afforded size is based on closing price for the current trading day
