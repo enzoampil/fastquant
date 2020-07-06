@@ -60,7 +60,7 @@ get_pse_data("JFC", "2018-01-01", "2019-01-01")
 *Note: Python has Yahoo Finance and phisix support. R only has phisix support. Symbols from Yahoo Finance will return closing prices in USD, while symbols from PSE will return closing prices in PHP*
 
 ## Get crypto data
-The data is pulled from Binance, and all the available tickers are found [here](List of tickers here: https://coinmarketcap.com/exchanges/binance/).
+The data is pulled from Binance, and all the available tickers are found [here](https://coinmarketcap.com/exchanges/binance/).
 
 ```
 from fastquant import get_crypto_data
