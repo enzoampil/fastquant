@@ -175,12 +175,13 @@ backtest('bbands', df, period=20, devfactor=2.0)
 ### News Sentiment Strategy
 Use Tesla (TSLA) stock from yahoo finance and news articles from [Business Times](https://www.businesstimes.com.sg/)
 ```
-from fastquant import get_yahoo_data
-df = get_yahoo_data("TSLA", "2019-01-01", "2020-06-10")
-backtest("sentiment", df, keyword="tesla", page_nums=10, senti=0.4)
+from fastquant import get_yahoo_data, get_bt_news_sentiment
+data = get_yahoo_data("TSLA", "2020-01-01", "2020-07-04")
+sentiments = get_bt_news_sentiment(keyword="tesla", page_nums=3)
+backtest("sentiment", data, sentiments=sentiments, senti=0.2)
 
 # Starting Portfolio Value: 100000.00
-# Final Portfolio Value: 348536.99
+# Final Portfolio Value: 313198.37
 ```
 ![](./docs/assets/sentiment.png)
 
