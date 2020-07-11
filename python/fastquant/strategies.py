@@ -19,7 +19,7 @@ import pandas as pd
 import numpy as np
 from collections.abc import Iterable
 import time
-from .fastquant import get_bt_news
+from .fastquant import get_bt_news_sentiment
 from .indicators import Sentiment
 
 # Global arguments
@@ -99,6 +99,7 @@ class BaseStrategy(bt.Strategy):
 
         self.dataclose = self.datas[0].close
         self.dataopen = self.datas[0].open
+
         self.order = None
         self.buyprice = None
         self.buycomm = None
@@ -528,52 +529,29 @@ class SentimentStrategy(BaseStrategy):
 
     Parameters
     ----------
-    keyword : str
-        The keyword you wanted to search for in Business Times page.
-    page_nums : int
-        The number of iteration of pages you want to scrape.
     senti : float
         The sentiment score threshold to indicate when to buy/sell
 
-    TODO: Textblob implementation in the custom_indicators for Sentiment indicator
+    TODO: Textblob implementation for Sentiment indicator
 
     """
 
-    params = (
-        ("page_nums", 1),
-        ("senti", 0.2),
-    )
+    params = (("senti", 0.2),)
 
-    def __init__(self, keyword):
+    def __init__(self):
         # Initialize global variables
         super().__init__()
         # Strategy level variables
-        self.keyword = keyword
-        errmsg = "provide `keyword` used for news article scraping"
-        assert keyword is not None, errmsg
-
-        self.page_nums = self.params.page_nums
         self.senti = self.params.senti
-
         print("===Strategy level arguments===")
-        print("keyword for news scraping:", self.keyword)
-        print(
-            "page numbers to scrape in https://www.businesstimes.com.sg/search/{}? : ".format(
-                self.keyword
-            ),
-            self.page_nums,
-        )
         print("sentiment threshold :", self.senti)
-        self.agg_sentiment = get_bt_news(
-            keyword=self.keyword, page_nums=self.page_nums
-        )
-        self.sentiment = Sentiment(agg_sentiment=self.agg_sentiment)
+        self.datasentiment = Sentiment(self.data)
 
     def buy_signal(self):
-        return self.sentiment[0] >= self.senti
+        return self.datasentiment[0] >= self.senti
 
     def sell_signal(self):
-        return self.sentiment[0] <= self.senti
+        return self.datasentiment[0] <= self.senti
 
 
 STRATEGY_MAPPING = {
@@ -592,6 +570,15 @@ strat_docs = "\nExisting strategies:\n\n" + "\n".join(
 )
 
 
+class SentimentDF(bt.feeds.PandasData):
+    # Add a 'sentiment_score' line to the inherited ones from the base class
+    lines = ("sentiment_score",)
+
+    # automatically handle parameter with -1
+    # add the parameter to the parameters inherited from the base class
+    params = (("sentiment_score", -1),)
+
+
 @docstring_parameter(strat_docs)
 def backtest(
     strategy,
@@ -602,6 +589,7 @@ def backtest(
     plot=True,
     verbose=True,
     sort_by="rnorm",
+    sentiments=None,
     strats=None,  # Only used when strategy = "multi"
     **kwargs
 ):
@@ -655,14 +643,32 @@ def backtest(
             print("Reading path as pandas dataframe ...")
         data = pd.read_csv(data, header=0, parse_dates=["dt"])
 
-    # If data has `dt` as the index, set `dt` as the first column
-    # This means `backtest` supports the dataframe whether `dt` is the index or a column
-    if data.index.name == "dt":
+    # extend the dataframe with sentiment score
+    if strategy == "sentiment":
+        # initialize series for sentiments
+        senti_series = pd.Series(
+            sentiments, name="sentiment_score", dtype=float
+        )
+
+        # join and reset the index for dt to become the first column
+        data = data.merge(
+            senti_series, left_index=True, right_index=True, how="left"
+        )
         data = data.reset_index()
 
-    pd_data = bt.feeds.PandasData(
-        dataname=data, **DATA_FORMAT_MAPPING[data_format]
-    )
+        # create PandasData using SentimentDF
+        pd_data = SentimentDF(
+            dataname=data, **DATA_FORMAT_MAPPING[data_format]
+        )
+
+    else:
+        # If data has `dt` as the index, set `dt` as the first column
+        # This means `backtest` supports the dataframe whether `dt` is the index or a column
+        if data.index.name == "dt":
+            data = data.reset_index()
+        pd_data = bt.feeds.PandasData(
+            dataname=data, **DATA_FORMAT_MAPPING[data_format]
+        )
 
     cerebro.adddata(pd_data)
     cerebro.broker.setcash(init_cash)
