@@ -58,7 +58,7 @@ Ready to contribute? Here's how to set up `fastquant` for local development.
     $ cd fastquant
     $ virtualenv env
     $ source env/bin/activate
-    $ pip install -r requirements.txt
+    $ pip install -r python/requirements.txt
     ```
 
 4. Create a branch for local development
