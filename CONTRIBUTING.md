@@ -58,7 +58,7 @@ Ready to contribute? Here's how to set up `fastquant` for local development.
     $ cd fastquant
     $ virtualenv env
     $ source env/bin/activate
-    $ pip install -r requirements.txt
+    $ pip install -r python/requirements.txt
     ```
 
 4. Create a branch for local development
@@ -105,5 +105,5 @@ Before you submit a pull request, check that it meets these guidelines:
    your new functionality into a function with a docstring, and add the
    feature to the list in README.md.
 3. The pull request should work for Python 3.5 and above. Check
-   https://github.com/enzoampil/fastquant//pull_requests
+   https://github.com/enzoampil/fastquant/pull_requests
    and make sure that the tests pass for all supported Python versions.
