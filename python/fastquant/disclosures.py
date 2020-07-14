@@ -29,7 +29,7 @@ import matplotlib as mpl
 from fastquant import get_stock_data, DATA_PATH
 
 warnings.simplefilter("ignore")
-mpl.style.use("fivethirtyeight")
+mpl.style.use("default")  # change to default from fivethirtyeight
 
 COOKIES = {
     "BIGipServerPOOL_EDGE": "1427584378.20480.0000",

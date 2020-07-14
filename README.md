@@ -59,6 +59,23 @@ get_pse_data("JFC", "2018-01-01", "2019-01-01")
 
 *Note: Python has Yahoo Finance and phisix support. R only has phisix support. Symbols from Yahoo Finance will return closing prices in USD, while symbols from PSE will return closing prices in PHP*
 
+## Get crypto data
+The data is pulled from Binance, and all the available tickers are found [here](https://coinmarketcap.com/exchanges/binance/).
+
+```
+from fastquant import get_crypto_data
+crypto = get_crypto_data("BTC/USDT", "2018-12-01", "2019-12-31")
+crypto.head()
+
+#             open    high     low     close    volume
+# dt                                                          
+# 2018-12-01  4041.27  4299.99  3963.01  4190.02  44840.073481
+# 2018-12-02  4190.98  4312.99  4103.04  4161.01  38912.154790
+# 2018-12-03  4160.55  4179.00  3827.00  3884.01  49094.369163
+# 2018-12-04  3884.76  4085.00  3781.00  3951.64  48489.551613
+# 2018-12-05  3950.98  3970.00  3745.00  3769.84  44004.799448
+```
+
 ## Backtest trading strategies
 
 *Note: Support for backtesting in R is pending*
@@ -108,6 +125,7 @@ print(res[['fast_period', 'slow_period', 'final_value']].head())
 | Moving Average Convergence Divergence (MACD) | macd | `fast_perod`, `slow_upper`, `signal_period`, `sma_period`, `sma_dir_period` |
 | Bollinger Bands | bbands | `period`, `devfactor` |
 | Buy and Hold | buynhold | `N/A` |
+| Sentiment Strategy | sentiment | `keyword` , `page_nums`, `senti` |
 
 ### Relative Strength Index (RSI) Strategy
 ```
@@ -154,5 +172,45 @@ backtest('bbands', df, period=20, devfactor=2.0)
 ```
 ![](./docs/assets/bbands.png)
 
+### News Sentiment Strategy
+Use Tesla (TSLA) stock from yahoo finance and news articles from [Business Times](https://www.businesstimes.com.sg/)
+```
+from fastquant import get_yahoo_data, get_bt_news_sentiment
+data = get_yahoo_data("TSLA", "2020-01-01", "2020-07-04")
+sentiments = get_bt_news_sentiment(keyword="tesla", page_nums=3)
+backtest("sentiment", data, sentiments=sentiments, senti=0.2)
+
+# Starting Portfolio Value: 100000.00
+# Final Portfolio Value: 313198.37
+```
+![](./docs/assets/sentiment.png)
+
+### Multi Strategy
+
+Multiple registered strategies can be utilized together in an OR fashion, where buy or sell signals are applied when at least one of the strategies trigger them.
+
+```
+df = get_stock_data("JFC", "2018-01-01", "2019-01-01")
+
+# Utilize single set of parameters
+strats = { 
+    "smac": {"fast_period": 35, "slow_period": 50}, 
+    "rsi": {"rsi_lower": 30, "rsi_upper": 70} 
+} 
+res = backtest("multi", df, strats=strats)
+res.shape
+# (1, 16)
+
+
+# Utilize auto grid search
+strats_opt = { 
+    "smac": {"fast_period": 35, "slow_period": [40, 50]}, 
+    "rsi": {"rsi_lower": [15, 30], "rsi_upper": 70} 
+} 
+
+res_opt = backtest("multi", df, strats=strats_opt)
+res_opt.shape
+# (4, 16)
+```
 
 See more examples [here](https://nbviewer.jupyter.org/github/enzoampil/fastquant/tree/master/examples/).

@@ -8,7 +8,8 @@ Created on Tue Jun 25 19:48:03 2019
 # Import standard library
 import os
 import requests
-from datetime import datetime
+from datetime import datetime, timedelta
+import time
 from pathlib import Path
 from pkg_resources import resource_filename
 
@@ -19,6 +20,11 @@ import lxml.html as LH
 from tqdm import tqdm
 import tweepy
 import yfinance as yf
+from nltk.sentiment.vader import SentimentIntensityAnalyzer
+import nltk
+from urllib.request import urlopen
+from bs4 import BeautifulSoup
+import ccxt
 
 DATA_PATH = resource_filename(__name__, "data")
 
@@ -523,6 +529,30 @@ def get_stock_data(symbol, start_date, end_date, source="phisix", format="c"):
     return df[df_columns]
 
 
+def unix_time_millis(date):
+    epoch = datetime.utcfromtimestamp(0)
+    dt = datetime.strptime(date, "%Y-%m-%d")
+    # return int((dt - epoch).total_seconds() * 1000)
+    return int(dt.timestamp() * 1000)
+
+
+def get_crypto_data(ticker, start_date, end_date):
+    """
+    Get crypto data in OHLCV format
+
+    List of tickers here: https://coinmarketcap.com/exchanges/binance/
+    """
+    start_date_epoch = unix_time_millis(start_date)
+    binance = ccxt.binance({"verbose": False})
+    ohlcv_lol = binance.fetch_ohlcv(ticker, "1d", since=start_date_epoch)
+    ohlcv_df = pd.DataFrame(
+        ohlcv_lol, columns=["dt", "open", "high", "low", "close", "volume"]
+    )
+    ohlcv_df["dt"] = pd.to_datetime(ohlcv_df["dt"], unit="ms")
+    ohlcv_df = ohlcv_df[ohlcv_df.dt <= end_date]
+    return ohlcv_df.set_index("dt")
+
+
 def pse_data_to_csv(symbol, start_date, end_date, pse_dir=DATA_PATH):
     """
     """
@@ -567,3 +597,67 @@ def datestring_to_datetime(date, sep="-"):
     errmsg = "date format must be YYYY-MM-DD"
     assert len(ymd[0]) == 4, errmsg
     return datetime(*map(int, ymd))
+
+
+def get_bt_news_sentiment(keyword, page_nums=None):
+    """
+    This function scrapes Business Times (https://www.businesstimes.com.sg) articles by giving
+    a specific keyword e.g "facebook, jollibee" and number of pages that you needed.
+
+    Parameters
+    ----------
+    keyword : str
+        The keyword you wanted to search for in Business Times page.
+    page_nums : int
+        The number of iteration of pages you want to scrape.
+
+    Returns
+    ----------
+    date_sentiments: dict
+        The dictionary output of the scraped data in form of {date: sentiment score}
+
+    TO DO: change page_nums to a start_date (and end_date maybe)
+    """
+
+    nltk.download("vader_lexicon", quiet=True)  # download vader lexicon
+
+    if page_nums is None:
+        page_nums = 1
+        print("no page numbers indicated, setting this variable to 1")
+
+    date_sentiments = {}
+    sia = SentimentIntensityAnalyzer()
+
+    for i in tqdm(range(1, page_nums + 1)):
+        page = urlopen(
+            "https://www.businesstimes.com.sg/search/{}?page={}".format(
+                keyword.replace(" ", "%20"), str(i)
+            )
+        ).read()
+        soup = BeautifulSoup(page, features="html.parser")
+        posts = soup.findAll("div", {"class": "media-body"})
+        for post in posts:
+            time.sleep(1)
+            url = post.a["href"]
+            date = post.time.text
+            try:
+                link_page = urlopen(url).read()
+            except Exception:
+                url = url[:-2]
+                link_page = urlopen(url).read()
+            link_soup = BeautifulSoup(link_page, features="lxml")
+            sentences = link_soup.findAll("p")
+            passage = ""
+            for sentence in sentences:
+                passage += sentence.text
+            sentiment = sia.polarity_scores(passage)["compound"]
+            date_sentiments.setdefault(date, []).append(sentiment)
+
+    date_sentiment = {}
+
+    for k, v in date_sentiments.items():
+        date_sentiment[
+            datetime.strptime(k, "%d %b %Y").date() + timedelta(days=1)
+        ] = round(sum(v) / float(len(v)), 3)
+
+    return date_sentiment
