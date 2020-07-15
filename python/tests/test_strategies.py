@@ -1,6 +1,13 @@
 import pandas as pd
 from pathlib import Path
-from fastquant import backtest, STRATEGY_MAPPING, DATA_PATH, get_yahoo_data
+from datetime import datetime
+from fastquant import (
+    backtest,
+    STRATEGY_MAPPING,
+    DATA_PATH,
+    get_yahoo_data,
+    get_bt_news_sentiment,
+)
 
 SAMPLE_CSV = Path(DATA_PATH, "JFC_20180101_20190110_DCV.csv")
 SAMPLE_STRAT_DICT = {
@@ -13,12 +20,14 @@ def test_backtest():
     """
     Ensures that the backtest function works on all the registered strategies, with their default parameter values
     """
+    current_date = datetime.today().strftime("%Y-%m-%d")
     sample = pd.read_csv(SAMPLE_CSV, parse_dates=["dt"])
     for strategy in STRATEGY_MAPPING.keys():
         if strategy == "sentiment":
-            data = get_yahoo_data("TSLA", "2020-01-01", "2020-06-10")
+            data = get_yahoo_data("TSLA", "2020-01-01", current_date)
+            sentiments = get_bt_news_sentiment(keyword="tesla", page_nums=2)
             cerebro = backtest(
-                strategy, data, keyword="tesla", page_nums=2, senti=0.4
+                strategy, data, sentiments=sentiments, senti=0.4
             )
             errmsg = "Backtest encountered error for strategy '{}'!".format(
                 strategy

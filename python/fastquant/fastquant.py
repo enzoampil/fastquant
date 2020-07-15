@@ -24,6 +24,7 @@ from nltk.sentiment.vader import SentimentIntensityAnalyzer
 import nltk
 from urllib.request import urlopen
 from bs4 import BeautifulSoup
+import ccxt
 
 DATA_PATH = resource_filename(__name__, "data")
 
@@ -528,6 +529,30 @@ def get_stock_data(symbol, start_date, end_date, source="phisix", format="c"):
     return df[df_columns]
 
 
+def unix_time_millis(date):
+    epoch = datetime.utcfromtimestamp(0)
+    dt = datetime.strptime(date, "%Y-%m-%d")
+    # return int((dt - epoch).total_seconds() * 1000)
+    return int(dt.timestamp() * 1000)
+
+
+def get_crypto_data(ticker, start_date, end_date):
+    """
+    Get crypto data in OHLCV format
+
+    List of tickers here: https://coinmarketcap.com/exchanges/binance/
+    """
+    start_date_epoch = unix_time_millis(start_date)
+    binance = ccxt.binance({"verbose": False})
+    ohlcv_lol = binance.fetch_ohlcv(ticker, "1d", since=start_date_epoch)
+    ohlcv_df = pd.DataFrame(
+        ohlcv_lol, columns=["dt", "open", "high", "low", "close", "volume"]
+    )
+    ohlcv_df["dt"] = pd.to_datetime(ohlcv_df["dt"], unit="ms")
+    ohlcv_df = ohlcv_df[ohlcv_df.dt <= end_date]
+    return ohlcv_df.set_index("dt")
+
+
 def pse_data_to_csv(symbol, start_date, end_date, pse_dir=DATA_PATH):
     """
     """
@@ -574,7 +599,7 @@ def datestring_to_datetime(date, sep="-"):
     return datetime(*map(int, ymd))
 
 
-def get_bt_news(keyword, page_nums=None):
+def get_bt_news_sentiment(keyword, page_nums=None):
     """
     This function scrapes Business Times (https://www.businesstimes.com.sg) articles by giving
     a specific keyword e.g "facebook, jollibee" and number of pages that you needed.
@@ -590,6 +615,8 @@ def get_bt_news(keyword, page_nums=None):
     ----------
     date_sentiments: dict
         The dictionary output of the scraped data in form of {date: sentiment score}
+
+    TO DO: change page_nums to a start_date (and end_date maybe)
     """
 
     nltk.download("vader_lexicon", quiet=True)  # download vader lexicon
