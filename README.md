@@ -23,11 +23,14 @@ pip install fastquant
 
 ### R
 
-R support is pending development, but you may install the R package by typing the following 
+R support is pending development and lagging in features, but you may install the R package by typing the following: 
 
 ```
-# install.packages("remotes")
+# To install the stable version: 
+install.packages("fastquant")
 
+# To install the development version: 
+# install.packages("remotes")
 remotes::install_github("enzoampil/fastquant", subdir = "R")
 ```
 
@@ -54,10 +57,21 @@ print(df.head())
 ```
 library(fastquant)
 
-get_pse_data("JFC", "2018-01-01", "2019-01-01")
+get_stock_data("JFC", "2018-01-01", "2018-02-01")
+
+#> # A tibble: 22 x 7
+#>    symbol dt         name     currency close percent_change  volume
+#>    <chr>  <date>     <chr>    <chr>    <dbl>          <dbl>   <dbl>
+#>  1 JFC    2018-01-03 Jollibee PHP       255.             NA  745780
+#>  2 JFC    2018-01-04 Jollibee PHP       255              NA  617010
+#>  3 JFC    2018-01-05 Jollibee PHP       255              NA  946040
+#>  4 JFC    2018-01-08 Jollibee PHP       256              NA  840630
+#> ...
 ```
 
-*Note: Python has Yahoo Finance and phisix support. R only has phisix support. Symbols from Yahoo Finance will return closing prices in USD, while symbols from PSE will return closing prices in PHP*
+*Note: Python has Yahoo Finance and phisix support. R has phisix support and porting to symbols from the `quantmod` package. Symbols from Yahoo Finance will return closing prices in USD, while symbols from PSE will return closing prices in PHP.*
+
+*R does NOT have support for cryptocurrency data pulling and backtesting yet as of v0.1.2*
 
 ## Get crypto data
 The data is pulled from Binance, and all the available tickers are found [here](https://coinmarketcap.com/exchanges/binance/).
