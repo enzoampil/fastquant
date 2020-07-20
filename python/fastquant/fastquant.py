@@ -661,3 +661,88 @@ def get_bt_news_sentiment(keyword, page_nums=None):
         ] = round(sum(v) / float(len(v)), 3)
 
     return date_sentiment
+
+
+def get_twitter_sentiment(stock_code, twitter_auth, start_date, twitter_accounts=None):
+    """
+    This function scrapes twitter data based on stock code and twitter accounts specified
+    Parameters
+    ----------
+    stock_code : str
+        The stock code you wanted to scrape from Twitter
+    twitter_auth : obj
+         Authenticated tweepy.API object
+    start_date : str
+        Starting date (YYYY-MM-DD) of the period that you want to get twitter data on
+    twitter_accounts : list
+        List of twitter account names you want to scrape from
+    Returns
+    ----------
+    date_sentiments: dict
+        The dictionary output of the scraped data in form of {date: sentiment score}
+    """
+    year, month, day = map(int,start_date.split(sep='-'))
+    start_date = date(year,month,day)
+
+    stock_code = stock_code.lstrip("$")
+
+    # Empty list to store the user tweets
+    usertweets = []
+
+    sia = SentimentIntensityAnalyzer()
+    
+    if twitter_accounts is None or len(twitter_accounts) == 0:
+        raise Exception ("You don't have any twitter accounts specified.")
+    else:
+        for acc in twitter_accounts:
+            print(f"Scraping ${stock_code} tweets from {acc}")
+            # Max for count is 200
+            new_tweets = twitter_auth.user_timeline(screen_name=acc, count = 20, tweet_mode='extended')
+
+            # Only store tweets within the specified date range and which contains the stock code specified
+            new_tweets = [tweet for tweet in new_tweets if datetime.strptime(str(tweet.created_at), "%Y-%m-%d %H:%M:%S").date() >= start_date and stock_code in tweet.full_text]
+
+            print(f"{len(new_tweets)} tweets scraped from {acc}")
+
+            usertweets.extend(new_tweets)
+
+            ''' Getting errors here: Failed to send request and JSON payload issue
+            if( usertweets[-1].created_at.date() >= start_date):
+                # NOTE: Save the ID of the oldest tweet less one
+                oldest_tweet = usertweets[-1].id - 1
+                # NOTE: Keep grabbing tweets until there are no tweets left to grab
+                while len(new_tweets) > 0:
+                    print(f"Getting tweets before {oldest_tweet}")
+                    # NOTE: All subsequent requests use the max_id param to prevent duplicates
+                    new_tweets = twitter_auth.user_timeline(screen_name = acc, count = 200, tweet_mode = 'extended', max_id = oldest_tweet)
+                    # NOTE: Only store tweets within the specified date range
+                    new_tweets = [tweet for tweet in new_tweets if datetime.strptime(str(tweet.created_at), "%Y-%m-%d %H:%M:%S").date() >= start_date and stock_code in tweet.full_text]
+                    # NOTE: Save most recent tweets
+                    usertweets.extend(new_tweets)
+                    # NOTE: Update the id of the oldest tweet less one
+                    oldest_tweet = usertweets[-1].id - 1
+                    print(f"Downloaded {len(usertweets)} tweets so far!")
+            '''
+    
+        tweet_df = pd.DataFrame([])
+
+        if len(usertweets) > 0:
+            tweet_created_at = [tweet.created_at for tweet in usertweets]
+            tweet_text = [tweet.full_text for tweet in usertweets]
+            
+            # Putting them to a df
+            tweet_df['tweet_created_at'] = tweet_created_at
+            tweet_df['tweet_created_at'] = pd.to_datetime(tweet_df['tweet_created_at']).dt.date
+            tweet_df['tweet'] = tweet_text
+            tweet_df['sentiment_score'] = tweet_df['tweet'].apply(lambda tweet: sia.polarity_scores(tweet)['compound'])
+
+            # Getting the average sentiment scores for tweets of the same date
+            tweet_avg_df = tweet_df.groupby('tweet_created_at', as_index=False).agg({'sentiment_score': 'mean'})
+            
+            # Converting the dataframe into a dictionary
+            date_sentiment = dict(zip(tweet_avg_df['tweet_created_at'], tweet_avg_df['sentiment_score']))
+
+            return date_sentiment
+    
+        else:
+            raise Exception (f"No tweet found for {stock_code} starting from {start_date}.")
