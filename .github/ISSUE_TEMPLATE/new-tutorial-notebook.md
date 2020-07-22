@@ -7,6 +7,10 @@ assignees: ''
 
 ---
 
+**Tutorial title:** 
+
+**Tutorial summary:** 
+
 Please use this checklist as a rough outline of prerequisites when submitting a new tutorial notebook to fastquant!
 
 - [ ] Complete [front matter](https://github.com/fastai/fastpages#customizing-blog-posts-with-front-matter) (title, description, author, etc)
