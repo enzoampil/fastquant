@@ -25,14 +25,10 @@ def test_get_yahoo_data():
 
 
 def test_get_stock_data():
-    stock_df = get_stock_data(
-        PHISIX_SYMBOL, DATE_START, DATE_END, source="phisix"
-    )
+    stock_df = get_stock_data(PHISIX_SYMBOL, DATE_START, DATE_END, source="phisix")
     assert isinstance(stock_df, pd.DataFrame)
 
-    stock_df = get_stock_data(
-        YAHOO_SYMBOL, DATE_START, DATE_END, source="yahoo"
-    )
+    stock_df = get_stock_data(YAHOO_SYMBOL, DATE_START, DATE_END, source="yahoo")
     assert isinstance(stock_df, pd.DataFrame)
 
 

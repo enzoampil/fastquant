@@ -73,9 +73,7 @@ class Network:
         self.interpolation_method = interpolation_method
         self.n_companies = n_companies
         self.update_cache = update_cache
-        self.data_cache = get_pse_data_cache(
-            update=self.update_cache, verbose=False
-        )
+        self.data_cache = get_pse_data_cache(update=self.update_cache, verbose=False)
         self.data = self.data_cache.xs(indicator, level=1, axis=1)
         self.filtered_data = self.filter_data()
         self.company_table = self.load_company_table()
@@ -97,9 +95,7 @@ class Network:
         """get sector or subsector where symbol belongs
         """
         info = self.company_table.copy()
-        sector = info.loc[
-            info["Stock Symbol"].isin([symbol]), "Sector"
-        ].values[0]
+        sector = info.loc[info["Stock Symbol"].isin([symbol]), "Sector"].values[0]
         return sector
 
     def get_symbols_of_a_sector(self, sector, subsector=False, verbose=False):
@@ -111,9 +107,7 @@ class Network:
 
         sector_indices = sectors_dict[sector]
         sector_symbols = info.loc[sector_indices, "Stock Symbol"]
-        data_availability_indices = self.filtered_data.columns.isin(
-            sector_symbols
-        )
+        data_availability_indices = self.filtered_data.columns.isin(sector_symbols)
         symbols_with_data = self.filtered_data.columns[
             data_availability_indices
         ].tolist()
@@ -122,9 +116,7 @@ class Network:
         ].tolist()
         if verbose:
             print(
-                "Symbols without data in {}:\n{}".format(
-                    sector, symbols_without_data
-                )
+                "Symbols without data in {}:\n{}".format(sector, symbols_without_data)
             )
         return symbols_with_data
 
@@ -220,7 +212,7 @@ class Network:
         # replace some few remaining NaNs with interpolated values
         df.interpolate(method=method, limit=5, inplace=True)
         # remove columns with any remaining NaNs
-        #df.dropna(how="any", axis=1, inplace=True)
+        # df.dropna(how="any", axis=1, inplace=True)
         return df
 
     def compute_corr(
@@ -342,12 +334,7 @@ class Network:
         return fig
 
     def plot_corr_company(
-        self,
-        symbol=None,
-        symbol2=None,
-        positive=True,
-        rescale=True,
-        indicator="close",
+        self, symbol=None, symbol2=None, positive=True, rescale=True, indicator="close",
     ):
         """
         plot company with highest positive/negative correlation with symbol
@@ -364,11 +351,7 @@ class Network:
         if positive:
             # positively correlated
             if symbol2 is None:
-                symbol2 = (
-                    rank.index[-2]
-                    if rank.index[-1] == symbol
-                    else rank.index[-1]
-                )
+                symbol2 = rank.index[-2] if rank.index[-1] == symbol else rank.index[-1]
 
         else:
             # negatively correlated

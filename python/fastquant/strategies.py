@@ -160,8 +160,7 @@ class BaseStrategy(bt.Strategy):
             return
         if self.transaction_logging:
             self.log(
-                "OPERATION PROFIT, GROSS %.2f, NET %.2f"
-                % (trade.pnl, trade.pnlcomm)
+                "OPERATION PROFIT, GROSS %.2f, NET %.2f" % (trade.pnl, trade.pnlcomm)
             )
 
     def notify_cashvalue(self, cash, value):
@@ -202,10 +201,7 @@ class BaseStrategy(bt.Strategy):
                 # Add allowance to commission per transaction (avoid margin)
                 afforded_size = int(
                     self.cash
-                    / (
-                        self.dataclose[0]
-                        * (1 + COMMISSION_PER_TRANSACTION + 0.001)
-                    )
+                    / (self.dataclose[0] * (1 + COMMISSION_PER_TRANSACTION + 0.001))
                 )
                 buy_prop_size = int(afforded_size * self.buy_prop)
                 # Buy based on the closing price of the next closing day
@@ -224,10 +220,7 @@ class BaseStrategy(bt.Strategy):
                     # Margin is required for buy commission
                     afforded_size = int(
                         self.cash
-                        / (
-                            self.dataopen[1]
-                            * (1 + COMMISSION_PER_TRANSACTION + 0.001)
-                        )
+                        / (self.dataopen[1] * (1 + COMMISSION_PER_TRANSACTION + 0.001))
                     )
                     final_size = min(buy_prop_size, afforded_size)
                     if self.transaction_logging:
@@ -253,18 +246,14 @@ class BaseStrategy(bt.Strategy):
                         # Sell based on the closing price of the next closing day
                         self.order = self.sell(
                             size=int(
-                                (stock_value / (self.dataclose[1]))
-                                * self.sell_prop
+                                (stock_value / (self.dataclose[1])) * self.sell_prop
                             ),
                             exectype=bt.Order.Close,
                         )
                 else:
                     # Sell based on the opening price of the next closing day (only works "open" data exists in the dataset)
                     self.order = self.sell(
-                        size=int(
-                            (self.init_cash / self.dataopen[1])
-                            * self.sell_prop
-                        )
+                        size=int((self.init_cash / self.dataopen[1]) * self.sell_prop)
                     )
 
 
@@ -335,9 +324,7 @@ class SMACStrategy(BaseStrategy):
         print("slow_period :", self.slow_period)
         sma_fast = bt.ind.SMA(period=self.fast_period)  # fast moving average
         sma_slow = bt.ind.SMA(period=self.slow_period)  # slow moving average
-        self.crossover = bt.ind.CrossOver(
-            sma_fast, sma_slow
-        )  # crossover signal
+        self.crossover = bt.ind.CrossOver(sma_fast, sma_slow)  # crossover signal
 
     def buy_signal(self):
         return self.crossover > 0
@@ -376,9 +363,7 @@ class EMACStrategy(BaseStrategy):
         print("slow_period :", self.slow_period)
         ema_fast = bt.ind.EMA(period=self.fast_period)  # fast moving average
         ema_slow = bt.ind.EMA(period=self.slow_period)  # slow moving average
-        self.crossover = bt.ind.CrossOver(
-            ema_fast, ema_slow
-        )  # crossover signal
+        self.crossover = bt.ind.CrossOver(ema_fast, ema_slow)  # crossover signal
 
     def buy_signal(self):
         return self.crossover > 0
@@ -646,29 +631,21 @@ def backtest(
     # extend the dataframe with sentiment score
     if strategy == "sentiment":
         # initialize series for sentiments
-        senti_series = pd.Series(
-            sentiments, name="sentiment_score", dtype=float
-        )
+        senti_series = pd.Series(sentiments, name="sentiment_score", dtype=float)
 
         # join and reset the index for dt to become the first column
-        data = data.merge(
-            senti_series, left_index=True, right_index=True, how="left"
-        )
+        data = data.merge(senti_series, left_index=True, right_index=True, how="left")
         data = data.reset_index()
 
         # create PandasData using SentimentDF
-        pd_data = SentimentDF(
-            dataname=data, **DATA_FORMAT_MAPPING[data_format]
-        )
+        pd_data = SentimentDF(dataname=data, **DATA_FORMAT_MAPPING[data_format])
 
     else:
         # If data has `dt` as the index, set `dt` as the first column
         # This means `backtest` supports the dataframe whether `dt` is the index or a column
         if data.index.name == "dt":
             data = data.reset_index()
-        pd_data = bt.feeds.PandasData(
-            dataname=data, **DATA_FORMAT_MAPPING[data_format]
-        )
+        pd_data = bt.feeds.PandasData(dataname=data, **DATA_FORMAT_MAPPING[data_format])
 
     cerebro.adddata(pd_data)
     cerebro.broker.setcash(init_cash)
@@ -741,9 +718,7 @@ def backtest(
     optim_idxs = np.argsort(metrics_df[sort_by].values)[::-1]
     sorted_params_df = params_df.iloc[optim_idxs].reset_index(drop=True)
     sorted_metrics_df = metrics_df.iloc[optim_idxs].reset_index(drop=True)
-    sorted_combined_df = pd.concat(
-        [sorted_params_df, sorted_metrics_df], axis=1
-    )
+    sorted_combined_df = pd.concat([sorted_params_df, sorted_metrics_df], axis=1)
 
     # print out the result
     print("Time used (seconds):", str(tend - tstart))

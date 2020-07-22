@@ -26,18 +26,12 @@ def test_backtest():
         if strategy == "sentiment":
             data = get_yahoo_data("TSLA", "2020-01-01", current_date)
             sentiments = get_bt_news_sentiment(keyword="tesla", page_nums=2)
-            cerebro = backtest(
-                strategy, data, sentiments=sentiments, senti=0.4
-            )
-            errmsg = "Backtest encountered error for strategy '{}'!".format(
-                strategy
-            )
+            cerebro = backtest(strategy, data, sentiments=sentiments, senti=0.4)
+            errmsg = "Backtest encountered error for strategy '{}'!".format(strategy)
             assert cerebro is not None, errmsg
         else:
             cerebro = backtest(strategy, sample, plot=False)
-            errmsg = "Backtest encountered error for strategy '{}'!".format(
-                strategy
-            )
+            errmsg = "Backtest encountered error for strategy '{}'!".format(strategy)
             assert cerebro is not None, errmsg
 
 
@@ -47,6 +41,4 @@ def test_multi_backtest():
     """
     sample = pd.read_csv(SAMPLE_CSV, parse_dates=["dt"])
     cerebro = backtest("multi", sample, strats=SAMPLE_STRAT_DICT, plot=False)
-    assert (
-        cerebro is not None
-    ), "Backtest encountered error for strategy 'multi'!"
+    assert cerebro is not None, "Backtest encountered error for strategy 'multi'!"
