@@ -10,7 +10,7 @@ assignees: ''
 ### How to contribute a tutorial notebook to fastquant
 
 1. Create a `New tutorial notebook` issue with the tutorial notebook outline details filled
-2. If you haven't yet, read this [guide](https://fastpages.fast.ai/jupyter/2020/02/20/test.html) on how to format your notebook as blog post
+2. If you haven't yet, read this [guide](https://fastpages.fast.ai/jupyter/2020/02/20/test.html) on how to format your notebook as a blog post
 3. Add your tutorial notebook to the [examples](https://github.com/enzoampil/fastquant/tree/master/examples) directory with the naming convention `YYYY-MM-DD-*` (details [here](https://github.com/fastai/fastpages#automatically-convert-notebooks-to-blog-posts)).
 4. Send a PR that refers to this issue
 
