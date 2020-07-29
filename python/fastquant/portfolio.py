@@ -1,4 +1,11 @@
-import datetime
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+Created on Jul 29, 2020
+@authors: jpdeleon & benjamincabalona1029
+"""
+
+from datetime import datetime
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
@@ -9,7 +16,7 @@ from fastquant import get_stock_data
 TODAY = datetime.now().date().strftime("%Y-%m-%d")
 
 class Portfolio:
-    def __init__(self, stock_list, start_date="2020-01-01", end_date=TODAY, 
+    def __init__(self, stock_list, start_date="2015-01-01", end_date=TODAY, 
                  init_weights=None, verbose=False):
         """
         Allows constrained optimization of portfolio consisting of PSE stocks
