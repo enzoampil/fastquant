@@ -26,3 +26,4 @@ Please use this checklist as a rough outline of prerequisites when submitting a 
 - [ ] Each section has at least some commentary to guide the reader
 - [ ] All images, including graphs, and equations are displaying properly
 - [ ] Code is expected to work for someone with fastquant [dependencies](https://github.com/enzoampil/fastquant/blob/master/python/requirements.txt) installed; otherwise, indicate the installation on the notebook.
+- [ ] Each of the section headers have their first letter capitalized (e.g. *Define the search space*)
