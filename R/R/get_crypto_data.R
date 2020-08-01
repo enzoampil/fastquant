@@ -10,10 +10,22 @@
 #' @return A tibble
 #'
 #' @importFrom httr GET content
+#' @importFrom stringr str_c
+#' @importFrom magrittr str_c
 #'
 #' @export
 get_crypto_data <- function(symbol, start_date, end_date) {
   endpoint <- "https://api.binance.com/api/v3/klines?"
   start_date <- format(as.numeric(as.POSIXct(start_date)) * 1e3, scientific = FALSE)
   end_date <- format(as.numeric(as.POSIXct(end_date)) * 1e3, scientific = FALSE)
+
+  params <- paste0(str_c("symbol=", symbol),
+                   "interval=1d",
+                   str_c("startTime=", start_date),
+                   str_c("endTime=", end_date),
+                   collapse = "&")
+
+  res <- GET(str_c(endpoint, params)) %>%
+    content("application/json")
+
 }
