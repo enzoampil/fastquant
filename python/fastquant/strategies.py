@@ -72,6 +72,7 @@ class BaseStrategy(bt.Strategy):
         ("init_cash", INIT_CASH),
         ("buy_prop", BUY_PROP),
         ("sell_prop", SELL_PROP),
+        ("commission", COMMISSION_PER_TRANSACTION),
         (
             "execution_type",
             "close",
@@ -92,10 +93,12 @@ class BaseStrategy(bt.Strategy):
         self.execution_type = self.params.execution_type
         self.periodic_logging = self.params.periodic_logging
         self.transaction_logging = self.params.transaction_logging
+        self.commission = self.params.commission
         print("===Global level arguments===")
         print("init_cash : {}".format(self.init_cash))
         print("buy_prop : {}".format(self.buy_prop))
         print("sell_prop : {}".format(self.sell_prop))
+        print("commission : {}".format(self.commission))
 
         self.dataclose = self.datas[0].close
         self.dataopen = self.datas[0].open
@@ -204,7 +207,7 @@ class BaseStrategy(bt.Strategy):
                     self.cash
                     / (
                         self.dataclose[0]
-                        * (1 + COMMISSION_PER_TRANSACTION + 0.001)
+                        * (1 + self.commission + 0.001)
                     )
                 )
                 buy_prop_size = int(afforded_size * self.buy_prop)
@@ -226,7 +229,7 @@ class BaseStrategy(bt.Strategy):
                         self.cash
                         / (
                             self.dataopen[1]
-                            * (1 + COMMISSION_PER_TRANSACTION + 0.001)
+                            * (1 + self.commission + 0.001)
                         )
                     )
                     final_size = min(buy_prop_size, afforded_size)
