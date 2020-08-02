@@ -72,7 +72,7 @@ class BaseStrategy(bt.Strategy):
         ("init_cash", INIT_CASH),
         ("buy_prop", BUY_PROP),
         ("sell_prop", SELL_PROP),
-        ("commission", COMMISSION_PER_TRANSACTION)
+        ("commission", COMMISSION_PER_TRANSACTION),
         (
             "execution_type",
             "close",
