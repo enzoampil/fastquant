@@ -622,6 +622,7 @@ def backtest(
                 STRATEGY_MAPPING[strat],
                 init_cash=[init_cash],
                 transaction_logging=[verbose],
+                commission=commission,
                 **params
             )
             strat_names.append(strat)
@@ -630,6 +631,7 @@ def backtest(
             STRATEGY_MAPPING[strategy],
             init_cash=[init_cash],
             transaction_logging=[verbose],
+            commission=commission,
             **kwargs
         )
         strat_names.append(STRATEGY_MAPPING[strategy])
