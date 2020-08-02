@@ -416,7 +416,7 @@ def get_pse_data(
     else:
         cache = get_pse_data_cache(symbol=symbol)
         # Return None if the column is not in the cached df
-        if not cache:
+        if cache is None:
             return None
         cache = cache.reset_index()
         # oldest_date = cache["dt"].iloc[0]
