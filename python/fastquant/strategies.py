@@ -72,6 +72,7 @@ class BaseStrategy(bt.Strategy):
         ("init_cash", INIT_CASH),
         ("buy_prop", BUY_PROP),
         ("sell_prop", SELL_PROP),
+        ("commission", COMMISSION_PER_TRANSACTION)
         (
             "execution_type",
             "close",
@@ -204,7 +205,7 @@ class BaseStrategy(bt.Strategy):
                     self.cash
                     / (
                         self.dataclose[0]
-                        * (1 + COMMISSION_PER_TRANSACTION + 0.001)
+                        * (1 + commission + 0.001)
                     )
                 )
                 buy_prop_size = int(afforded_size * self.buy_prop)
@@ -226,7 +227,7 @@ class BaseStrategy(bt.Strategy):
                         self.cash
                         / (
                             self.dataopen[1]
-                            * (1 + COMMISSION_PER_TRANSACTION + 0.001)
+                            * (1 + commission + 0.001)
                         )
                     )
                     final_size = min(buy_prop_size, afforded_size)
