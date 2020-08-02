@@ -413,6 +413,8 @@ def get_pse_data(
             pse_data_df = get_phisix_data(
                 symbol, start_date, end_date, save=False, max_straight_nones=10
             )
+        if pse_data_df is None:
+            return None
     else:
         cache = get_pse_data_cache(symbol=symbol)
         # Return None if the column is not in the cached df
