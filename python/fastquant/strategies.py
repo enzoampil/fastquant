@@ -178,6 +178,7 @@ class BaseStrategy(bt.Strategy):
         # Saving to self so it's accessible later during optimization
         self.final_value = self.broker.getvalue()
         self.pnl = round(self.final_value - self.init_cash, 2)
+        print("Final Portfolio Value: {}".format(self.final_value))
         print("Final PnL: {}".format(self.pnl))
 
     def next(self):
