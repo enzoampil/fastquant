@@ -312,7 +312,7 @@ def get_pse_data_cache(
         df.index = pd.to_datetime(df.index)
         if verbose:
             print("Loaded: ", cache_fp)
-        return df if symbol is None else df[symbol]
+        return df if symbol is None else df[symbol] if symbol in df.columns else None
     else:
         errmsg = "Cache does not exist! Try update=True"
         print(errmsg)
@@ -415,6 +415,9 @@ def get_pse_data(
             )
     else:
         cache = get_pse_data_cache(symbol=symbol)
+        # Return None if the column is not in the cached df
+        if not cache:
+            return None
         cache = cache.reset_index()
         # oldest_date = cache["dt"].iloc[0]
         newest_date = cache["dt"].iloc[-1]
