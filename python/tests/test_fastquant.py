@@ -42,14 +42,20 @@ def test_get_stock_data():
 
 
 def test_get_crypto_data():
-    # try default crypto exchange, which is binance
-    crypto_df = get_crypto_data(CRYPTO_SYMBOL, DATE_START, DATE_END)
-    assert isinstance(crypto_df, pd.DataFrame)
-    # test other exchanges work
+    # test that multiple exchanges work
     from fastquant.crypto import CRYPTO_EXCHANGES
+
+    exchange_pairs = {
+        "binance": "BTC/USDT",
+        "coinbasepro": "BTC/USD",
+        "bithumb": "XRP/KRW",
+        "kraken": "BTC/USD",
+        "kucoin": "BTC/USDT",
+        "bitstamp": "BTC/USD",
+    }
 
     for ex in CRYPTO_EXCHANGES:
         crypto_df = get_crypto_data(
-            CRYPTO_SYMBOL, DATE_START, DATE_END, exchange=ex
+            exchange_pairs[ex], DATE_START, DATE_END, exchange=ex
         )
         assert isinstance(crypto_df, pd.DataFrame)
