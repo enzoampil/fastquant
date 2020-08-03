@@ -441,7 +441,7 @@ def get_pse_data(
     pse_data_df = pse_data_df[idx].drop_duplicates("dt")
     if save:
         pse_data_df.to_csv(fp, index=False)
-        print(f"Saved: ", fp)
+        print("Saved: ", fp)
     return pse_data_df.set_index("dt")
 
 
