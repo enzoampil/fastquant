@@ -266,11 +266,10 @@ def update_pse_data_cache(start_date="2010-01-01", verbose=True):
         print("Updating cache...")
     date_today = datetime.now().date().strftime("%Y-%m-%d")
 
-    ifp = Path(DATA_PATH, "company_names.csv")
-    names = pd.read_csv(ifp)
+    names = get_stock_table(stock_table_fp=None)
 
     data, unavailable = {}, []
-    for symbol in tqdm(names.Symbol):
+    for symbol in tqdm(names["Stock Symbol"].values):
         try:
             df = get_pse_data_old(
                 symbol, start_date, date_today, verbose=False
