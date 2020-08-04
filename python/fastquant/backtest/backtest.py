@@ -22,15 +22,41 @@ import time
 
 # Import from package
 from fastquant.strategies.sentiment import SentimentDF
+from fastquant.strategies import (
+    RSIStrategy,
+    SMACStrategy,
+    BaseStrategy,
+    MACDStrategy,
+    EMACStrategy,
+    BBandsStrategy,
+    BuyAndHoldStrategy,
+    SentimentStrategy,
+)
 
 # Import backtest variables
-from config import (
+from fastquant.config import (
     INIT_CASH,
     COMMISSION_PER_TRANSACTION,
     DATA_FORMAT_MAPPING,
-    strat_docs,
-    STRATEGY_MAPPING,
+    # strat_docs,
+    # STRATEGY_MAPPING,
     GLOBAL_PARAMS,
+)
+
+
+STRATEGY_MAPPING = {
+    "rsi": RSIStrategy,
+    "smac": SMACStrategy,
+    "base": BaseStrategy,
+    "macd": MACDStrategy,
+    "emac": EMACStrategy,
+    "bbands": BBandsStrategy,
+    "buynhold": BuyAndHoldStrategy,
+    "sentiment": SentimentStrategy,
+}
+
+strat_docs = "\nExisting strategies:\n\n" + "\n".join(
+    [key + "\n" + value.__doc__ for key, value in STRATEGY_MAPPING.items()]
 )
 
 

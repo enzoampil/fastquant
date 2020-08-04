@@ -4,3 +4,4 @@ from .strategies import *
 from .network import *
 from .portfolio import *
 from .config import *
+from .backtest import *

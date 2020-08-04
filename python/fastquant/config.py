@@ -2,17 +2,6 @@ import os
 from pkg_resources import resource_filename
 from pathlib import Path
 
-from fastquant.strategies import (
-    BaseStrategy,
-    BBandsStrategy,
-    BuyAndHoldStrategy,
-    SMACStrategy,
-    EMACStrategy,
-    MACDStrategy,
-    RSIStrategy,
-    SentimentStrategy,
-)
-
 DATA_PATH = resource_filename(__name__, "data")
 
 if not Path(DATA_PATH).exists():
@@ -47,19 +36,3 @@ DATA_FORMAT_MAPPING = {
     },
 }
 GLOBAL_PARAMS = ["init_cash", "buy_prop", "sell_prop", "execution_type"]
-
-
-STRATEGY_MAPPING = {
-    "rsi": RSIStrategy,
-    "smac": SMACStrategy,
-    "base": BaseStrategy,
-    "macd": MACDStrategy,
-    "emac": EMACStrategy,
-    "bbands": BBandsStrategy,
-    "buynhold": BuyAndHoldStrategy,
-    "sentiment": SentimentStrategy,
-}
-
-strat_docs = "\nExisting strategies:\n\n" + "\n".join(
-    [key + "\n" + value.__doc__ for key, value in STRATEGY_MAPPING.items()]
-)
