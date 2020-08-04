@@ -206,10 +206,7 @@ class BaseStrategy(bt.Strategy):
                 # Add allowance to commission per transaction (avoid margin)
                 afforded_size = int(
                     self.cash
-                    / (
-                        self.dataclose[0]
-                        * (1 + self.commission + 0.001)
-                    )
+                    / (self.dataclose[0] * (1 + self.commission + 0.001))
                 )
                 buy_prop_size = int(afforded_size * self.buy_prop)
                 # Buy based on the closing price of the next closing day
@@ -228,10 +225,7 @@ class BaseStrategy(bt.Strategy):
                     # Margin is required for buy commission
                     afforded_size = int(
                         self.cash
-                        / (
-                            self.dataopen[1]
-                            * (1 + self.commission + 0.001)
-                        )
+                        / (self.dataopen[1] * (1 + self.commission + 0.001))
                     )
                     final_size = min(buy_prop_size, afforded_size)
                     if self.transaction_logging:

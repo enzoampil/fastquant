@@ -220,7 +220,7 @@ class Network:
         # replace some few remaining NaNs with interpolated values
         df.interpolate(method=method, limit=5, inplace=True)
         # remove columns with any remaining NaNs
-        #df.dropna(how="any", axis=1, inplace=True)
+        # df.dropna(how="any", axis=1, inplace=True)
         return df
 
     def compute_corr(
