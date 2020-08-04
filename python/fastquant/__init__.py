@@ -6,6 +6,3 @@ from .portfolio import *
 from .config import *
 from .backtest import *
 from .data import *
-
-fastquant_var = 123
-
