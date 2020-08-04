@@ -16,7 +16,7 @@ CRYPTO_EXCHANGES = [
 
 
 def unix_time_millis(date):
-    epoch = datetime.utcfromtimestamp(0)
+    # epoch = datetime.utcfromtimestamp(0)
     dt = datetime.strptime(date, "%Y-%m-%d")
     # return int((dt - epoch).total_seconds() * 1000)
     return int(dt.timestamp() * 1000)
