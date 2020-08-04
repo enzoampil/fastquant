@@ -19,13 +19,13 @@ get_crypto_data <- function(symbol, start_date, end_date) {
   start_date <- format(as.numeric(as.POSIXct(start_date)) * 1e3, scientific = FALSE)
   end_date <- format(as.numeric(as.POSIXct(end_date)) * 1e3, scientific = FALSE)
 
-  params <- paste0(str_c("symbol=", symbol),
-                   "interval=1d",
-                   str_c("startTime=", start_date),
-                   str_c("endTime=", end_date),
-                   collapse = "&")
+  params <- paste(stringr::str_c("symbol=", symbol),
+                  "interval=1d",
+                  stringr::str_c("startTime=", start_date),
+                  stringr::str_c("endTime=", end_date),
+                  sep = "&")
+  res <- httr::GET(stringr::str_c(endpoint, params)) %>%
+    httr::content("parsed")
 
-  res <- GET(str_c(endpoint, params)) %>%
-    content("application/json")
-
+  res
 }
