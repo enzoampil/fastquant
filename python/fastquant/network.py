@@ -17,10 +17,11 @@ import pandas as pd
 import networkx as nx
 
 # Import from package
-from fastquant import get_pse_data_cache, DATA_PATH
+from fastquant.data import get_pse_data_cache
+from fastquant.config import DATA_PATH, CALENDAR_FORMAT
 
 pl.style.use("fivethirtyeight")
-CALENDAR_FORMAT = "%m-%d-%Y"
+
 TODAY = datetime.now().date().strftime(CALENDAR_FORMAT)
 
 __all__ = ["Network"]

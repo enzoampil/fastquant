@@ -26,7 +26,8 @@ import matplotlib.pyplot as pl
 import matplotlib as mpl
 
 # Import from package
-from fastquant import get_stock_data, DATA_PATH
+from fastquant.data import get_stock_data
+from fastquant.config import DATA_PATH
 from fastquant.disclosures.base import (
     _remove_amend,
     format_date,

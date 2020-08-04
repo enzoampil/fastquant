@@ -43,7 +43,7 @@ def test_get_stock_data():
 
 def test_get_crypto_data():
     # test that multiple exchanges work
-    from fastquant.crypto import CRYPTO_EXCHANGES
+    from fastquant import CRYPTO_EXCHANGES
 
     exchange_pairs = {
         "binance": "BTC/USDT",

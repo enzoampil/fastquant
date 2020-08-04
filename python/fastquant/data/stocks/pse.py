@@ -9,46 +9,25 @@ Created on Tue Jun 25 19:48:03 2019
 import os
 import requests
 from datetime import datetime, timedelta
-import time
 from pathlib import Path
-from pkg_resources import resource_filename
 
 # Import modules
 import pandas as pd
 import numpy as np
 import lxml.html as LH
 from tqdm import tqdm
-import tweepy
-import yfinance as yf
-from nltk.sentiment.vader import SentimentIntensityAnalyzer
-import nltk
-from urllib.request import urlopen
-from bs4 import BeautifulSoup
-from .crypto import get_crypto_data
 
-DATA_PATH = resource_filename(__name__, "data")
-
-PSE_TWITTER_ACCOUNTS = [
-    "phstockexchange",
-    "colfinancial",
-    "firstmetrosec",
-    "BPItrade",
-    "Philstocks_",
-    "itradeph",
-    "UTradePH",
-    "wealthsec",
-]
-
-DATA_FORMAT_COLS = {
-    "o": "open",
-    "h": "high",
-    "l": "low",
-    "c": "close",
-    "v": "volume",
-    "i": "openinterest",
-}
-
-CALENDAR_FORMAT = "%Y-%m-%d"
+# Import package modules
+from fastquant.config import (
+    DATA_PATH,
+    PSE_TWITTER_ACCOUNTS,
+    DATA_FORMAT_COLS,
+    CALENDAR_FORMAT,
+    PSE_STOCK_TABLE_FILE,
+    PSE_CACHE_FILE,
+)
+from fastquant.data.stocks.phisix import get_phisix_data
+from fastquant.data.stocks.yahoofinance import get_yahoo_data
 
 
 def get_stock_table(stock_table_fp=None):
@@ -56,7 +35,7 @@ def get_stock_table(stock_table_fp=None):
     Returns dataframe containing info about PSE listed stocks while also saving it
     """
     if stock_table_fp is None:
-        stock_table_fp = Path(DATA_PATH, "stock_table.csv")
+        stock_table_fp = Path(DATA_PATH, PSE_STOCK_TABLE_FILE)
 
     stock_table = pd.DataFrame(
         columns=[
@@ -117,23 +96,9 @@ def get_stock_table(stock_table_fp=None):
     return stock_table
 
 
-def fill_gaps(df):
-    """
-    Fills gaps of time series dataframe with NaN rows
-    """
-    idx = pd.period_range(df.index.min(), df.index.max(), freq="D")
-    # idx_forecast = pd.period_range(start_datetime, end_datetime, freq="H")
-    ts = pd.DataFrame({"empty": [0 for i in range(idx.shape[0])]}, index=idx)
-    ts = ts.to_timestamp()
-    df_filled = pd.concat([df, ts], axis=1)
-    del df_filled["empty"]
-    return df_filled
-
-
 def get_pse_data_old(
     symbol, start_date, end_date, stock_table_fp=None, verbose=True
 ):
-
     """Returns pricing data for a specified stock.
 
     Parameters
@@ -200,62 +165,39 @@ def get_pse_data_old(
     return df
 
 
-def process_phisix_date_dict(phisix_dict):
-    date = datetime.strftime(
-        pd.to_datetime(phisix_dict["as_of"]).date(), CALENDAR_FORMAT
-    )
-    stock_dict = phisix_dict["stock"][0]
-    stock_price_dict = stock_dict["price"]
-    name = stock_dict["name"]
-    currency = stock_price_dict["currency"]
-    closing_price = stock_price_dict["amount"]
-    percent_change = stock_dict["percent_change"]
-    volume = stock_dict["volume"]
-    symbol = stock_dict["symbol"]
-    return {
-        "dt": date,
-        "name": name,
-        "currency": currency,
-        "close": closing_price,
-        "percent_change": percent_change,
-        "volume": volume,
-        "symbol": symbol,
-    }
-
-
-def get_phisix_data_by_date(symbol, date):
+def get_pse_data_cache(
+    symbol=None, cache_fp=None, update=False, verbose=False
+):
     """
-    Requests data in json format from phisix API
-
-    Note: new API endpoint is now used, with fallback to old API
+    Loads cached historical data
+    Returns all if symbol is None
     """
+    if update:
+        update_pse_data_cache()
+    if cache_fp is None:
+        cache_fp = Path(DATA_PATH, PSE_CACHE_FILE)
 
-    new_endpoint = "http://1.phisix-api.appspot.com/stocks/"
-    url = new_endpoint + "{}.{}.json".format(symbol, date)
-    res = requests.get(url)
-    if res.ok:
-        unprocessed_dict = res.json()
-        processed_dict = process_phisix_date_dict(unprocessed_dict)
-        return processed_dict
+    if cache_fp.exists():
+        df = pd.read_csv(cache_fp, index_col=0, header=[0, 1])
+        df.index = pd.to_datetime(df.index)
+        if verbose:
+            print("Loaded: ", cache_fp)
+        return (
+            df
+            if symbol is None
+            else df[symbol]
+            if symbol in df.columns
+            else None
+        )
     else:
-        # fallback to old endpoint
-        old_endpoint = "http://phisix-api2.appspot.com/stocks/"
-        url = old_endpoint + "{}.{}.json".format(symbol, date)
-        res = requests.get(url)
-        if res.ok:
-            unprocessed_dict = res.json()
-            processed_dict = process_phisix_date_dict(unprocessed_dict)
-            return processed_dict
-        else:
-            if res.status_code == 500:
-                # server error
-                res.raise_for_status()
-            else:
-                # non-trading day
-                return None
+        errmsg = "Cache does not exist! Try update=True"
+        print(errmsg)
+        return None
 
 
-def update_pse_data_cache(start_date="2010-01-01", verbose=True):
+def update_pse_data_cache(
+    start_date="2010-01-01", verbose=True, cache_fp=None
+):
     """
     Downloads DOHLC data of all PSE comapnies using get_pse_old
     and saves as .zip in /data to be used as cache
@@ -287,97 +229,13 @@ def update_pse_data_cache(start_date="2010-01-01", verbose=True):
     DF.index.name = "dt"
 
     # save as csv
-    ofp = Path(DATA_PATH, "merged_stock_data.zip")
-    DF.to_csv(ofp, index=True)
-    if verbose:
-        print("Saved: ", ofp)
-    # return DF
-
-
-def get_pse_data_cache(
-    symbol=None, cache_fp=None, update=False, verbose=False
-):
-    """
-    Loads cached historical data
-    Returns all if symbol is None
-    """
-    if update:
-        update_pse_data_cache()
     if cache_fp is None:
-        cache_fp = Path(DATA_PATH, "merged_stock_data.zip")
+        cache_fp = Path(DATA_PATH, PSE_CACHE_FILE)
 
-    if cache_fp.exists():
-        df = pd.read_csv(cache_fp, index_col=0, header=[0, 1])
-        df.index = pd.to_datetime(df.index)
-        if verbose:
-            print("Loaded: ", cache_fp)
-        return (
-            df
-            if symbol is None
-            else df[symbol]
-            if symbol in df.columns
-            else None
-        )
-    else:
-        errmsg = "Cache does not exist! Try update=True"
-        print(errmsg)
-        return None
-
-
-def get_phisix_data(
-    symbol, start_date, end_date, save=False, max_straight_nones=10
-):
-    """Returns pricing data for a PHISIX stock symbol.
-
-    Parameters
-    ----------
-    symbol : str
-        Symbol of the stock in the PSE. You can refer to this link: https://www.pesobility.com/stock.
-    start_date : str
-        Starting date (YYYY-MM-DD) of the period that you want to get data on
-    end_date : str
-        Ending date (YYYY-MM-DD) of the period you want to get data on
-
-    Returns
-    -------
-    pandas.DataFrame
-        Stock data (in CV format) for the specified company and date range
-    """
-    date_range = (
-        pd.period_range(start_date, end_date, freq="D")
-        .to_series()
-        .astype(str)
-        .values
-    )
-
-    max_straight_nones = min(max_straight_nones, len(date_range))
-    pse_data_list = []
-    straight_none_count = 0
-    for i, date in tqdm(enumerate(date_range)):
-        iter_num = i + 1
-        pse_data_1day = get_phisix_data_by_date(symbol, date)
-
-        # Return None if the first `max_straight_nones` phisix iterations return Nones (status_code != 200)
-        if pse_data_1day is None:
-            if iter_num < max_straight_nones:
-                straight_none_count += 1
-            else:
-                straight_none_count += 1
-                if straight_none_count >= max_straight_nones:
-                    print(
-                        "{} not found in phisix after the first {} date iterations!".format(
-                            symbol, straight_none_count
-                        )
-                    )
-                    return None
-            continue
-        else:
-            # Refresh straight none count when phisix returns
-            straight_none_count = 0
-        pse_data_list.append(pse_data_1day)
-    pse_data_df = pd.DataFrame(pse_data_list)
-    pse_data_df = pse_data_df[["dt", "close", "volume"]]
-    return pse_data_df
+    DF.to_csv(cache_fp, index=True)
+    if verbose:
+        print("Saved: ", cache_fp)
+    # return DF
 
 
 def get_pse_data(
@@ -450,43 +308,14 @@ def get_pse_data(
     return pse_data_df.set_index("dt")
 
 
-def get_yahoo_data(symbol, start_date, end_date):
-    """Returns pricing data for a YAHOO stock symbol.
-
-    Parameters
-    ----------
-    symbol : str
-        Symbol of the stock in the Yahoo. You can refer to this link:
-        https://www.nasdaq.com/market-activity/stocks/screener?exchange=nasdaq.
-    start_date : str
-        Starting date (YYYY-MM-DD) of the period that you want to get data on
-    end_date : str
-        Ending date (YYYY-MM-DD) of the period you want to get data on
-
-    Returns
-    -------
-    pandas.DataFrame
-        Stock data (in OHLCAV format) for the specified company and date range
-    """
-    df = yf.download(symbol, start=start_date, end=end_date)
-    df = df.reset_index()
-    rename_dict = {
-        "Date": "dt",
-        "Open": "open",
-        "High": "high",
-        "Low": "low",
-        "Close": "close",
-        "Adj Close": "adj_close",
-        "Volume": "volume",
-    }
-    rename_list = ["dt", "open", "high", "low", "close", "adj_close", "volume"]
-    df = df.rename(columns=rename_dict)[rename_list].drop_duplicates()
-    df["dt"] = pd.to_datetime(df.dt)
-    return df.set_index("dt")
+def datestring_to_datetime(date, sep="-"):
+    ymd = date.split(sep)
+    errmsg = "date format must be YYYY-MM-DD"
+    assert len(ymd[0]) == 4, errmsg
+    return datetime(*map(int, ymd))
 
 
 def get_stock_data(symbol, start_date, end_date, source="phisix", format="c"):
-
     """Returns pricing data for a specified stock and source.
 
     Parameters
@@ -544,7 +373,10 @@ def pse_data_to_csv(symbol, start_date, end_date, pse_dir=DATA_PATH):
     """
     pse = get_pse_data(symbol, start_date, end_date)
     fp = Path(
-        pse_dir, "{}_{}_{}_OHLCV.csv".format(symbol, start_date, end_date)
+        pse_dir,
+        "{}_{}_{}_OHLCV.csCRYPTO_EXCHANGESv".format(
+            symbol, start_date, end_date
+        ),
     )
     if isinstance(pse, pd.DataFrame):
         pse.to_csv(fp)
@@ -561,89 +393,3 @@ def pse_data_to_csv(symbol, start_date, end_date, pse_dir=DATA_PATH):
                 pse_dir, "{}_{}_{}_E.csv".format(symbol, start_date, end_date)
             )
         )
-
-
-def tweepy_api(consumer_key, consumer_secret, access_token, access_secret):
-    """
-    Returns authenticated tweepy.API object
-
-    Sample methods:
-        user_timeline: returns recent tweets from a specified twitter user
-        - screen_name: username of account of interest
-        - count: number of most recent tweets to return
-    """
-    auth = tweepy.OAuthHandler(consumer_key, consumer_secret)
-    auth.set_access_token(access_token, access_secret)
-    api = tweepy.API(auth)
-    return api
-
-
-def datestring_to_datetime(date, sep="-"):
-    ymd = date.split(sep)
-    errmsg = "date format must be YYYY-MM-DD"
-    assert len(ymd[0]) == 4, errmsg
-    return datetime(*map(int, ymd))
-
-
-def get_bt_news_sentiment(keyword, page_nums=None):
-    """
-    This function scrapes Business Times (https://www.businesstimes.com.sg) articles by giving
-    a specific keyword e.g "facebook, jollibee" and number of pages that you needed.
-
-    Parameters
-    ----------
-    keyword : str
-        The keyword you wanted to search for in Business Times page.
-    page_nums : int
-        The number of iteration of pages you want to scrape.
-
-    Returns
-    ----------
-    date_sentiments: dict
-        The dictionary output of the scraped data in form of {date: sentiment score}
-
-    TO DO: change page_nums to a start_date (and end_date maybe)
-    """
-
-    nltk.download("vader_lexicon", quiet=True)  # download vader lexicon
-
-    if page_nums is None:
-        page_nums = 1
-        print("no page numbers indicated, setting this variable to 1")
-
-    date_sentiments = {}
-    sia = SentimentIntensityAnalyzer()
-
-    for i in tqdm(range(1, page_nums + 1)):
-        page = urlopen(
-            "https://www.businesstimes.com.sg/search/{}?page={}".format(
-                keyword.replace(" ", "%20"), str(i)
-            )
-        ).read()
-        soup = BeautifulSoup(page, features="html.parser")
-        posts = soup.findAll("div", {"class": "media-body"})
-        for post in posts:
-            time.sleep(1)
-            url = post.a["href"]
-            date = post.time.text
-            try:
-                link_page = urlopen(url).read()
-            except Exception:
-                url = url[:-2]
-                link_page = urlopen(url).read()
-            link_soup = BeautifulSoup(link_page, features="lxml")
-            sentences = link_soup.findAll("p")
-            passage = ""
-            for sentence in sentences:
-                passage += sentence.text
-            sentiment = sia.polarity_scores(passage)["compound"]
-            date_sentiments.setdefault(date, []).append(sentiment)
-
-    date_sentiment = {}
-
-    for k, v in date_sentiments.items():
-        date_sentiment[
-            datetime.strptime(k, "%d %b %Y").date() + timedelta(days=1)
-        ] = round(sum(v) / float(len(v)), 3)
-
-    return date_sentiment

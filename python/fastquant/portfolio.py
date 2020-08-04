@@ -11,7 +11,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 import scipy.optimize as optimization
-from fastquant import get_stock_data
+from fastquant.data import get_stock_data
 
 TODAY = datetime.now().date().strftime("%Y-%m-%d")
 

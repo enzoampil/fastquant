@@ -1,4 +1,4 @@
-# Import strategies here to include in fastquant.stragegies.*
+# Modules available for fastquant.strategies.*
 
 from fastquant.strategies.base import BaseStrategy
 from fastquant.strategies.bollinger_band import BBandsStrategy

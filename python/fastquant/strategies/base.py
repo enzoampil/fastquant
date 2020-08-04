@@ -19,7 +19,8 @@ import pandas as pd
 import numpy as np
 from collections.abc import Iterable
 import time
-from fastquant import get_bt_news_sentiment
+
+# from fastquant.data import get_bt_news_sentiment
 from fastquant.indicators import Sentiment
 
 from fastquant.config import (
