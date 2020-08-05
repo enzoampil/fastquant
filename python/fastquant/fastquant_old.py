@@ -24,7 +24,9 @@ from nltk.sentiment.vader import SentimentIntensityAnalyzer
 import nltk
 from urllib.request import urlopen
 from bs4 import BeautifulSoup
-from .crypto import get_crypto_data
+
+# from fastquant import get_crypto_data
+from data.crypto import get_crypto_data
 
 DATA_PATH = resource_filename(__name__, "data")
 
@@ -133,7 +135,6 @@ def fill_gaps(df):
 def get_pse_data_old(
     symbol, start_date, end_date, stock_table_fp=None, verbose=True
 ):
-
     """Returns pricing data for a specified stock.
 
     Parameters
@@ -486,7 +487,6 @@ def get_yahoo_data(symbol, start_date, end_date):
 
 
 def get_stock_data(symbol, start_date, end_date, source="phisix", format="c"):
-
     """Returns pricing data for a specified stock and source.
 
     Parameters
@@ -544,7 +544,10 @@ def pse_data_to_csv(symbol, start_date, end_date, pse_dir=DATA_PATH):
     """
     pse = get_pse_data(symbol, start_date, end_date)
     fp = Path(
-        pse_dir, "{}_{}_{}_OHLCV.csv".format(symbol, start_date, end_date)
+        pse_dir,
+        "{}_{}_{}_OHLCV.csCRYPTO_EXCHANGESv".format(
+            symbol, start_date, end_date
+        ),
     )
     if isinstance(pse, pd.DataFrame):
         pse.to_csv(fp)
