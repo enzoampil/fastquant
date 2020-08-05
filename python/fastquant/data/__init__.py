@@ -7,8 +7,6 @@ from fastquant.data.stocks.pse import (
     get_yahoo_data,
     # Gets listed PSE companies
     get_stock_table,
-    # Combines get_pse_data and yahoo_data
-    get_stock_data,
     # Combines get_phisix_data and get_pse_data_cache
     get_pse_data,
     # Gets data from PHISIX
@@ -18,5 +16,9 @@ from fastquant.data.stocks.pse import (
     pse_data_to_csv,
 )
 
+# Combines get_pse_data and yahoo_data
+from fastquant.data.stocks.stocks import get_stock_data
+
+# Businesstimes news
 from fastquant.data.web.businesstimes import get_bt_news_sentiment
 from fastquant.data.web.twitter import tweepy_api
