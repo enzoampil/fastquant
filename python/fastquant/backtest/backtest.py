@@ -99,12 +99,12 @@ def backtest(
     data,  # Treated as csv path is str, and dataframe of pd.DataFrame
     commission=COMMISSION_PER_TRANSACTION,
     init_cash=INIT_CASH,
-    data_format=None, # If none, format is automatically inferred
     plot=True,
     verbose=True,
     sort_by="rnorm",
     sentiments=None,
     strats=None,  # Only used when strategy = "multi"
+    data_format=None,  # If none, format is automatically inferred
     **kwargs
 ):
     """
