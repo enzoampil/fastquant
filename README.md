@@ -2,7 +2,7 @@
 [![Build Status](https://travis-ci.com/enzoampil/fastquant.svg?branch=master)](https://travis-ci.com/enzoampil/fastquant)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/ambv/black)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](https://raw.githubusercontent.com/enzoampil/fastquant/master/LICENSE)
-
+[![Downloads](https://pepy.tech/badge/fastquant/month)](https://pepy.tech/project/fastquant/month)
 ## Bringing backtesting to the mainstream
 
 **fastquant** allows you to easily backtest investment strategies with as few as 3 lines of python code. Its goal is to promote data driven investments by making quantitative analysis in finance accessible to everyone.
