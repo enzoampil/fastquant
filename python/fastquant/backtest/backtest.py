@@ -109,8 +109,28 @@ def backtest(
     data_format=None,  # If none, format is automatically inferred
     **kwargs
 ):
-    """
-    Backtest financial data with a specified trading strategy
+    """Backtest financial data with a specified trading strategy
+
+    Parameters
+    ----------------
+    strategy : str 
+        see list of accepted strategy keys below
+    data : pandas.DataFrame
+        dataframe with at least close price indexed with time
+    commission : float
+        commission per transaction [0, 1]
+    init_cash : float
+        initial cash (currency implied from `data`)
+    plot : bool
+        show plot backtrader (disabled if `strategy`=="multi")
+    sort_by : str
+        sort result by given metric (default='rnorm')
+    sentiments : pandas.DataFrame
+        df of sentiment [0, 1] indexed by time (applicable if `strategy`=='senti')
+    strats : dict
+        dictionary of strategy parameters (applicable if `strategy`=='multi')
+    data_format : str
+        input data format e.g. ohlcv (default=None so format is automatically inferred)
 
     {0}
     """
