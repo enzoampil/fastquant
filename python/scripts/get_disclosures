@@ -1,0 +1,87 @@
+#!/usr/bin/env python3
+"""
+Created on Tue Apr 5, 2020
+@author: jpdeleon
+
+download parsed company disclosures issued between specified dates
+"""
+import os
+import sys
+import argparse
+
+from pathlib import Path
+import matplotlib.pyplot as pl
+
+from fastquant import DisclosuresPSE
+from fastquant import DATA_PATH
+
+parser = argparse.ArgumentParser(
+    description="download company disclosures data"
+)
+parser.add_argument("symbol", type=str, help="company symbol")
+parser.add_argument(
+    "-t1",
+    "--start_date",
+    type=str,
+    help="start date (default=1-1-2020)",
+    default="1-1-2020",
+)
+parser.add_argument(
+    "-t2",
+    "--end_date",
+    type=str,
+    help="end date (default=TODAY)",
+    default=None,
+)
+parser.add_argument(
+    "-v", "--verbose", action="store_true", help="show details", default=False
+)
+parser.add_argument(
+    "-c",
+    "--clobber",
+    action="store_true",
+    help="clobber/overwrite",
+    default=False,
+)
+parser.add_argument(
+    "-p", "--plot", action="store_true", help="show plot", default=False
+)
+parser.add_argument(
+    "-o", "--outdir", type=str, help="output directory", default=DATA_PATH
+)
+parser.add_argument(
+    "-s",
+    "--savefig",
+    action="store_true",
+    help="save disclosures figure",
+    default=False,
+)
+parser.add_argument(
+    "-d",
+    "--disclosure_type",
+    type=str,
+    help="disclosure type (default=all)",
+    default="all",
+)
+
+# print help if no arguments supplied
+args = parser.parse_args(None if sys.argv[1:] else ["-h"])
+if __name__ == "__main__":
+    cd = DisclosuresPSE(
+        args.symbol,
+        start_date=args.start_date,
+        end_date=args.end_date,
+        disclosure_type=args.disclosure_type,
+        verbose=args.verbose,
+        clobber=args.clobber,
+    )
+    if not Path(args.outdir).exists():
+        os.makedirs(args.outdir)
+
+    fig = cd.plot_disclosures(disclosure_type=args.disclosure_type)
+    if args.plot:
+        pl.show()
+
+    if args.savefig:
+        fp = Path(args.outdir, "{}_disclosures.png".format(cd.symbol))
+        fig.savefig(fp)

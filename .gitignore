@@ -125,5 +125,10 @@ venv.bak/
 .dmypy.json
 dmypy.json
 
-# Pyre type checker
-.pyre/
+
+# Rproject cache folder
+.Rproj.user
+
+# R package cache
+fastquant.Rcheck/
+fastquant_0.0.0.9000.tar.gz
