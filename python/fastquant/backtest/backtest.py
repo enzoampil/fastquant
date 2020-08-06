@@ -88,7 +88,8 @@ def infer_data_format(data):
     # Set data format mapping
     data_format = {k: cols.index(k) if k in detected_cols else None for k, _ in DATA_FORMAT_BASE.items()}
     cols_to_alias = {v: k for k, v in DATA_FORMAT_COLS.items()}
-    data_format_alias = {cols_to_alias[k]: v for k, v in data_format.items()}
+    # Ignore "datetime" since it's assumed to be there when writing the alias
+    data_format_alias = {cols_to_alias[k]: v for k, v in data_format.items() if k != "datetime"}
     data_format_str = "".join(pd.Series(data_format_alias).dropna().sort_values().index.values.tolist())
     print("Data format detected:", data_format_str)
     return data_format
