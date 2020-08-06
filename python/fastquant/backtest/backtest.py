@@ -68,6 +68,22 @@ def docstring_parameter(*sub):
     return dec
 
 
+@docstring_parameter(", ".join(list(DATA_FORMAT_MAPPING.keys())))
+def infer_data_format(data):
+    """
+    Infers the data format of the dataframe based on the indices of its matched column names
+
+    The detectable column names are {0}
+    """
+    cols = data.columns.values.tolist()
+    detectable_cols = list(DATA_FORMAT_MAPPING.keys())
+    # Detected columns are those that are in both the dataframe and the list of detectable columns
+    detected_cols = set(cols).intersection(detectable_cols)
+    # Assertion error if no columns were detected
+    assert detected_cols, "No columns were detected! Please have at least one of: {}".format(detectable_cols)
+    data_format = {key for key in DATA_FORMAT_MAPPING.items()}
+
+
 @docstring_parameter(strat_docs)
 def backtest(
     strategy,
