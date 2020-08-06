@@ -41,6 +41,8 @@ from fastquant.config import (
     # strat_docs,
     # STRATEGY_MAPPING,
     GLOBAL_PARAMS,
+    DATA_FORMAT_BASE,
+    DATA_FORMAT_COLS,
 )
 
 
@@ -68,20 +70,27 @@ def docstring_parameter(*sub):
     return dec
 
 
-@docstring_parameter(", ".join(list(DATA_FORMAT_MAPPING.keys())))
+@docstring_parameter(", ".join(["dt"] + list(DATA_FORMAT_MAPPING.keys())))
 def infer_data_format(data):
     """
     Infers the data format of the dataframe based on the indices of its matched column names
 
     The detectable column names are {0}
     """
+    # Rename "dt" column to "datetime" to match the formal alias
+    data = data.rename(columns={"dt": "datetime"})
     cols = data.columns.values.tolist()
     detectable_cols = list(DATA_FORMAT_MAPPING.keys())
     # Detected columns are those that are in both the dataframe and the list of detectable columns
     detected_cols = set(cols).intersection(detectable_cols)
     # Assertion error if no columns were detected
     assert detected_cols, "No columns were detected! Please have at least one of: {}".format(detectable_cols)
-    data_format = {key for key in DATA_FORMAT_MAPPING.items()}
+    # Set data format mapping
+    data_format = {k: cols.index(k) if k in detected_cols else None for k, _ in DATA_FORMAT_BASE.items()}
+    data_format_alias = {DATA_FORMAT_COLS[k]: v for k, v in data_format.items()}
+    data_format_str = "".join(pd.Series(data_format_alias).dropna().sort_values().index.values.tolist())
+    print("Data format detected:", data_format_str)
+    return data_format
 
 
 @docstring_parameter(strat_docs)
@@ -90,7 +99,7 @@ def backtest(
     data,  # Treated as csv path is str, and dataframe of pd.DataFrame
     commission=COMMISSION_PER_TRANSACTION,
     init_cash=INIT_CASH,
-    data_format="c",
+    data_format=None, # If none, format is automatically inferred
     plot=True,
     verbose=True,
     sort_by="rnorm",
@@ -162,10 +171,11 @@ def backtest(
             senti_series, left_index=True, right_index=True, how="left"
         )
         data = data.reset_index()
+        data_format_dict = DATA_FORMAT_MAPPING[data_format] if data_format else infer_data_format(data)
 
         # create PandasData using SentimentDF
         pd_data = SentimentDF(
-            dataname=data, **DATA_FORMAT_MAPPING[data_format]
+            dataname=data, **data_format_dict
         )
 
     else:
@@ -173,8 +183,9 @@ def backtest(
         # This means `backtest` supports the dataframe whether `dt` is the index or a column
         if data.index.name == "dt":
             data = data.reset_index()
+        data_format_dict = DATA_FORMAT_MAPPING[data_format] if data_format else infer_data_format(data)
         pd_data = bt.feeds.PandasData(
-            dataname=data, **DATA_FORMAT_MAPPING[data_format]
+            dataname=data, **data_format_dict
         )
 
     cerebro.adddata(pd_data)
