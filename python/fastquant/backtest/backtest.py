@@ -70,7 +70,7 @@ def docstring_parameter(*sub):
     return dec
 
 
-@docstring_parameter(", ".join(["dt"] + list(DATA_FORMAT_MAPPING.keys())))
+@docstring_parameter(", ".join(["dt"] + list(DATA_FORMAT_BASE.keys())))
 def infer_data_format(data):
     """
     Infers the data format of the dataframe based on the indices of its matched column names
@@ -80,7 +80,7 @@ def infer_data_format(data):
     # Rename "dt" column to "datetime" to match the formal alias
     data = data.rename(columns={"dt": "datetime"})
     cols = data.columns.values.tolist()
-    detectable_cols = list(DATA_FORMAT_MAPPING.keys())
+    detectable_cols = list(DATA_FORMAT_BASE.keys())
     # Detected columns are those that are in both the dataframe and the list of detectable columns
     detected_cols = set(cols).intersection(detectable_cols)
     # Assertion error if no columns were detected
