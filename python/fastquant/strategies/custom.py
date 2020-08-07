@@ -30,28 +30,25 @@ class CustomStrategy(CustomStrategy):
     """
 
     params = (
-        ("upper", 80),  # period for the fast moving average
-        ("lower", 20),
+        ("upper_limit", 80),  # period for the fast moving average
+        ("lower_limit", 20),
     )
 
     def __init__(self):
         # Initialize global variables
         super().__init__()
         # Strategy level variables
-        self.fast_period = self.params.fast_period
-        self.slow_period = self.params.slow_period
+        self.upper_limit = self.params.upper_limit
+        self.lower_limit = self.params.lower_limit
+        self.custom = self.lines.custom[0]
 
         print("===Strategy level arguments===")
-        print("fast_period :", self.fast_period)
-        print("slow_period :", self.slow_period)
-        sma_fast = bt.ind.SMA(period=self.fast_period)  # fast moving average
-        sma_slow = bt.ind.SMA(period=self.slow_period)  # slow moving average
-        self.crossover = bt.ind.CrossOver(
-            sma_fast, sma_slow
-        )  # crossover signal
+        print("Upper limit :", self.upper_limit)
+        print("Lower limit :", self.lower_limit)
 
+    # Buy when the custom indicator is below the lower limit, and sell when it's above the upper limit
     def buy_signal(self):
-        return self.crossover > 0
+        return self.custom < self.lower_limit
 
     def sell_signal(self):
-        return self.crossover < 0
+        return self.custom > self.upper_limit

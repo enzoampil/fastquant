@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+q#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 # Import standard library
 from __future__ import (
@@ -19,10 +19,9 @@ class CustomIndicator(bt.Indicator):
 
     """
     Custom Indicator
-    Implementation of sentiment custom indicator using nltk/textblob pre-built sentiment models
     """
 
-    lines = ("sentiment",)
+    lines = ("custom",)
 
     plotinfo = dict(
         plotymargin=0.15, plothlines=[0], plotyticks=[1.0, 0, -1.0]
@@ -45,4 +44,4 @@ class CustomIndicator(bt.Indicator):
         return
 
     def next(self):
-        self.lines.sentiment[0] = self.datas[0].sentiment_score[0]
+        self.lines.custom[0] = self.datas[0].custom[0]
