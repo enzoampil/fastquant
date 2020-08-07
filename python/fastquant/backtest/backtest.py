@@ -181,6 +181,17 @@ def backtest(
             print("Reading path as pandas dataframe ...")
         data = pd.read_csv(data, header=0, parse_dates=["dt"])
 
+    class CustomData(bt.feeds.PandasData):
+        """
+        Data feed that includes all the columns in the input dataframe
+        """
+        # Add a custom lines to the inherited ones from the base class
+        lines = tuple(data.columns)
+
+        # automatically handle parameter with -1
+        # add the parameter to the parameters inherited from the base class
+        params = tuple([(col, -1) for col in data.columns])
+
     # extend the dataframe with sentiment score
     if strategy == "sentiment":
         # initialize series for sentiments
@@ -206,7 +217,7 @@ def backtest(
         if data.index.name == "dt":
             data = data.reset_index()
         data_format_dict = DATA_FORMAT_MAPPING[data_format] if data_format else infer_data_format(data)
-        pd_data = bt.feeds.PandasData(
+        pd_data = CustomData(
             dataname=data, **data_format_dict
         )
 
