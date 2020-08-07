@@ -36,7 +36,6 @@ from fastquant.disclosures.base import (
 )
 
 warnings.simplefilter("ignore")
-mpl.style.use("default")  # change to default from fivethirtyeight
 
 COOKIES = {
     "BIGipServerPOOL_EDGE": "1427584378.20480.0000",
