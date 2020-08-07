@@ -25,5 +25,5 @@ import fastquant
 #### Environment
 
 -  platform (e.g. Linux, OSX, Windows):
--  lightkurve version (e.g. 1.0b6):
+-  fastquant version (e.g. 0.1.3.17)
 -  installation method (e.g. pip, conda, source):
