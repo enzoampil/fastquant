@@ -2,7 +2,7 @@
 [![Build Status](https://travis-ci.com/enzoampil/fastquant.svg?branch=master)](https://travis-ci.com/enzoampil/fastquant)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/ambv/black)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](https://raw.githubusercontent.com/enzoampil/fastquant/master/LICENSE)
-
+[![Downloads](https://pepy.tech/badge/fastquant/month)](https://pepy.tech/project/fastquant/month)
 ## Bringing backtesting to the mainstream
 
 **fastquant** allows you to easily backtest investment strategies with as few as 3 lines of python code. Its goal is to promote data driven investments by making quantitative analysis in finance accessible to everyone.
@@ -12,6 +12,8 @@
 2. Backtest and optimize trading strategies with only 3 lines of code
 
 <sup>`*` - Both Yahoo Finance and Philippine stock data data are accessible straight from fastquant<sup>
+
+Check out our blog posts in the fastquant [website](https://enzoampil.github.io/fastquant-blog/) and this intro [article](https://towardsdatascience.com/backtest-your-trading-strategy-with-only-3-lines-of-python-3859b4a4ab44?source=friends_link&sk=ec647b6bb43fe322013248fd1d473015) on Medium!
 
 ## Installation
 
@@ -23,11 +25,14 @@ pip install fastquant
 
 ### R
 
-R support is pending development, but you may install the R package by typing the following 
+R support is pending development and lagging in features, but you may install the R package by typing the following: 
 
 ```
-# install.packages("remotes")
+# To install the stable version: 
+install.packages("fastquant")
 
+# To install the development version: 
+# install.packages("remotes")
 remotes::install_github("enzoampil/fastquant", subdir = "R")
 ```
 
@@ -54,10 +59,21 @@ print(df.head())
 ```
 library(fastquant)
 
-get_pse_data("JFC", "2018-01-01", "2019-01-01")
+get_stock_data("JFC", "2018-01-01", "2018-02-01")
+
+#> # A tibble: 22 x 7
+#>    symbol dt         name     currency close percent_change  volume
+#>    <chr>  <date>     <chr>    <chr>    <dbl>          <dbl>   <dbl>
+#>  1 JFC    2018-01-03 Jollibee PHP       255.             NA  745780
+#>  2 JFC    2018-01-04 Jollibee PHP       255              NA  617010
+#>  3 JFC    2018-01-05 Jollibee PHP       255              NA  946040
+#>  4 JFC    2018-01-08 Jollibee PHP       256              NA  840630
+#> ...
 ```
 
-*Note: Python has Yahoo Finance and phisix support. R only has phisix support. Symbols from Yahoo Finance will return closing prices in USD, while symbols from PSE will return closing prices in PHP*
+*Note: Python has Yahoo Finance and phisix support. R has phisix support and porting to symbols from the `quantmod` package. Symbols from Yahoo Finance will return closing prices in USD, while symbols from PSE will return closing prices in PHP.*
+
+*R does NOT have support for cryptocurrency data pulling and backtesting yet as of v0.1.2*
 
 ## Get crypto data
 The data is pulled from Binance, and all the available tickers are found [here](https://coinmarketcap.com/exchanges/binance/).

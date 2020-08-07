@@ -1,13 +1,24 @@
 Package: fastquant
-Title: What the Package Does (One Line, Title Case)
-Version: 0.0.0.9000
+Title: Backtest Investment Strategies with 3 Lines of Code
+Version: 0.1.2
 Authors@R: 
-    person(given = "First",
-           family = "Last",
-           role = c("aut", "cre"),
-           email = "first.last@example.com",
-           comment = c(ORCID = "YOUR-ORCID-ID"))
-Description: What the package does (one paragraph).
+    c(person(given = "Jose",
+             family = "Endrinal",
+             role = c("aut", "cre"),
+             email = "francis.endrinal@gmail.com"),
+      person(given = "Lorenzo",
+             family = "Ampil",
+             role = c("aut", "cph"),
+             email = "lorenzo.ampil@gmail.com"), 
+      person(given = "Jerome",
+             family = "de Leon",
+             role = c("aut"),
+             email = "jpdeleon.bsap@gmail.com"))
+Maintainer: Jose Endrinal <francis.endrinal@gmail.com>
+Description: Easily backtest investment strategies with as few as 3 lines of 
+  'Python' or 'R' code. Its goal is to promote data driven investing in finance 
+  accessible to everyone. This version only contains functionality for pulling 
+  Philippine Stock Exchange and Yahoo Finance stock data. 
 License: MIT + file LICENSE
 Imports: 
     dplyr,
@@ -16,9 +27,14 @@ Imports:
     purrr,
     tidyr,
     lubridate,
-    assertthat
+    assertthat,
+    quantmod,
+    tibble,
+    stringr
 Encoding: UTF-8
 LazyData: true
-RoxygenNote: 7.1.0
+RoxygenNote: 7.1.1
 Suggests: 
-    testthat
+    testthat,
+    spelling
+Language: en-US
