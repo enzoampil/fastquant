@@ -204,7 +204,6 @@ def backtest(
 
         # Need to make sure that the new lines don't overlap w/ the default lines already in PandasData
         lines = non_default_numeric_cols
-        print(lines)
 
         # automatically handle parameter with -1
         # add the parameter to the parameters inherited from the base class
