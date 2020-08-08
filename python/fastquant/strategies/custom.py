@@ -14,9 +14,10 @@ import backtrader as bt
 
 # Import from package
 from fastquant.strategies.base import BaseStrategy
+from fastquant.indicators.custom import CustomIndicator
 
 
-class CustomStrategy(CustomStrategy):
+class CustomStrategy(BaseStrategy):
     """
     Simple moving average crossover strategy
 

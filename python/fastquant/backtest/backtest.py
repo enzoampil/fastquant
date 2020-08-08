@@ -32,6 +32,7 @@ from fastquant.strategies import (
     BBandsStrategy,
     BuyAndHoldStrategy,
     SentimentStrategy,
+    CustomStrategy,
 )
 
 # Import backtest variables
@@ -56,6 +57,7 @@ STRATEGY_MAPPING = {
     "bbands": BBandsStrategy,
     "buynhold": BuyAndHoldStrategy,
     "sentiment": SentimentStrategy,
+    "custom": CustomStrategy,
 }
 
 strat_docs = "\nExisting strategies:\n\n" + "\n".join(
