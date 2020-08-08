@@ -188,15 +188,6 @@ def backtest(
             print("Reading path as pandas dataframe ...")
         # Rename dt to datetime
         data = pd.read_csv(data, header=0, parse_dates=["dt"])
-    
-    # If data has `dt` as the index, set `dt` as the first column
-    # This means `backtest` supports the dataframe whether `dt` is the index or a column
-    if data.index.name == "dt":
-        data = data.reset_index()
-    # Rename "dt" column to "datetime" to match the formal alias
-    data = data.rename(columns={"dt": "datetime"})
-    data["datetime"] = pd.to_datetime(data.datetime)
-    print(data.columns)
 
     if strategy == "sentiment":
         # initialize series for sentiments
@@ -209,7 +200,14 @@ def backtest(
             senti_series, left_index=True, right_index=True, how="left"
         )
         data = data.reset_index()
-        #data_format_dict = DATA_FORMAT_MAPPING[data_format] if data_format else infer_data_format(data)
+
+    # If data has `dt` as the index, set `dt` as the first column
+    # This means `backtest` supports the dataframe whether `dt` is the index or a column
+    if data.index.name == "dt":
+        data = data.reset_index()
+    # Rename "dt" column to "datetime" to match the formal alias
+    data = data.rename(columns={"dt": "datetime"})
+    data["datetime"] = pd.to_datetime(data.datetime)
 
     numeric_cols = [col for col in data.columns if is_numeric_dtype(data[col])]
     params_tuple = tuple([(col, i) for i, col in enumerate(data.columns) if col in numeric_cols + ["datetime"]])
@@ -237,13 +235,7 @@ def backtest(
         )
 
     else:
-        #data_format_dict = DATA_FORMAT_MAPPING[data_format] if data_format else infer_data_format(data)
         data_format_dict = tuple_to_dict(params_tuple)
-        #for p, i in params_tuple:
-        #    if p not in data_format_dict.keys():
-        #        data_format_dict[p] = i
-
-        print(data_format_dict)
         pd_data = CustomData(
             dataname=data, **data_format_dict
         )
