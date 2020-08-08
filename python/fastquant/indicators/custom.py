@@ -25,8 +25,8 @@ class CustomIndicator(bt.Indicator):
 
     params = (
         ("custom_column", "custom"),
-        ("upper_limit", 80),
-        ("lower_limit", 20),
+        ("upper_limit", 95),
+        ("lower_limit", 5),
     )
 
     plotlines = dict(

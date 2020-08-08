@@ -31,8 +31,8 @@ class CustomStrategy(BaseStrategy):
     """
 
     params = (
-        ("upper_limit", 80),  # period for the fast moving average
-        ("lower_limit", 20),
+        ("upper_limit", 95),  # period for the fast moving average
+        ("lower_limit", 5),
         ("custom_column", "custom"),
         ("type", "strength_index"), # Plan to have modes: strength_index (like RSI), crossover (like SMAC), binary (just boolean)
     )
