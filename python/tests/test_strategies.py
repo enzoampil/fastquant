@@ -27,7 +27,7 @@ def test_backtest():
 
     for strategy in STRATEGY_MAPPING.keys():
         if strategy == "sentiment":
-            data = get_yahoo_data("TSLA", "2020-01-01", "2020-02-01")
+            data = get_yahoo_data("TSLA", "2020-01-01", "2020-07-04")
             sentiments = get_bt_news_sentiment(keyword="tesla", page_nums=2)
             cerebro = backtest(
                 strategy, data, sentiments=sentiments, senti=0.4, plot=False
