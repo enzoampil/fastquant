@@ -109,6 +109,8 @@ backtest('smac', df, fast_period=15, slow_period=40)
 
 ## Optimize trading strategies with automated grid search
 
+fastquant allows you to automatically measure the performance of your trading strategy on multiple combinations of parameters. All you need to do is to input the values as iterators (like as a `list` or `range`).
+
 ### Simple Moving Average Crossover (15 to 30 day MA vs 40 to 55 day MA)
 Daily Jollibee prices from 2018-01-01 to 2019-01-01
 
