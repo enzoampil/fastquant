@@ -19,6 +19,7 @@ import pandas as pd
 import numpy as np
 from collections.abc import Iterable
 import time
+from pandas.api.types import is_numeric_dtype
 
 # Import from package
 from fastquant.strategies.sentiment import SentimentDF
@@ -77,8 +78,6 @@ def infer_data_format(data):
 
     The detectable column names are {0}
     """
-    # Rename "dt" column to "datetime" to match the formal alias
-    data = data.rename(columns={"dt": "datetime"})
     cols = data.columns.values.tolist()
     detectable_cols = list(DATA_FORMAT_BASE.keys())
     # Detected columns are those that are in both the dataframe and the list of detectable columns
@@ -179,7 +178,13 @@ def backtest(
     if isinstance(data, str):
         if verbose:
             print("Reading path as pandas dataframe ...")
+        # Rename dt to datetime
         data = pd.read_csv(data, header=0, parse_dates=["dt"])
+    
+    # Rename "dt" column to "datetime" to match the formal alias
+    data = data.rename(columns={"dt": "datetime"})
+    print(data.columns)
+    numeric_cols = [col for col in data.columns if is_numeric_dtype(data[col])]
 
     class CustomData(bt.feeds.PandasData):
         """
@@ -190,7 +195,8 @@ def backtest(
 
         # automatically handle parameter with -1
         # add the parameter to the parameters inherited from the base class
-        params = tuple([(col, -1) for col in data.columns])
+        params = tuple([(col, i) for i, col in enumerate(data.columns) if col in numeric_cols])
+        print(params)
 
     # extend the dataframe with sentiment score
     if strategy == "sentiment":
@@ -204,6 +210,8 @@ def backtest(
             senti_series, left_index=True, right_index=True, how="left"
         )
         data = data.reset_index()
+        data = data.rename(columns={"dt": "datetime"})
+        data["datetime"] = pd.to_datetime(data["datetime"])
         data_format_dict = DATA_FORMAT_MAPPING[data_format] if data_format else infer_data_format(data)
 
         # create PandasData using SentimentDF
