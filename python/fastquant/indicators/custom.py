@@ -23,6 +23,10 @@ class CustomIndicator(bt.Indicator):
 
     lines = ("custom",)
 
+    params = (
+        ("custom_column", "custom"),
+    )
+
     plotinfo = dict(
         plotymargin=0.15, plothlines=[0], plotyticks=[1.0, 0, -1.0]
     )
@@ -40,8 +44,11 @@ class CustomIndicator(bt.Indicator):
         )
     )
 
+    def __init__(self):
+        self.custom_column = self.params.custom_column
+
     def _plotlabel(self):
         return
 
     def next(self):
-        self.lines.custom[0] = self.datas[0].custom[0]
+        self.lines.custom[0] = getattr(self.datas[0], self.custom_column)[0]
