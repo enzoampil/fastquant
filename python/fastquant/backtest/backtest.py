@@ -197,6 +197,20 @@ def backtest(
     data = data.rename(columns={"dt": "datetime"})
     data["datetime"] = pd.to_datetime(data.datetime)
     print(data.columns)
+
+    if strategy == "sentiment":
+        # initialize series for sentiments
+        senti_series = pd.Series(
+            sentiments, name="sentiment_score", dtype=float
+        )
+
+        # join and reset the index for dt to become the first column
+        data = data.merge(
+            senti_series, left_index=True, right_index=True, how="left"
+        )
+        data = data.reset_index()
+        #data_format_dict = DATA_FORMAT_MAPPING[data_format] if data_format else infer_data_format(data)
+
     numeric_cols = [col for col in data.columns if is_numeric_dtype(data[col])]
     params_tuple = tuple([(col, i) for i, col in enumerate(data.columns) if col in numeric_cols + ["datetime"]])
     default_cols = [c for c, _ in DEFAULT_PANDAS]
@@ -216,22 +230,9 @@ def backtest(
 
     # extend the dataframe with sentiment score
     if strategy == "sentiment":
-        # initialize series for sentiments
-        senti_series = pd.Series(
-            sentiments, name="sentiment_score", dtype=float
-        )
-
-        # join and reset the index for dt to become the first column
-        data = data.merge(
-            senti_series, left_index=True, right_index=True, how="left"
-        )
-        data = data.reset_index()
-        data = data.rename(columns={"dt": "datetime"})
-        data["datetime"] = pd.to_datetime(data["datetime"])
-        data_format_dict = DATA_FORMAT_MAPPING[data_format] if data_format else infer_data_format(data)
-
+        data_format_dict = tuple_to_dict(params_tuple)
         # create PandasData using SentimentDF
-        pd_data = SentimentDF(
+        pd_data = CustomData(
             dataname=data, **data_format_dict
         )
 
