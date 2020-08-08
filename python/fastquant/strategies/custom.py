@@ -34,6 +34,7 @@ class CustomStrategy(BaseStrategy):
         ("upper_limit", 80),  # period for the fast moving average
         ("lower_limit", 20),
         ("custom_column", "custom"),
+        ("type", "strength_index"), # Plan to have modes: strength_index (like RSI), crossover (like SMAC), binary (just boolean)
     )
 
     def __init__(self):
@@ -43,7 +44,12 @@ class CustomStrategy(BaseStrategy):
         self.upper_limit = self.params.upper_limit
         self.lower_limit = self.params.lower_limit
         self.custom_column = self.params.custom_column
-        self.custom_indicator = CustomIndicator(self.custom_column)
+        self.custom_indicator = CustomIndicator(
+            self.data,
+            custom_column=self.custom_column,
+            upper_limit=self.params.upper_limit,
+            lower_limit=self.params.lower_limit
+        )
 
         print("===Strategy level arguments===")
         print("Upper limit :", self.upper_limit)
@@ -52,6 +58,8 @@ class CustomStrategy(BaseStrategy):
     # Buy when the custom indicator is below the lower limit, and sell when it's above the upper limit
     def buy_signal(self):
         return self.custom_indicator[0] < self.lower_limit
+        #return getattr(self.datas[0], self.custom_column) < self.lower_limit
 
     def sell_signal(self):
         return self.custom_indicator[0] > self.upper_limit
+        #return getattr(self.datas[0], self.custom_column) > self.upper_limit

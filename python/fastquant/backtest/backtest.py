@@ -45,6 +45,7 @@ from fastquant.config import (
     GLOBAL_PARAMS,
     DATA_FORMAT_BASE,
     DATA_FORMAT_COLS,
+    DEFAULT_PANDAS,
 )
 
 
@@ -71,6 +72,11 @@ def docstring_parameter(*sub):
         return obj
 
     return dec
+
+
+def tuple_to_dict(tup):
+    di = dict(tup)
+    return di
 
 
 @docstring_parameter(", ".join(["dt"] + list(DATA_FORMAT_BASE.keys())))
@@ -192,14 +198,21 @@ def backtest(
     data["datetime"] = pd.to_datetime(data.datetime)
     print(data.columns)
     numeric_cols = [col for col in data.columns if is_numeric_dtype(data[col])]
+    params_tuple = tuple([(col, i) for i, col in enumerate(data.columns) if col in numeric_cols + ["datetime"]])
+    default_cols = [c for c, _ in DEFAULT_PANDAS]
+    non_default_numeric_cols = tuple([col for col, _ in params_tuple if col not in default_cols])
 
     class CustomData(bt.feeds.PandasData):
         """
         Data feed that includes all the columns in the input dataframe
         """
+        # Need to make sure that the new lines don't overlap w/ the default lines already in PandasData
+        lines = non_default_numeric_cols
+        print(lines)
+        
         # automatically handle parameter with -1
         # add the parameter to the parameters inherited from the base class
-        params = tuple([(col, i) for i, col in enumerate(data.columns) if col in numeric_cols + ["datetime"]])
+        params = params_tuple
 
     # extend the dataframe with sentiment score
     if strategy == "sentiment":
@@ -223,7 +236,13 @@ def backtest(
         )
 
     else:
-        data_format_dict = DATA_FORMAT_MAPPING[data_format] if data_format else infer_data_format(data)
+        #data_format_dict = DATA_FORMAT_MAPPING[data_format] if data_format else infer_data_format(data)
+        data_format_dict = tuple_to_dict(params_tuple)
+        #for p, i in params_tuple:
+        #    if p not in data_format_dict.keys():
+        #        data_format_dict[p] = i
+
+        print(data_format_dict)
         pd_data = CustomData(
             dataname=data, **data_format_dict
         )
