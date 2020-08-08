@@ -45,6 +45,7 @@ class CustomIndicator(bt.Indicator):
     )
 
     def __init__(self):
+        super().__init__()
         self.custom_column = self.params.custom_column
 
     def _plotlabel(self):
