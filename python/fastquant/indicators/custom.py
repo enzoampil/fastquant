@@ -50,7 +50,9 @@ class CustomIndicator(bt.Indicator):
 
         # Plotting lines are based on the upper and lower limits
         CustomIndicator.plotinfo = dict(
-            plotymargin=0.15, plothlines=[0], plotyticks=[self.upper_limit, self.lower_limit]
+            plotymargin=0.15,
+            plothlines=[0],
+            plotyticks=[self.upper_limit, self.lower_limit],
         )
 
     def _plotlabel(self):

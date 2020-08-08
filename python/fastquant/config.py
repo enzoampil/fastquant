@@ -12,24 +12,24 @@ BUY_PROP = 1
 SELL_PROP = 1
 
 DEFAULT_PANDAS = (
-        ('datetime', None),
-        ('open', -1),
-        ('high', -1),
-        ('low', -1),
-        ('close', -1),
-        ('volume', -1),
-        ('openinterest', -1),
-    )
+    ("datetime", None),
+    ("open", -1),
+    ("high", -1),
+    ("low", -1),
+    ("close", -1),
+    ("volume", -1),
+    ("openinterest", -1),
+)
 
 DATA_FORMAT_BASE = {
-        "datetime": None,
-        "open": None,
-        "high": None,
-        "low": None,
-        "close": None,
-        "volume": None,
-        "openinterest": None,
-    }
+    "datetime": None,
+    "open": None,
+    "high": None,
+    "low": None,
+    "close": None,
+    "volume": None,
+    "openinterest": None,
+}
 
 DATA_FORMAT_MAPPING = {
     "cv": {

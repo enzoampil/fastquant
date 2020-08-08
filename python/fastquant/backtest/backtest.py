@@ -35,6 +35,7 @@ from fastquant.strategies import (
     CustomStrategy,
 )
 
+
 # Import backtest variables
 from fastquant.config import (
     INIT_CASH,
@@ -96,7 +97,7 @@ def backtest(
 
     Parameters
     ----------------
-    strategy : str 
+    strategy : str
         see list of accepted strategy keys below
     data : pandas.DataFrame
         dataframe with at least close price indexed with time
@@ -184,18 +185,27 @@ def backtest(
     data["datetime"] = pd.to_datetime(data.datetime)
 
     numeric_cols = [col for col in data.columns if is_numeric_dtype(data[col])]
-    params_tuple = tuple([(col, i) for i, col in enumerate(data.columns) if col in numeric_cols + ["datetime"]])
+    params_tuple = tuple(
+        [
+            (col, i)
+            for i, col in enumerate(data.columns)
+            if col in numeric_cols + ["datetime"]
+        ]
+    )
     default_cols = [c for c, _ in DEFAULT_PANDAS]
-    non_default_numeric_cols = tuple([col for col, _ in params_tuple if col not in default_cols])
+    non_default_numeric_cols = tuple(
+        [col for col, _ in params_tuple if col not in default_cols]
+    )
 
     class CustomData(bt.feeds.PandasData):
         """
         Data feed that includes all the columns in the input dataframe
         """
+
         # Need to make sure that the new lines don't overlap w/ the default lines already in PandasData
         lines = non_default_numeric_cols
         print(lines)
-        
+
         # automatically handle parameter with -1
         # add the parameter to the parameters inherited from the base class
         params = params_tuple
@@ -204,15 +214,11 @@ def backtest(
     if strategy == "sentiment":
         data_format_dict = tuple_to_dict(params_tuple)
         # create PandasData using SentimentDF
-        pd_data = CustomData(
-            dataname=data, **data_format_dict
-        )
+        pd_data = CustomData(dataname=data, **data_format_dict)
 
     else:
         data_format_dict = tuple_to_dict(params_tuple)
-        pd_data = CustomData(
-            dataname=data, **data_format_dict
-        )
+        pd_data = CustomData(dataname=data, **data_format_dict)
 
     cerebro.adddata(pd_data)
     cerebro.broker.setcash(init_cash)
