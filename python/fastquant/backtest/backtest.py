@@ -79,29 +79,6 @@ def tuple_to_dict(tup):
     return di
 
 
-@docstring_parameter(", ".join(["dt"] + list(DATA_FORMAT_BASE.keys())))
-def infer_data_format(data):
-    """
-    Infers the data format of the dataframe based on the indices of its matched column names
-
-    The detectable column names are {0}
-    """
-    cols = data.columns.values.tolist()
-    detectable_cols = list(DATA_FORMAT_BASE.keys())
-    # Detected columns are those that are in both the dataframe and the list of detectable columns
-    detected_cols = set(cols).intersection(detectable_cols)
-    # Assertion error if no columns were detected
-    assert detected_cols, "No columns were detected! Please have at least one of: {}".format(detectable_cols)
-    # Set data format mapping
-    data_format = {k: cols.index(k) if k in detected_cols else None for k, _ in DATA_FORMAT_BASE.items()}
-    cols_to_alias = {v: k for k, v in DATA_FORMAT_COLS.items()}
-    # Ignore "datetime" since it's assumed to be there when writing the alias
-    data_format_alias = {cols_to_alias[k]: v for k, v in data_format.items() if k != "datetime"}
-    data_format_str = "".join(pd.Series(data_format_alias).dropna().sort_values().index.values.tolist())
-    print("Data format detected:", data_format_str)
-    return data_format
-
-
 @docstring_parameter(strat_docs)
 def backtest(
     strategy,
@@ -113,7 +90,6 @@ def backtest(
     sort_by="rnorm",
     sentiments=None,
     strats=None,  # Only used when strategy = "multi"
-    data_format=None,  # If none, format is automatically inferred
     **kwargs
 ):
     """Backtest financial data with a specified trading strategy
@@ -136,8 +112,6 @@ def backtest(
         df of sentiment [0, 1] indexed by time (applicable if `strategy`=='senti')
     strats : dict
         dictionary of strategy parameters (applicable if `strategy`=='multi')
-    data_format : str
-        input data format e.g. ohlcv (default=None so format is automatically inferred)
 
     {0}
     """
