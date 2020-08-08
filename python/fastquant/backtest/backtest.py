@@ -183,8 +183,13 @@ def backtest(
         # Rename dt to datetime
         data = pd.read_csv(data, header=0, parse_dates=["dt"])
     
+    # If data has `dt` as the index, set `dt` as the first column
+    # This means `backtest` supports the dataframe whether `dt` is the index or a column
+    if data.index.name == "dt":
+        data = data.reset_index()
     # Rename "dt" column to "datetime" to match the formal alias
     data = data.rename(columns={"dt": "datetime"})
+    data["datetime"] = pd.to_datetime(data.datetime)
     print(data.columns)
     numeric_cols = [col for col in data.columns if is_numeric_dtype(data[col])]
 
@@ -192,13 +197,9 @@ def backtest(
         """
         Data feed that includes all the columns in the input dataframe
         """
-        # Add a custom lines to the inherited ones from the base class
-        lines = tuple(data.columns)
-
         # automatically handle parameter with -1
         # add the parameter to the parameters inherited from the base class
-        params = tuple([(col, i) for i, col in enumerate(data.columns) if col in numeric_cols])
-        print(params)
+        params = tuple([(col, i) for i, col in enumerate(data.columns) if col in numeric_cols + ["datetime"]])
 
     # extend the dataframe with sentiment score
     if strategy == "sentiment":
@@ -222,10 +223,6 @@ def backtest(
         )
 
     else:
-        # If data has `dt` as the index, set `dt` as the first column
-        # This means `backtest` supports the dataframe whether `dt` is the index or a column
-        if data.index.name == "dt":
-            data = data.reset_index()
         data_format_dict = DATA_FORMAT_MAPPING[data_format] if data_format else infer_data_format(data)
         pd_data = CustomData(
             dataname=data, **data_format_dict

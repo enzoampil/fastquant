@@ -43,7 +43,7 @@ class CustomStrategy(BaseStrategy):
         self.upper_limit = self.params.upper_limit
         self.lower_limit = self.params.lower_limit
         self.custom_column = self.params.custom_column
-        self.custom_indicator = CustomIndicator(self.data, self.custom_column)
+        self.custom_indicator = CustomIndicator(self.custom_column)
 
         print("===Strategy level arguments===")
         print("Upper limit :", self.upper_limit)
