@@ -15,7 +15,7 @@ However, to do this, you need to get your own Twitter API credentials (twitter\_
 Below is a guide on how to get your API credentials and how to authenticate them using fastquant.
 
 
-Before anything. **please make sure that you have a Twitter account and are logged in**. Once done, please follow the steps below:
+Before anything, **please make sure that you have a Twitter account and are logged in**. Once done, please follow the steps below:
 
 ### Steps:
 
