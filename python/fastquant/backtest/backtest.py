@@ -85,6 +85,7 @@ def backtest(
     sort_by="rnorm",
     sentiments=None,
     strats=None,  # Only used when strategy = "multi"
+    data_format=None,  # No longer needed but will leave for now to warn removal in a coming release
     **kwargs
 ):
     """Backtest financial data with a specified trading strategy
@@ -110,6 +111,10 @@ def backtest(
 
     {0}
     """
+
+    if data_format:
+        print("Warning: data_format argument is no longer needed since formatting is now purely automated based on column names!")
+        print("We will be removing this argument in a coming release!")
 
     # Setting inital support for 1 cpu
     # Return the full strategy object to get all run information
