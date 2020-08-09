@@ -52,9 +52,9 @@ class CustomStrategy(BaseStrategy):
         self.custom_indicator = CustomIndicator(
             self.data,
             custom_column=self.custom_column,
-            upper_limit=self.params.upper_limit,
-            lower_limit=self.params.lower_limit,
         )
+        # Plotting lines are based on the upper and lower limits
+        self.custom_indicator.plotinfo.plotyticks = [self.lower_limit, self.upper_limit]
 
         print("===Strategy level arguments===")
         print("Upper limit :", self.upper_limit)

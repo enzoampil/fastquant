@@ -42,18 +42,17 @@ class CustomIndicator(bt.Indicator):
         )
     )
 
+    plotinfo = dict(
+        plotymargin=0.15,
+        plothlines=[0],
+        plotyticks=[5, 95],
+    )
+
     def __init__(self):
+        super().__init__()
         self.custom_column = self.params.custom_column
         self.upper_limit = self.params.upper_limit
         self.lower_limit = self.params.lower_limit
-
-        # Plotting lines are based on the upper and lower limits
-        CustomIndicator.plotinfo = dict(
-            plotymargin=0.15,
-            plothlines=[0],
-            plotyticks=[self.upper_limit, self.lower_limit],
-        )
-        super().__init__()
 
     def _plotlabel(self):
         return
