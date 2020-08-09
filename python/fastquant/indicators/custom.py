@@ -43,7 +43,6 @@ class CustomIndicator(bt.Indicator):
     )
 
     def __init__(self):
-        super().__init__()
         self.custom_column = self.params.custom_column
         self.upper_limit = self.params.upper_limit
         self.lower_limit = self.params.lower_limit
@@ -54,6 +53,7 @@ class CustomIndicator(bt.Indicator):
             plothlines=[0],
             plotyticks=[self.upper_limit, self.lower_limit],
         )
+        super().__init__()
 
     def _plotlabel(self):
         return
