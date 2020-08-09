@@ -21,16 +21,6 @@ DEFAULT_PANDAS = (
     ("openinterest", -1),
 )
 
-DATA_FORMAT_BASE = {
-    "datetime": None,
-    "open": None,
-    "high": None,
-    "low": None,
-    "close": None,
-    "volume": None,
-    "openinterest": None,
-}
-
 DATA_FORMAT_MAPPING = {
     "cv": {
         "datetime": 0,

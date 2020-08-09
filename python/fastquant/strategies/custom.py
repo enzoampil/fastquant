@@ -27,17 +27,19 @@ class CustomStrategy(BaseStrategy):
         The upper value of the custom indicator above which, the asset is sold
     lower_limit : float
         The lower value of the custom indicator above which, the asset is sold
+    custom_column : str
+        The name of the column in the dataframe that corresponds to the custom indicator
 
     """
 
     params = (
-        ("upper_limit", 95),  # period for the fast moving average
+        ("upper_limit", 95),
         ("lower_limit", 5),
         ("custom_column", "custom"),
         (
             "type",
             "strength_index",
-        ),  # Plan to have modes: strength_index (like RSI), crossover (like SMAC), binary (just boolean)
+        ),  # Plan to have modes: strength_index (like RSI), crossover (like SMAC), binary (just sell, neutral, buy)
     )
 
     def __init__(self):

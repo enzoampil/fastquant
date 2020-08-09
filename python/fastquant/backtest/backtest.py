@@ -22,7 +22,6 @@ import time
 from pandas.api.types import is_numeric_dtype
 
 # Import from package
-from fastquant.strategies.sentiment import SentimentDF
 from fastquant.strategies import (
     RSIStrategy,
     SMACStrategy,
@@ -40,12 +39,7 @@ from fastquant.strategies import (
 from fastquant.config import (
     INIT_CASH,
     COMMISSION_PER_TRANSACTION,
-    DATA_FORMAT_MAPPING,
-    # strat_docs,
-    # STRATEGY_MAPPING,
     GLOBAL_PARAMS,
-    DATA_FORMAT_BASE,
-    DATA_FORMAT_COLS,
     DEFAULT_PANDAS,
 )
 
@@ -212,7 +206,7 @@ def backtest(
     # extend the dataframe with sentiment score
     if strategy == "sentiment":
         data_format_dict = tuple_to_dict(params_tuple)
-        # create PandasData using SentimentDF
+        # create CustomData which inherits from PandasData
         pd_data = CustomData(dataname=data, **data_format_dict)
 
     else:
