@@ -63,8 +63,6 @@ class CustomStrategy(BaseStrategy):
     # Buy when the custom indicator is below the lower limit, and sell when it's above the upper limit
     def buy_signal(self):
         return self.custom_indicator[0] < self.lower_limit
-        # return getattr(self.datas[0], self.custom_column) < self.lower_limit
 
     def sell_signal(self):
         return self.custom_indicator[0] > self.upper_limit
-        # return getattr(self.datas[0], self.custom_column) > self.upper_limit
