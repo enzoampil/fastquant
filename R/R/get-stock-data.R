@@ -109,10 +109,12 @@ get_stock_data_by_date <- function(symbol, date){
                                 req$stock[[1]]$percent_change),
                               volume = req$stock[[1]]$volume)))
 
-  } else if (loadSymbols(symbol, env = NULL, from = date)[1] %>%
-             as.data.frame() %>%
-             rownames_to_column() %>%
-             `$`("rowname") == date) {
+  } else if (
+        suppressWarnings(!"error" %in% class(tryCatch(
+            loadSymbols(symbol, env = NULL, from = date)[1],
+            error = function(cond) cond
+        )))
+    ) {
 
     prereq <- loadSymbols(symbol, env = NULL, from = date)[1] %>%
       as.data.frame() %>%
