@@ -19,7 +19,9 @@ from fastquant.indicators.custom import CustomIndicator
 
 class CustomStrategy(BaseStrategy):
     """
-    Simple moving average crossover strategy
+    implements a chosen dataframe column as a custom indicator (column name set as "custom" by default).
+    
+    The strategy is structured similar to RSIStrategy where you can set an upper_limit, above which the asset is sold (considered "overbought"), and a lower_limit, below which the asset is sold (considered "underbought). upper_limit is set to 95 by default, while lower_limit is set to 5 by default.
 
     Parameters
     ----------
