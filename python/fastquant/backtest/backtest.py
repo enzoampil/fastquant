@@ -7,9 +7,7 @@ from __future__ import (
     print_function,
     unicode_literals,
 )
-from pkg_resources import resource_filename
-import datetime
-import sys
+import warnings
 
 # Import modules
 import backtrader as bt
@@ -113,8 +111,10 @@ def backtest(
     """
 
     if data_format:
-        print("Warning: data_format argument is no longer needed since formatting is now purely automated based on column names!")
-        print("We will be removing this argument in a coming release!")
+        errmsg = "Warning: data_format argument is no longer needed since formatting is now purely automated based on column names!"
+        errmsg += "\nWe will be removing this argument in a coming release!"
+        warnings.warn(errmsg, DeprecationWarning)
+        print(errmsg)
 
     # Setting inital support for 1 cpu
     # Return the full strategy object to get all run information

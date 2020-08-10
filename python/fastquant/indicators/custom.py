@@ -26,20 +26,7 @@ class CustomIndicator(bt.Indicator):
     params = (
         ("custom_column", "custom"),
     )
-
-    plotlines = dict(
-        sentiment=dict(
-            alpha=0.85,
-            width=1.0,
-            _method="bar",
-            _plotvalue=True,
-            _plotvaluetag=False,
-            _name=" ",
-            _skipnan=True,
-            _samecolor=False,
-        )
-    )
-
+        
     plotinfo = dict(
         plotymargin=0.15,
         plothlines=[0],
