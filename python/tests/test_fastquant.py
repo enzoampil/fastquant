@@ -25,6 +25,7 @@ def test_get_yahoo_data():
 
 
 def test_get_stock_data():
+    # Test w/ respective sources
     stock_df = get_stock_data(
         PHISIX_SYMBOL, DATE_START, DATE_END, source="phisix"
     )
@@ -35,7 +36,26 @@ def test_get_stock_data():
     )
     assert isinstance(stock_df, pd.DataFrame)
 
+    # Test getting yahoo when (default) phisix fails on a non PSE SYMBOL
+    stock_df = get_stock_data(YAHOO_SYMBOL, DATE_START, DATE_END)
+    assert isinstance(stock_df, pd.DataFrame)
+
 
 def test_get_crypto_data():
-    crypto_df = get_crypto_data(CRYPTO_SYMBOL, DATE_START, DATE_END)
-    assert isinstance(crypto_df, pd.DataFrame)
+    # test that multiple exchanges work
+    from fastquant import CRYPTO_EXCHANGES
+
+    exchange_pairs = {
+        "binance": "BTC/USDT",
+        "coinbasepro": "BTC/USD",
+        "bithumb": "XRP/KRW",
+        "kraken": "BTC/USD",
+        "kucoin": "BTC/USDT",
+        "bitstamp": "BTC/USD",
+    }
+
+    for ex in CRYPTO_EXCHANGES:
+        crypto_df = get_crypto_data(
+            exchange_pairs[ex], DATE_START, DATE_END, exchange=ex
+        )
+        assert isinstance(crypto_df, pd.DataFrame)

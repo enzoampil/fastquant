@@ -2,7 +2,7 @@
 [![Build Status](https://travis-ci.com/enzoampil/fastquant.svg?branch=master)](https://travis-ci.com/enzoampil/fastquant)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/ambv/black)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](https://raw.githubusercontent.com/enzoampil/fastquant/master/LICENSE)
-
+[![Downloads](https://pepy.tech/badge/fastquant/month)](https://pepy.tech/project/fastquant/month)
 ## Bringing backtesting to the mainstream
 
 **fastquant** allows you to easily backtest investment strategies with as few as 3 lines of python code. Its goal is to promote data driven investments by making quantitative analysis in finance accessible to everyone.
@@ -12,6 +12,8 @@
 2. Backtest and optimize trading strategies with only 3 lines of code
 
 <sup>`*` - Both Yahoo Finance and Philippine stock data data are accessible straight from fastquant<sup>
+
+Check out our blog posts in the fastquant [website](https://enzoampil.github.io/fastquant-blog/) and this intro [article](https://towardsdatascience.com/backtest-your-trading-strategy-with-only-3-lines-of-python-3859b4a4ab44?source=friends_link&sk=ec647b6bb43fe322013248fd1d473015) on Medium!
 
 ## Installation
 
@@ -106,6 +108,8 @@ backtest('smac', df, fast_period=15, slow_period=40)
 ![](./docs/assets/smac_sample.png)
 
 ## Optimize trading strategies with automated grid search
+
+fastquant allows you to automatically measure the performance of your trading strategy on multiple combinations of parameters. All you need to do is to input the values as iterators (like as a `list` or `range`).
 
 ### Simple Moving Average Crossover (15 to 30 day MA vs 40 to 55 day MA)
 Daily Jollibee prices from 2018-01-01 to 2019-01-01
