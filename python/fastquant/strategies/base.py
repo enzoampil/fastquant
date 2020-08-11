@@ -20,13 +20,9 @@ import numpy as np
 from collections.abc import Iterable
 import time
 
-# from fastquant.data import get_bt_news_sentiment
-from fastquant.indicators import Sentiment
-
 from fastquant.config import (
     INIT_CASH,
     COMMISSION_PER_TRANSACTION,
-    DATA_FORMAT_MAPPING,
     GLOBAL_PARAMS,
     BUY_PROP,
     SELL_PROP,

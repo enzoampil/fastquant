@@ -7,9 +7,7 @@ from __future__ import (
     print_function,
     unicode_literals,
 )
-from pkg_resources import resource_filename
-import datetime
-import sys
+import warnings
 
 # Import modules
 import backtrader as bt
@@ -19,9 +17,9 @@ import pandas as pd
 import numpy as np
 from collections.abc import Iterable
 import time
+from pandas.api.types import is_numeric_dtype
 
 # Import from package
-from fastquant.strategies.sentiment import SentimentDF
 from fastquant.strategies import (
     RSIStrategy,
     SMACStrategy,
@@ -31,18 +29,16 @@ from fastquant.strategies import (
     BBandsStrategy,
     BuyAndHoldStrategy,
     SentimentStrategy,
+    CustomStrategy,
 )
+
 
 # Import backtest variables
 from fastquant.config import (
     INIT_CASH,
     COMMISSION_PER_TRANSACTION,
-    DATA_FORMAT_MAPPING,
-    # strat_docs,
-    # STRATEGY_MAPPING,
     GLOBAL_PARAMS,
-    DATA_FORMAT_BASE,
-    DATA_FORMAT_COLS,
+    DEFAULT_PANDAS,
 )
 
 
@@ -55,6 +51,7 @@ STRATEGY_MAPPING = {
     "bbands": BBandsStrategy,
     "buynhold": BuyAndHoldStrategy,
     "sentiment": SentimentStrategy,
+    "custom": CustomStrategy,
 }
 
 strat_docs = "\nExisting strategies:\n\n" + "\n".join(
@@ -70,29 +67,9 @@ def docstring_parameter(*sub):
     return dec
 
 
-@docstring_parameter(", ".join(["dt"] + list(DATA_FORMAT_BASE.keys())))
-def infer_data_format(data):
-    """
-    Infers the data format of the dataframe based on the indices of its matched column names
-
-    The detectable column names are {0}
-    """
-    # Rename "dt" column to "datetime" to match the formal alias
-    data = data.rename(columns={"dt": "datetime"})
-    cols = data.columns.values.tolist()
-    detectable_cols = list(DATA_FORMAT_BASE.keys())
-    # Detected columns are those that are in both the dataframe and the list of detectable columns
-    detected_cols = set(cols).intersection(detectable_cols)
-    # Assertion error if no columns were detected
-    assert detected_cols, "No columns were detected! Please have at least one of: {}".format(detectable_cols)
-    # Set data format mapping
-    data_format = {k: cols.index(k) if k in detected_cols else None for k, _ in DATA_FORMAT_BASE.items()}
-    cols_to_alias = {v: k for k, v in DATA_FORMAT_COLS.items()}
-    # Ignore "datetime" since it's assumed to be there when writing the alias
-    data_format_alias = {cols_to_alias[k]: v for k, v in data_format.items() if k != "datetime"}
-    data_format_str = "".join(pd.Series(data_format_alias).dropna().sort_values().index.values.tolist())
-    print("Data format detected:", data_format_str)
-    return data_format
+def tuple_to_dict(tup):
+    di = dict(tup)
+    return di
 
 
 @docstring_parameter(strat_docs)
@@ -106,14 +83,14 @@ def backtest(
     sort_by="rnorm",
     sentiments=None,
     strats=None,  # Only used when strategy = "multi"
-    data_format=None,  # If none, format is automatically inferred
+    data_format=None,  # No longer needed but will leave for now to warn removal in a coming release
     **kwargs
 ):
     """Backtest financial data with a specified trading strategy
 
     Parameters
     ----------------
-    strategy : str 
+    strategy : str
         see list of accepted strategy keys below
     data : pandas.DataFrame
         dataframe with at least close price indexed with time
@@ -129,11 +106,15 @@ def backtest(
         df of sentiment [0, 1] indexed by time (applicable if `strategy`=='senti')
     strats : dict
         dictionary of strategy parameters (applicable if `strategy`=='multi')
-    data_format : str
-        input data format e.g. ohlcv (default=None so format is automatically inferred)
 
     {0}
     """
+
+    if data_format:
+        errmsg = "Warning: data_format argument is no longer needed since formatting is now purely automated based on column names!"
+        errmsg += "\nWe will be removing this argument in a coming release!"
+        warnings.warn(errmsg, DeprecationWarning)
+        print(errmsg)
 
     # Setting inital support for 1 cpu
     # Return the full strategy object to get all run information
@@ -179,9 +160,9 @@ def backtest(
     if isinstance(data, str):
         if verbose:
             print("Reading path as pandas dataframe ...")
+        # Rename dt to datetime
         data = pd.read_csv(data, header=0, parse_dates=["dt"])
 
-    # extend the dataframe with sentiment score
     if strategy == "sentiment":
         # initialize series for sentiments
         senti_series = pd.Series(
@@ -193,22 +174,49 @@ def backtest(
             senti_series, left_index=True, right_index=True, how="left"
         )
         data = data.reset_index()
-        data_format_dict = DATA_FORMAT_MAPPING[data_format] if data_format else infer_data_format(data)
 
-        # create PandasData using SentimentDF
-        pd_data = SentimentDF(
-            dataname=data, **data_format_dict
-        )
+    # If data has `dt` as the index, set `dt` as the first column
+    # This means `backtest` supports the dataframe whether `dt` is the index or a column
+    if data.index.name == "dt":
+        data = data.reset_index()
+    # Rename "dt" column to "datetime" to match the formal alias
+    data = data.rename(columns={"dt": "datetime"})
+    data["datetime"] = pd.to_datetime(data.datetime)
+
+    numeric_cols = [col for col in data.columns if is_numeric_dtype(data[col])]
+    params_tuple = tuple(
+        [
+            (col, i)
+            for i, col in enumerate(data.columns)
+            if col in numeric_cols + ["datetime"]
+        ]
+    )
+    default_cols = [c for c, _ in DEFAULT_PANDAS]
+    non_default_numeric_cols = tuple(
+        [col for col, _ in params_tuple if col not in default_cols]
+    )
+
+    class CustomData(bt.feeds.PandasData):
+        """
+        Data feed that includes all the columns in the input dataframe
+        """
+
+        # Need to make sure that the new lines don't overlap w/ the default lines already in PandasData
+        lines = non_default_numeric_cols
+
+        # automatically handle parameter with -1
+        # add the parameter to the parameters inherited from the base class
+        params = params_tuple
+
+    # extend the dataframe with sentiment score
+    if strategy == "sentiment":
+        data_format_dict = tuple_to_dict(params_tuple)
+        # create CustomData which inherits from PandasData
+        pd_data = CustomData(dataname=data, **data_format_dict)
 
     else:
-        # If data has `dt` as the index, set `dt` as the first column
-        # This means `backtest` supports the dataframe whether `dt` is the index or a column
-        if data.index.name == "dt":
-            data = data.reset_index()
-        data_format_dict = DATA_FORMAT_MAPPING[data_format] if data_format else infer_data_format(data)
-        pd_data = bt.feeds.PandasData(
-            dataname=data, **data_format_dict
-        )
+        data_format_dict = tuple_to_dict(params_tuple)
+        pd_data = CustomData(dataname=data, **data_format_dict)
 
     cerebro.adddata(pd_data)
     cerebro.broker.setcash(init_cash)
@@ -315,7 +323,6 @@ def backtest(
                 strategy,
                 data,  # Treated as csv path is str, and dataframe of pd.DataFrame
                 commission=commission,
-                data_format=data_format,
                 plot=plot,
                 verbose=verbose,
                 sort_by=sort_by,
