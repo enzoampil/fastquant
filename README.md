@@ -142,6 +142,7 @@ print(res[['fast_period', 'slow_period', 'final_value']].head())
 | Bollinger Bands | bbands | `period`, `devfactor` |
 | Buy and Hold | buynhold | `N/A` |
 | Sentiment Strategy | sentiment | `keyword` , `page_nums`, `senti` |
+| Custom Prediction Strategy | custom | `upper_limit`, `lower_limit` |
 
 ### Relative Strength Index (RSI) Strategy
 ```
