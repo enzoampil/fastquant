@@ -144,6 +144,7 @@ print(res[['fast_period', 'slow_period', 'final_value']].head())
 | Bollinger Bands | bbands | `period`, `devfactor` |
 | Buy and Hold | buynhold | `N/A` |
 | Sentiment Strategy | sentiment | `keyword` , `page_nums`, `senti` |
+| Custom Prediction Strategy | custom | `upper_limit`, `lower_limit` |
 
 ### Relative Strength Index (RSI) Strategy
 ```
@@ -230,5 +231,48 @@ res_opt = backtest("multi", df, strats=strats_opt)
 res_opt.shape
 # (4, 16)
 ```
+
+### Custom Strategy for Backtesting Machine Learning & Statistics Based Predictions
+
+This powerful strategy allows you to backtest your own trading strategies using any type of model w/ as few as 3 lines of code after the forecast!
+
+ Predictions based on any model can be used as a custom indicator to be backtested using fastquant. You just need to add a `custom` column in the input dataframe, and set values for `upper_limit` and `lower_limit`.
+
+The strategy is structured similar to `RSIStrategy` where you can set an `upper_limit`, above which the asset is sold (considered "overbought"), and a `lower_limit`, below which the asset is bought (considered "underbought). `upper_limit` is set to 95 by default, while `lower_limit` is set to 5 by default.
+
+In the example below, we show how to use the custom strategy to backtest a custom indicator based on in-sample time series forecasts. The forecasts were generated using Facebook's [Prophet](https://github.com/facebook/prophet) package on Bitcoin prices.
+
+```
+from fastquant import get_crypto_data, backtest
+from fbprophet import Prophet
+from matplotlib import pyplot as plt
+
+# Pull crypto data
+df = get_crypto_data("BTC/USDT", "2019-01-01", "2020-05-31")
+
+# Fit model on closing prices
+ts = df.reset_index()[["dt", "close"]]
+ts.columns = ['ds', 'y']
+m = Prophet(daily_seasonality=True, yearly_seasonality=True).fit(ts)
+forecast = m.make_future_dataframe(periods=0, freq='D')
+
+# Predict and plot
+pred = m.predict(forecast)
+fig1 = m.plot(pred)
+plt.title('BTC/USDT: Forecasted Daily Closing Price', fontsize=25)
+```
+
+![](./docs/assets/bitcoin_forecasts.png)
+
+```
+# Convert predictions to expected 1 day returns
+expected_1day_return = pred.set_index("ds").yhat.pct_change().shift(-1).multiply(100)
+
+# Backtest the predictions, given that we buy bitcoin when the predicted next day return is > +1.5%, and sell when it's < -1.5%.
+df["custom"] = expected_1day_return.multiply(-1)
+backtest("custom", df.dropna(),upper_limit=1.5, lower_limit=-1.5)
+```
+
+![](./docs/assets/bitcoin_prophet_backtest.png)
 
 See more examples [here](https://nbviewer.jupyter.org/github/enzoampil/fastquant/tree/master/examples/).

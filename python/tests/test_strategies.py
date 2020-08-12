@@ -1,4 +1,5 @@
 import pandas as pd
+import numpy as np
 from pathlib import Path
 from datetime import datetime
 from fastquant import (
@@ -20,14 +21,16 @@ def test_backtest():
     """
     Ensures that the backtest function works on all the registered strategies, with their default parameter values
     """
-    current_date = datetime.today().strftime("%Y-%m-%d")
     sample = pd.read_csv(SAMPLE_CSV, parse_dates=["dt"])
+    # Simulate custom indicator
+    sample["custom"] = np.random.random((sample.shape[0],)) * 100
+
     for strategy in STRATEGY_MAPPING.keys():
         if strategy == "sentiment":
-            data = get_yahoo_data("TSLA", "2020-01-01", current_date)
+            data = get_yahoo_data("TSLA", "2020-01-01", "2020-07-04")
             sentiments = get_bt_news_sentiment(keyword="tesla", page_nums=2)
             cerebro = backtest(
-                strategy, data, sentiments=sentiments, senti=0.4
+                strategy, data, sentiments=sentiments, senti=0.4, plot=False
             )
             errmsg = "Backtest encountered error for strategy '{}'!".format(
                 strategy
