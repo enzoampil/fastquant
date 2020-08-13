@@ -179,6 +179,11 @@ def backtest(
     # This means `backtest` supports the dataframe whether `dt` is the index or a column
     if data.index.name == "dt":
         data = data.reset_index()
+    # If the index is a datetime index, set this as the datetime column
+    elif isinstance(data.index, pd.DatetimeIndex):
+        data.index.name = "dt"
+        data = data.reset_index()
+
     # Rename "dt" column to "datetime" to match the formal alias
     data = data.rename(columns={"dt": "datetime"})
     data["datetime"] = pd.to_datetime(data.datetime)
