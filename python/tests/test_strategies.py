@@ -53,3 +53,14 @@ def test_multi_backtest():
     assert (
         cerebro is not None
     ), "Backtest encountered error for strategy 'multi'!"
+
+
+def test_grid_backtest():
+    """
+    Test grid search
+    """
+    sample = pd.read_csv(SAMPLE_CSV, parse_dates=["dt"])
+    cerebro = backtest("smac", sample, fast_period=[20, 25], slow_period=[40, 50], plot=False)
+    assert (
+        cerebro is not None
+    ), "Backtest encountered error doing grid search on SMAC!"

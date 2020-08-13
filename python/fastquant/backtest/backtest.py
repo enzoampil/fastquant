@@ -328,7 +328,6 @@ def backtest(
             backtest(
                 strategy,
                 data,  # Treated as csv path is str, and dataframe of pd.DataFrame
-                commission=commission,
                 plot=plot,
                 verbose=verbose,
                 sort_by=sort_by,
