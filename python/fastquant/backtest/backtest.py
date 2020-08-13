@@ -303,7 +303,7 @@ def backtest(
     print("Optimal metrics:", optim_metrics)
 
     if plot and strategy != "multi":
-        has_volume = data_format_dict["volume"] is not None
+        has_volume = data_format_dict["volume"] is not None if "volume" in data_format_dict.keys() else False
         # Plot only with the optimal parameters when multiple strategy runs are required
         if params_df.shape[0] == 1:
             # This handles the Colab Plotting
