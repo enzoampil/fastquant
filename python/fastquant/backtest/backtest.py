@@ -175,10 +175,16 @@ def backtest(
         )
         data = data.reset_index()
 
-    # If data has `dt` as the index, set `dt` as the first column
+    # If data has `dt` as the index and `dt` and `datetime` are not already columns, set `dt` as the first column
     # This means `backtest` supports the dataframe whether `dt` is the index or a column
-    if data.index.name == "dt":
-        data = data.reset_index()
+    if set(["dt", "datetime"]).intersection(data.columns):
+        if data.index.name == "dt":
+            data = data.reset_index()
+        # If the index is a datetime index, set this as the datetime column
+        elif isinstance(data.index, pd.DatetimeIndex):
+            data.index.name = "dt"
+            data = data.reset_index()
+
     # Rename "dt" column to "datetime" to match the formal alias
     data = data.rename(columns={"dt": "datetime"})
     data["datetime"] = pd.to_datetime(data.datetime)
@@ -303,7 +309,7 @@ def backtest(
     print("Optimal metrics:", optim_metrics)
 
     if plot and strategy != "multi":
-        has_volume = data_format_dict["volume"] is not None
+        has_volume = data_format_dict["volume"] is not None if "volume" in data_format_dict.keys() else False
         # Plot only with the optimal parameters when multiple strategy runs are required
         if params_df.shape[0] == 1:
             # This handles the Colab Plotting
