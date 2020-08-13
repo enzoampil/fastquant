@@ -1,8 +1,22 @@
-language: python
-install:
-  - pip install --upgrade pip
-  - pip install -U -r python/requirements.txt
-before_script:
-  - cd python
-script:
-  - pytest tests
+matrix:
+  include:
+    - language: python
+        before_install:
+          - cd python
+        install:
+          - pip install --upgrade pip
+          - pip install -U -r requirements.txt
+        before_script:
+          - cd python
+        script:
+          - pytest tests
+    - language: r
+        before_install:
+          - cd R
+        install:
+          - R CMD build .
+          - R CMD install fastquant.0.1.2.tar.gz
+        script:
+          - R CMD check 
+warnings_are_errors: false
+ sudo: required
