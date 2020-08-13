@@ -71,12 +71,10 @@ get_stock_data("JFC", "2018-01-01", "2018-02-01")
 #> ...
 ```
 
-*Note: Python has Yahoo Finance and phisix support. R has phisix support and porting to symbols from the `quantmod` package. Symbols from Yahoo Finance will return closing prices in USD, while symbols from PSE will return closing prices in PHP.*
-
-*R does NOT have support for cryptocurrency data pulling and backtesting yet as of v0.1.2*
-
 ## Get crypto data
 The data is pulled from Binance, and all the available tickers are found [here](https://coinmarketcap.com/exchanges/binance/).
+
+### Python
 
 ```
 from fastquant import get_crypto_data
@@ -91,6 +89,26 @@ crypto.head()
 # 2018-12-04  3884.76  4085.00  3781.00  3951.64  48489.551613
 # 2018-12-05  3950.98  3970.00  3745.00  3769.84  44004.799448
 ```
+### R
+
+```
+get_crypto_data("BTC/USDT", "2018-12-01", "2019-12-31")
+
+#> # A tibble: 59 x 6
+#>    dt          open  high   low close volume
+#>    <date>     <dbl> <dbl> <dbl> <dbl>  <dbl>
+#>  1 2019-01-01 3701. 3810. 3642  3797. 23742.
+#>  2 2019-01-02 3796. 3882. 3750. 3859. 35156.
+#>  3 2019-01-03 3858. 3863. 3730  3767. 29407.
+#>  4 2019-01-04 3767. 3824. 3704. 3792. 29520.
+#>  5 2019-01-05 3790. 3841. 3751  3771. 30491.
+#> # … with 54 more rows
+```
+
+
+*Note: Python has Yahoo Finance and phisix support. R has phisix support and porting to symbols from the `quantmod` package. Symbols from Yahoo Finance will return closing prices in USD, while symbols from PSE will return closing prices in PHP.*
+
+*R does NOT have support for backtesting yet*
 
 ## Backtest trading strategies
 
@@ -108,6 +126,8 @@ backtest('smac', df, fast_period=15, slow_period=40)
 ![](./docs/assets/smac_sample.png)
 
 ## Optimize trading strategies with automated grid search
+
+fastquant allows you to automatically measure the performance of your trading strategy on multiple combinations of parameters. All you need to do is to input the values as iterators (like as a `list` or `range`).
 
 ### Simple Moving Average Crossover (15 to 30 day MA vs 40 to 55 day MA)
 Daily Jollibee prices from 2018-01-01 to 2019-01-01
