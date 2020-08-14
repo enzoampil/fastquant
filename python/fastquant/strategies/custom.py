@@ -38,10 +38,6 @@ class CustomStrategy(BaseStrategy):
         ("upper_limit", 95),
         ("lower_limit", 5),
         ("custom_column", "custom"),
-        (
-            "type",
-            "strength_index",
-        ),  # Plan to have modes: strength_index (like RSI), crossover (like SMAC), binary (just sell, neutral, buy)
     )
 
     def __init__(self):
