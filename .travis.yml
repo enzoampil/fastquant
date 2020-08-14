@@ -1,33 +1,12 @@
-dist: xenial
-addons:
-  apt:
-    packages:
-      - libv8-dev
-language: python
-
-jobs:
-  include:
-    - language: python
-        before_install:
-          - cd python
-        install:
-          - pip install --upgrade pip
-          - pip install -U -r requirements.txt
-        before_script:
-          - cd python
-        script:
-          - pytest tests
-    - language: r
-        r: 
-          - devel
-        cache: packages
-        before_install:
-          - cd R
-        install:
-          - R -e 'install.packages("devtools")'
-          - R -e 'devtools::install_deps("R", dependencies = TRUE)'
-          - cd R
-          - R CMD build .
-          - R CMD INSTALL *tar.gz
-        script:
-          - R -e 'library(fastquant); library(devtools); devtools::test()'
+language: r
+  r: 
+    - devel
+  cache: packages
+  install:
+    - R -e 'install.packages("devtools")'
+    - R -e 'devtools::install_deps("R", dependencies = TRUE)'
+    - cd R
+    - R CMD build .
+    - R CMD INSTALL *tar.gz
+  script:
+    - R -e 'library(fastquant); library(devtools); devtools::test()'
