@@ -92,7 +92,7 @@ crypto.head()
 ### R
 
 ```
-get_crypto_data("BTC/USDT", "2018-12-01", "2019-12-31")
+get_crypto_data("BTCUSDT", "2019-01-01", "2019-03-01")
 
 #> # A tibble: 59 x 6
 #>    dt          open  high   low close volume
