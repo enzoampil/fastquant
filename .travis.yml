@@ -1,4 +1,4 @@
-matrix:
+jobs:
   include:
     - language: python
         before_install:
@@ -11,12 +11,16 @@ matrix:
         script:
           - pytest tests
     - language: r
+        r: 
+          - devel
+        cache: packages
         before_install:
           - cd R
         install:
+          - R -e 'install.packages("devtools")'
+          - R -e 'devtools::install_deps("R", dependencies = TRUE)'
+          - cd R
           - R CMD build .
-          - R CMD install fastquant.0.1.2.tar.gz
+          - R CMD INSTALL *tar.gz
         script:
-          - R CMD check 
-warnings_are_errors: false
- sudo: required
+          - R -e 'library(fastquant); library(devtools); devtools::test()'
