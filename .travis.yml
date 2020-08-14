@@ -1,3 +1,10 @@
+dist: xenial
+addons:
+  apt:
+    packages:
+      - libv8-dev
+language: python
+
 jobs:
   include:
     - language: python
@@ -24,6 +31,3 @@ jobs:
           - R CMD INSTALL *tar.gz
         script:
           - R -e 'library(fastquant); library(devtools); devtools::test()'
-
-
-          
