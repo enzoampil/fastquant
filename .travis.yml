@@ -1,1 +1,4 @@
-language: r
+jobs:
+  include:
+    - language: python
+    - language: r
