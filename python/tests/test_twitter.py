@@ -15,6 +15,6 @@ def test_get_twitter_sentiment():
 assert api is not None
   account_list = ['2TradeAsia', 'colfinancial']
   sentiment_dict = get_twitter_sentiment('$ALI', api, '2020-06-14', account_list)
-  assert isinstance(sentiment_dict, dict)
+  #assert isinstance(sentiment_dict, dict)
 
   
