@@ -19,4 +19,4 @@ jobs:
         - R CMD build .
         - R CMD INSTALL *tar.gz
       script:
-        - R -e 'library(fastquant); library(devtools); devtools::test()'
+        - R CMD check --as-cran *tar.gz
