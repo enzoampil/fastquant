@@ -13,7 +13,7 @@
 #' @importFrom stringr str_c
 #' @importFrom magrittr `%>%`
 #' @importFrom dplyr mutate select
-#' @importFrom purrr map_dbl
+#' @importFrom purrr map_dbl map_chr
 #'
 #' @export
 get_crypto_data <- function(symbol, start_date, end_date) {
@@ -31,9 +31,10 @@ get_crypto_data <- function(symbol, start_date, end_date) {
 
   x <- NULL
 
-  tibble(dt = seq(as.Date(start_date), as.Date(end_date) - 1, by = "day"),
-         x = res) %>%
-    mutate(open = map_dbl(x, function(x) as.numeric(x[[2]])),
+  tibble(x = res) %>%
+    mutate(dt = map_chr(x, function(x) as.character(as.Date(as.POSIXct(as.numeric(x[[1]]) / 1e3,
+                                                                       origin="1970-01-01")))),
+           open = map_dbl(x, function(x) as.numeric(x[[2]])),
            high = map_dbl(x, function(x) as.numeric(x[[3]])),
            low = map_dbl(x, function(x) as.numeric(x[[4]])),
            close = map_dbl(x, function(x) as.numeric(x[[5]])),
