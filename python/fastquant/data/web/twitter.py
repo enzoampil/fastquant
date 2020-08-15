@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 import tweepy
 from nltk.sentiment.vader import SentimentIntensityAnalyzer
-
+from datetime import date
 
 def tweepy_api(consumer_key, consumer_secret, access_token, access_secret):
     """
