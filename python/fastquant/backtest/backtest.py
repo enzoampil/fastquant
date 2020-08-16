@@ -84,6 +84,7 @@ def backtest(
     sentiments=None,
     strats=None,  # Only used when strategy = "multi"
     data_format=None,  # No longer needed but will leave for now to warn removal in a coming release
+    return_transactions=False,
     **kwargs
 ):
     """Backtest financial data with a specified trading strategy
@@ -106,6 +107,8 @@ def backtest(
         df of sentiment [0, 1] indexed by time (applicable if `strategy`=='senti')
     strats : dict
         dictionary of strategy parameters (applicable if `strategy`=='multi')
+    return_transactions : bool
+        return history of transactions (i.e. buy and sell timestamps) (default=False)
 
     {0}
     """
@@ -135,7 +138,7 @@ def backtest(
             cerebro.optstrategy(
                 STRATEGY_MAPPING[strat],
                 init_cash=[init_cash],
-                transaction_logging=[verbose],
+                transaction_logging=[True if return_transactions else verbose],
                 commission=commission,
                 **params
             )
@@ -144,11 +147,11 @@ def backtest(
         cerebro.optstrategy(
             STRATEGY_MAPPING[strategy],
             init_cash=[init_cash],
-            transaction_logging=[verbose],
+            transaction_logging=[True if return_transactions else verbose],
             commission=commission,
             **kwargs
         )
-        strat_names.append(STRATEGY_MAPPING[strategy])
+        strat_names.append(strategy)
 
     # Apply Total, Average, Compound and Annualized Returns calculated using a logarithmic approach
     cerebro.addanalyzer(btanalyzers.Returns, _name="returns")
@@ -246,12 +249,17 @@ def backtest(
         print("Number of strat runs:", len(stratruns))
         print("Number of strats per run:", len(stratruns[0]))
         print("Strat names:", strat_names)
+
+    history_dfs = {}
     for stratrun in stratruns:
         strats_params = {}
 
         if verbose:
             print("**************************************************")
+
+        
         for i, strat in enumerate(stratrun):
+            strat_name = strat_names[i]
             p_raw = strat.p._getkwargs()
             p = {}
             for k, v in p_raw.items():
@@ -259,15 +267,31 @@ def backtest(
                     # Make sure the parameters are mapped to the corresponding strategy
                     if strategy == "multi":
                         key = (
-                            "{}.{}".format(strat_names[i], k)
+                            "{}.{}".format(strat_name, k)
                             if k not in GLOBAL_PARAMS
                             else k
                         )
+
+                        selected_p = {}
+                        if k in strats[strat_name]:
+                            selected_p[k] = v
+                        pkeys = '_'.join(["{}{}".format(*i) for i in selected_p.items()])
+                        history_key = "{}_{}".format(strat_name, pkeys)
                     else:
                         key = k
+                        history_key = strat_name
                     p[key] = v
 
             strats_params = {**strats_params, **p}
+
+            # record transactions history into a dict of dataframes
+            history = np.array(strat.transactions_history).reshape((-1,5))
+            #columns are decided in log method of BaseStrategy class in base.py
+            history_df = pd.DataFrame(history, columns=strat.transactions_columns)
+            history_df.dt = pd.to_datetime(history_df.dt)
+            history_df = history_df.set_index('dt')
+            history_dfs[history_key] = history_df
+
 
         # We run metrics on the last strat since all the metrics will be the same for all strats
         returns = strat.analyzers.returns.get_analysis()
@@ -333,5 +357,7 @@ def backtest(
                 sort_by=sort_by,
                 **optim_params
             )
-
-    return sorted_combined_df
+    if return_transactions:
+        return sorted_combined_df, history_dfs
+    else:
+        return sorted_combined_df

@@ -46,13 +46,33 @@ class BaseStrategy(bt.Strategy):
             "execution_type",
             "close",
         ),  # Either open or close, to indicate if a purchase is executed based on the next open or close
-        ("periodic_logging", False),
+        ("periodic_logging", False), #DO NOT set to True else return_transactions
         ("transaction_logging", True),
     )
 
     def log(self, txt, dt=None):
+        """
+        FIXME: parsing data from txt assumes a format
+        """
         dt = dt or self.datas[0].datetime.date(0)
         print("%s, %s" % (dt.isoformat(), txt))
+
+        txts = txt.split(', ')
+        if ("BUY EXECUTED" in txts) | ("SELL EXECUTED" in txts):
+            if "BUY EXECUTED" in txts: 
+                #"BUY EXECUTED, Price: %.2f, Cost: %.2f, Comm: %.2f"
+                buy_price = txts[1].split(": ")[1]
+            else:
+                buy_price = None
+            if "SELL EXECUTED" in txts: 
+                #"SELL EXECUTED, Price: %.2f, Cost: %.2f, Comm: %.2f"
+                sell_price = txts[1].split(": ")[1]
+            else:
+                sell_price = None
+            cost = txts[2].split(": ")[1]
+            comm = txts[3].split(": ")[1]
+            data = (dt.isoformat(), buy_price, sell_price, cost, comm)
+            self.transactions_history.append(data)
 
     def __init__(self):
         # Global variables
@@ -68,6 +88,8 @@ class BaseStrategy(bt.Strategy):
         print("buy_prop : {}".format(self.buy_prop))
         print("sell_prop : {}".format(self.sell_prop))
         print("commission : {}".format(self.commission))
+        self.transactions_history = []
+        self.transactions_columns = ['dt','buy_price','sell_price','cost','commision']
 
         self.dataclose = self.datas[0].close
         self.dataopen = self.datas[0].open
@@ -92,7 +114,7 @@ class BaseStrategy(bt.Strategy):
             if order.isbuy():
                 if self.transaction_logging:
                     self.log(
-                        "BUY EXECUTED, Price: %.2f, Cost: %.2f, Comm %.2f"
+                        "BUY EXECUTED, Price: %.2f, Cost: %.2f, Comm: %.2f"
                         % (
                             order.executed.price,
                             order.executed.value,
@@ -105,7 +127,7 @@ class BaseStrategy(bt.Strategy):
             else:  # Sell
                 if self.transaction_logging:
                     self.log(
-                        "SELL EXECUTED, Price: %.2f, Cost: %.2f, Comm %.2f"
+                        "SELL EXECUTED, Price: %.2f, Cost: %.2f, Comm: %.2f"
                         % (
                             order.executed.price,
                             order.executed.value,
