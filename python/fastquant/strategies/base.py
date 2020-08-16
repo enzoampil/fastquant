@@ -46,7 +46,7 @@ class BaseStrategy(bt.Strategy):
             "execution_type",
             "close",
         ),  # Either open or close, to indicate if a purchase is executed based on the next open or close
-        ("periodic_logging", False), #DO NOT set to True else return_transactions
+        ("periodic_logging", False),
         ("transaction_logging", True),
     )
 

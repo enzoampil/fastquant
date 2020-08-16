@@ -285,7 +285,8 @@ def backtest(
             strats_params = {**strats_params, **p}
 
             # record transactions history into a dict of dataframes
-            history = np.array(strat.transactions_history).reshape((-1,5))
+            ncols = len(strat.transactions_columns)
+            history = np.array(strat.transactions_history).reshape((-1, ncols))
             #columns are decided in log method of BaseStrategy class in base.py
             history_df = pd.DataFrame(history, columns=strat.transactions_columns)
             history_df.dt = pd.to_datetime(history_df.dt)
