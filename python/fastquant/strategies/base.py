@@ -48,6 +48,8 @@ class BaseStrategy(bt.Strategy):
         ),  # Either open or close, to indicate if a purchase is executed based on the next open or close
         ("periodic_logging", False),
         ("transaction_logging", True),
+        ("live", False),
+        ("today", False),
     )
 
     def log(self, txt, dt=None):
@@ -63,6 +65,8 @@ class BaseStrategy(bt.Strategy):
         self.periodic_logging = self.params.periodic_logging
         self.transaction_logging = self.params.transaction_logging
         self.commission = self.params.commission
+        self.live = self.params.live
+        self.today = self.params.today
         print("===Global level arguments===")
         print("init_cash : {}".format(self.init_cash))
         print("buy_prop : {}".format(self.buy_prop))
@@ -102,6 +106,11 @@ class BaseStrategy(bt.Strategy):
 
                 self.buyprice = order.executed.price
                 self.buycomm = order.executed.comm
+                if (
+                    self.live
+                    and str(self.datas[0].datetime.date(0)) == self.today
+                ):
+                    trigger_bot("buy")
             else:  # Sell
                 if self.transaction_logging:
                     self.log(
@@ -112,6 +121,11 @@ class BaseStrategy(bt.Strategy):
                             order.executed.comm,
                         )
                     )
+                if (
+                    self.live
+                    and str(self.datas[0].datetime.date(0)) == self.today
+                ):
+                    trigger_bot("sell")
 
             self.bar_executed = len(self)
 
@@ -233,3 +247,13 @@ class BaseStrategy(bt.Strategy):
                             * self.sell_prop
                         )
                     )
+
+
+def trigger_bot(action):
+    if action == "buy":
+        print(">>> Notif bot: BUY! <<<")
+    elif action == "sell":
+        print(">>> Notif bot: SELL! <<<")
+    else:  # hold
+        print(">>> Notif bot: HOLD! <<<")
+    return
