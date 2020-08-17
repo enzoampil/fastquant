@@ -14,12 +14,14 @@
 #' @importFrom magrittr `%>%`
 #' @importFrom dplyr mutate select
 #' @importFrom purrr map_dbl map_chr
+#' @importFrom lubridate days
 #'
 #' @export
 get_crypto_data <- function(symbol, start_date, end_date) {
   endpoint <- "https://api.binance.com/api/v3/klines?"
   s_date <- format(as.numeric(as.POSIXct(start_date)) * 1e3, scientific = FALSE)
-  e_date <- format(as.numeric(as.POSIXct(end_date)) * 1e3, scientific = FALSE)
+  e_date <- format(as.numeric(as.POSIXct(end_date) + lubridate::days(1)) * 1e3,
+                   scientific = FALSE)
 
   params <- paste(stringr::str_c("symbol=", symbol),
                   "interval=1d",
