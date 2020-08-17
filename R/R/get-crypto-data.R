@@ -12,7 +12,7 @@
 #' @importFrom httr GET content
 #' @importFrom stringr str_c
 #' @importFrom magrittr `%>%`
-#' @importFrom dplyr mutate select
+#' @importFrom dplyr mutate select slice n
 #' @importFrom purrr map_dbl map_chr
 #' @importFrom lubridate days
 #'
@@ -41,5 +41,6 @@ get_crypto_data <- function(symbol, start_date, end_date) {
            low = map_dbl(x, function(x) as.numeric(x[[4]])),
            close = map_dbl(x, function(x) as.numeric(x[[5]])),
            volume = map_dbl(x, function(x) as.numeric(x[[6]]))) %>%
-    select(-x)
+    select(-x) %>%
+    slice(1:(n() - 1))
 }
