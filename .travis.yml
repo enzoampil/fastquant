@@ -12,8 +12,10 @@ jobs:
       r:
         - devel
       cache: packages
+      before_install:
+        - sudo apt-get update
+        - sudo apt-get -y install python
       install:
-        - apt-get install python
         - R -e 'install.packages("devtools")'
         - R -e 'devtools::install_deps("R", dependencies = TRUE)'
         - cd R
