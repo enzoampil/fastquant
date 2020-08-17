@@ -281,7 +281,7 @@ def backtest(
 
                         # make key with format: e.g. slow_period40_fast_period10
                         if k not in ["periodic_logging", "transaction_logging", "init_cash",
-                            "buy_prop", "sell_prop", "commission", "execution_type"
+                            "buy_prop", "sell_prop", "commission", "execution_type", "custom_column"
                         ]:
                             selected_p[k] = v
                         history_key = '_'.join(["{}{}".format(*i) for i in selected_p.items()])
@@ -289,15 +289,16 @@ def backtest(
 
             strats_params = {**strats_params, **p}
 
-            # record transactions history into a dict of dataframes
-            ncols = len(strat.transactions_columns)
-            history = np.array(strat.transactions_history).reshape((-1, ncols))
-            #columns are decided in log method of BaseStrategy class in base.py
-            history_df = pd.DataFrame(history, columns=strat.transactions_columns)
-            history_df.dt = pd.to_datetime(history_df.dt)
-            #combine rows with identical index 
-            history_df = history_df.set_index('dt').dropna(how='all')
-            history_dfs[history_key] = history_df.stack().unstack().astype(float)
+            if return_transactions:
+                # record transactions history into a dict of dataframes
+                ncols = len(strat.transactions_columns)
+                history = np.array(strat.transactions_history).reshape((-1, ncols))
+                #columns are decided in log method of BaseStrategy class in base.py
+                history_df = pd.DataFrame(history, columns=strat.transactions_columns)
+                history_df.dt = pd.to_datetime(history_df.dt)
+                #combine rows with identical index 
+                history_df = history_df.set_index('dt').dropna(how='all')
+                history_dfs[history_key] = history_df.stack().unstack().astype(float)
 
 
         # We run metrics on the last strat since all the metrics will be the same for all strats
