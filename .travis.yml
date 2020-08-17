@@ -13,6 +13,7 @@ jobs:
         - devel
       cache: packages
       install:
+        - apt-get install python
         - R -e 'install.packages("devtools")'
         - R -e 'devtools::install_deps("R", dependencies = TRUE)'
         - cd R
