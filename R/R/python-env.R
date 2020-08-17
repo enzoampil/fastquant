@@ -4,7 +4,7 @@ use_env <- function() {
   if (!env_exists()) {
     reticulate::virtualenv_create("fastquant-env")
   } else {
-    use_virtualenv("fastquant-env")
+    reticulate::use_virtualenv("fastquant-env")
   }
 }
 
