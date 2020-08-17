@@ -58,6 +58,14 @@ class BaseStrategy(bt.Strategy):
         print("%s, %s" % (dt.isoformat(), txt))
 
         txts = txt.split(', ')
+        #"OPERATION PROFIT, GROSS: %.2f, NET: %.2f"
+        if "OPERATION PROFIT" in txts:
+            # gross_profit = txts[1].split(": ")[1]
+            net_profit = txts[2].split(": ")[1]
+        else:
+            # gross_profit = None
+            net_profit = None
+
         if ("BUY EXECUTED" in txts) | ("SELL EXECUTED" in txts):
             if "BUY EXECUTED" in txts: 
                 #"BUY EXECUTED, Price: %.2f, Cost: %.2f, Comm: %.2f"
@@ -71,8 +79,10 @@ class BaseStrategy(bt.Strategy):
                 sell_price = None
             cost = txts[2].split(": ")[1]
             comm = txts[3].split(": ")[1]
-            data = (dt.isoformat(), buy_price, sell_price, cost, comm)
-            self.transactions_history.append(data)
+        else:
+            buy_price, sell_price, cost, comm = None, None, None, None
+        data = (dt.isoformat(), buy_price, sell_price, cost, comm, net_profit)
+        self.transactions_history.append(data)
 
     def __init__(self):
         # Global variables
@@ -89,7 +99,7 @@ class BaseStrategy(bt.Strategy):
         print("sell_prop : {}".format(self.sell_prop))
         print("commission : {}".format(self.commission))
         self.transactions_history = []
-        self.transactions_columns = ['dt','buy_price','sell_price','cost','commision']
+        self.transactions_columns = ['dt','buy_price','sell_price','cost','commision','net_profit']
 
         self.dataclose = self.datas[0].close
         self.dataopen = self.datas[0].open
@@ -154,7 +164,7 @@ class BaseStrategy(bt.Strategy):
             return
         if self.transaction_logging:
             self.log(
-                "OPERATION PROFIT, GROSS %.2f, NET %.2f"
+                "OPERATION PROFIT, GROSS: %.2f, NET: %.2f"
                 % (trade.pnl, trade.pnlcomm)
             )
 

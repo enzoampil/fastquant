@@ -261,7 +261,7 @@ def backtest(
         for i, strat in enumerate(stratrun):
             strat_name = strat_names[i]
             p_raw = strat.p._getkwargs()
-            p = {}
+            p, selected_p = {}, {}
             for k, v in p_raw.items():
                 if k not in ["periodic_logging", "transaction_logging"]:
                     # Make sure the parameters are mapped to the corresponding strategy
@@ -271,15 +271,20 @@ def backtest(
                             if k not in GLOBAL_PARAMS
                             else k
                         )
-
-                        selected_p = {}
+                        # make key with format: e.g. smac.slow_period40_fast_period10
                         if k in strats[strat_name]:
                             selected_p[k] = v
                         pkeys = '_'.join(["{}{}".format(*i) for i in selected_p.items()])
-                        history_key = "{}_{}".format(strat_name, pkeys)
+                        history_key = "{}.{}".format(strat_name, pkeys)
                     else:
                         key = k
-                        history_key = strat_name
+
+                        # make key with format: e.g. slow_period40_fast_period10
+                        if k not in ["periodic_logging", "transaction_logging", "init_cash",
+                            "buy_prop", "sell_prop", "commission", "execution_type"
+                        ]:
+                            selected_p[k] = v
+                        history_key = '_'.join(["{}{}".format(*i) for i in selected_p.items()])
                     p[key] = v
 
             strats_params = {**strats_params, **p}
@@ -290,8 +295,9 @@ def backtest(
             #columns are decided in log method of BaseStrategy class in base.py
             history_df = pd.DataFrame(history, columns=strat.transactions_columns)
             history_df.dt = pd.to_datetime(history_df.dt)
-            history_df = history_df.set_index('dt')
-            history_dfs[history_key] = history_df
+            #combine rows with identical index 
+            history_df = history_df.set_index('dt').dropna(how='all')
+            history_dfs[history_key] = history_df.stack().unstack().astype(float)
 
 
         # We run metrics on the last strat since all the metrics will be the same for all strats
