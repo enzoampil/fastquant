@@ -6,7 +6,7 @@ install_fastquant_source <- function() {
     {
     system("cd ~/.fastquant/fastquant-master; pip3 install .")
     },
-    error = function(e) {
+    warning = function(cond) {
       message("pip3 does not exist. Using pip . . .")
       system("cd ~/.fastquant/fastquant-master; pip install .")
     }
