@@ -11,5 +11,5 @@ use_fastquant_py <- function() {
   use_env()
   download_fastquant_repo()
   install_fastquant_source()
-  reticulate::import("fastquant")
+  reticulate::import("fastquant", delay_load = TRUE)
 }
