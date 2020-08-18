@@ -77,7 +77,15 @@ class BaseStrategy(bt.Strategy):
         print("buy_prop : {}".format(self.buy_prop))
         print("sell_prop : {}".format(self.sell_prop))
         print("commission : {}".format(self.commission))
-        self.order_history = {"dt": [], "type": [], "price": [], "size": [] , "value": [], "commission": [], "pnl": []}
+        self.order_history = {
+            "dt": [],
+            "type": [],
+            "price": [],
+            "size": [],
+            "value": [],
+            "commission": [],
+            "pnl": [],
+        }
         self.order_history_df = None
 
         self.dataclose = self.datas[0].close

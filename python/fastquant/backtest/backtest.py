@@ -256,7 +256,7 @@ def backtest(
 
         if verbose:
             print("**************************************************")
-  
+
         for i, strat in enumerate(stratrun):
             strat_name = strat_names[i]
             p_raw = strat.p._getkwargs()
@@ -273,17 +273,28 @@ def backtest(
                         # make key with format: e.g. smac.slow_period40_fast_period10
                         if k in strats[strat_name]:
                             selected_p[k] = v
-                        pkeys = '_'.join(["{}{}".format(*i) for i in selected_p.items()])
+                        pkeys = "_".join(
+                            ["{}{}".format(*i) for i in selected_p.items()]
+                        )
                         history_key = "{}.{}".format(strat_name, pkeys)
                     else:
                         key = k
 
                         # make key with format: e.g. slow_period40_fast_period10
-                        if k not in ["periodic_logging", "transaction_logging", "init_cash",
-                            "buy_prop", "sell_prop", "commission", "execution_type", "custom_column"
+                        if k not in [
+                            "periodic_logging",
+                            "transaction_logging",
+                            "init_cash",
+                            "buy_prop",
+                            "sell_prop",
+                            "commission",
+                            "execution_type",
+                            "custom_column",
                         ]:
                             selected_p[k] = v
-                        history_key = '_'.join(["{}{}".format(*i) for i in selected_p.items()])
+                        history_key = "_".join(
+                            ["{}{}".format(*i) for i in selected_p.items()]
+                        )
                     p[key] = v
 
             strats_params = {**strats_params, **p}
@@ -293,8 +304,8 @@ def backtest(
                 order_history_df = strat.order_history_df
                 order_history_df["dt"] = pd.to_datetime(order_history_df.dt)
                 # combine rows with identical index
-                #history_df = order_history_df.set_index('dt').dropna(how='all')
-                #history_dfs[history_key] = order_history_df.stack().unstack().astype(float)
+                # history_df = order_history_df.set_index('dt').dropna(how='all')
+                # history_dfs[history_key] = order_history_df.stack().unstack().astype(float)
                 order_history_df.insert(0, "strat_name", history_key)
                 order_history_df.insert(0, "strat_id", strat_idx)
                 order_history_dfs.append(order_history_df)
@@ -342,7 +353,11 @@ def backtest(
     print("Optimal metrics:", optim_metrics)
 
     if plot and strategy != "multi":
-        has_volume = data_format_dict["volume"] is not None if "volume" in data_format_dict.keys() else False
+        has_volume = (
+            data_format_dict["volume"] is not None
+            if "volume" in data_format_dict.keys()
+            else False
+        )
         # Plot only with the optimal parameters when multiple strategy runs are required
         if params_df.shape[0] == 1:
             # This handles the Colab Plotting
@@ -368,9 +383,7 @@ def backtest(
             )
     if return_history:
         order_history = pd.concat(order_history_dfs)
-        history_dict = dict(
-            orders=order_history
-        )
+        history_dict = dict(orders=order_history)
 
         return sorted_combined_df, history_dict
     else:
