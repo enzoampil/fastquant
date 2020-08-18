@@ -2,11 +2,14 @@
 % Please edit documentation in R/fastquant-use.R
 \name{use_fastquant_py}
 \alias{use_fastquant_py}
-\title{Use fastquant python repo}
+\title{Import fastquant python module}
 \usage{
 use_fastquant_py()
 }
-\description{
-Use fastquant python repo
+\value{
+A Python module object
 }
-\keyword{internal}
+\description{
+Access backtesting functionality in R using the Python package. R does not
+have native support for backtesting according to the backtrader framework.
+}

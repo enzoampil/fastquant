@@ -2,6 +2,7 @@
 
 export(get_crypto_data)
 export(get_stock_data)
+export(use_fastquant_py)
 export(use_python)
 importFrom(assertthat,assert_that)
 importFrom(dplyr,filter)
