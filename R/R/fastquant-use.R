@@ -9,7 +9,6 @@
 use_fastquant_py <- function() {
   use_env()
   download_fastquant_repo()
-  install_python_deps()
   install_fastquant_source()
   reticulate::import("fastquant")
 }
