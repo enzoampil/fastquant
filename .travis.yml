@@ -15,7 +15,6 @@ jobs:
       before_install:
         - sudo apt-get update
         - sudo apt-get -y install python3
-        - sudo apt-get -y install pip3
       install:
         - R -e 'install.packages("devtools")'
         - R -e 'devtools::install_deps("R", dependencies = TRUE)'
