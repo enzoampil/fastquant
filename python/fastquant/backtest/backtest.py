@@ -84,7 +84,7 @@ def backtest(
     sentiments=None,
     strats=None,  # Only used when strategy = "multi"
     data_format=None,  # No longer needed but will leave for now to warn removal in a coming release
-    return_transactions=False,
+    return_history=False,
     **kwargs
 ):
     """Backtest financial data with a specified trading strategy
@@ -107,7 +107,7 @@ def backtest(
         df of sentiment [0, 1] indexed by time (applicable if `strategy`=='senti')
     strats : dict
         dictionary of strategy parameters (applicable if `strategy`=='multi')
-    return_transactions : bool
+    return_history : bool
         return history of transactions (i.e. buy and sell timestamps) (default=False)
 
     {0}
@@ -138,7 +138,7 @@ def backtest(
             cerebro.optstrategy(
                 STRATEGY_MAPPING[strat],
                 init_cash=[init_cash],
-                transaction_logging=[True if return_transactions else verbose],
+                transaction_logging=[verbose],
                 commission=commission,
                 **params
             )
@@ -147,7 +147,7 @@ def backtest(
         cerebro.optstrategy(
             STRATEGY_MAPPING[strategy],
             init_cash=[init_cash],
-            transaction_logging=[True if return_transactions else verbose],
+            transaction_logging=[verbose],
             commission=commission,
             **kwargs
         )
@@ -250,14 +250,13 @@ def backtest(
         print("Number of strats per run:", len(stratruns[0]))
         print("Strat names:", strat_names)
 
-    history_dfs = {}
-    for stratrun in stratruns:
+    order_history_dfs = []
+    for strat_idx, stratrun in enumerate(stratruns):
         strats_params = {}
 
         if verbose:
             print("**************************************************")
-
-        
+  
         for i, strat in enumerate(stratrun):
             strat_name = strat_names[i]
             p_raw = strat.p._getkwargs()
@@ -289,17 +288,16 @@ def backtest(
 
             strats_params = {**strats_params, **p}
 
-            if return_transactions:
-                # record transactions history into a dict of dataframes
-                ncols = len(strat.transactions_columns)
-                history = np.array(strat.transactions_history).reshape((-1, ncols))
-                #columns are decided in log method of BaseStrategy class in base.py
-                history_df = pd.DataFrame(history, columns=strat.transactions_columns)
-                history_df.dt = pd.to_datetime(history_df.dt)
-                #combine rows with identical index 
-                history_df = history_df.set_index('dt').dropna(how='all')
-                history_dfs[history_key] = history_df.stack().unstack().astype(float)
-
+            if return_history:
+                # columns are decided in log method of BaseStrategy class in base.py
+                order_history_df = strat.order_history_df
+                order_history_df["dt"] = pd.to_datetime(order_history_df.dt)
+                # combine rows with identical index
+                #history_df = order_history_df.set_index('dt').dropna(how='all')
+                #history_dfs[history_key] = order_history_df.stack().unstack().astype(float)
+                order_history_df.insert(0, "strat_name", history_key)
+                order_history_df.insert(0, "strat_id", strat_idx)
+                order_history_dfs.append(order_history_df)
 
         # We run metrics on the last strat since all the metrics will be the same for all strats
         returns = strat.analyzers.returns.get_analysis()
@@ -321,14 +319,17 @@ def backtest(
             print(sharpe)
 
     params_df = pd.DataFrame(params)
+    # Set the index as a separate strat id column, so that we retain the information after sorting
+    strat_ids = pd.DataFrame({"strat_id": params_df.index.values})
     metrics_df = pd.DataFrame(metrics)
 
     # Get indices based on `sort_by` metric
     optim_idxs = np.argsort(metrics_df[sort_by].values)[::-1]
     sorted_params_df = params_df.iloc[optim_idxs].reset_index(drop=True)
     sorted_metrics_df = metrics_df.iloc[optim_idxs].reset_index(drop=True)
+    sorted_strat_ids = strat_ids.iloc[optim_idxs].reset_index(drop=True)
     sorted_combined_df = pd.concat(
-        [sorted_params_df, sorted_metrics_df], axis=1
+        [sorted_strat_ids, sorted_params_df, sorted_metrics_df], axis=1
     )
 
     # print out the result
@@ -365,7 +366,12 @@ def backtest(
                 sort_by=sort_by,
                 **optim_params
             )
-    if return_transactions:
-        return sorted_combined_df, history_dfs
+    if return_history:
+        order_history = pd.concat(order_history_dfs)
+        history_dict = dict(
+            orders=order_history
+        )
+
+        return sorted_combined_df, history_dict
     else:
         return sorted_combined_df
