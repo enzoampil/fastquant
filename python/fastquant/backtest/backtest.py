@@ -308,6 +308,8 @@ def backtest(
                 # history_dfs[history_key] = order_history_df.stack().unstack().astype(float)
                 order_history_df.insert(0, "strat_name", history_key)
                 order_history_df.insert(0, "strat_id", strat_idx)
+                order_history_df['csum'] = (order_history_df.pnl-order_history_df.commission).cumsum()+init_cash
+                order_history_df['returns'] = order_history_df.csum.pct_change()
                 order_history_dfs.append(order_history_df)
 
         # We run metrics on the last strat since all the metrics will be the same for all strats
