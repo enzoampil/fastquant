@@ -19,6 +19,7 @@ import pandas as pd
 import numpy as np
 from collections.abc import Iterable
 import time
+from fastquant.notification import trigger_bot
 
 from fastquant.config import (
     INIT_CASH,
@@ -50,6 +51,8 @@ class BaseStrategy(bt.Strategy):
         ("transaction_logging", True),
         ("live", False),
         ("today", False),
+        ("notif_script_dir", False),
+        ("symbol", ""),
     )
 
     def log(self, txt, dt=None):
@@ -67,6 +70,8 @@ class BaseStrategy(bt.Strategy):
         self.commission = self.params.commission
         self.live = self.params.live
         self.today = self.params.today
+        self.notif_script_dir = self.params.notif_script_dir
+        self.symbol = self.params.symbol
         print("===Global level arguments===")
         print("init_cash : {}".format(self.init_cash))
         print("buy_prop : {}".format(self.buy_prop))
@@ -110,7 +115,9 @@ class BaseStrategy(bt.Strategy):
                     self.live
                     and str(self.datas[0].datetime.date(0)) == self.today
                 ):
-                    trigger_bot("buy")
+                    trigger_bot(
+                        "buy", self.notif_script_dir, self.today, self.symbol
+                    )
             else:  # Sell
                 if self.transaction_logging:
                     self.log(
@@ -125,7 +132,9 @@ class BaseStrategy(bt.Strategy):
                     self.live
                     and str(self.datas[0].datetime.date(0)) == self.today
                 ):
-                    trigger_bot("sell")
+                    trigger_bot(
+                        "sell", self.notif_script_dir, self.today, self.symbol
+                    )
 
             self.bar_executed = len(self)
 
@@ -247,13 +256,3 @@ class BaseStrategy(bt.Strategy):
                             * self.sell_prop
                         )
                     )
-
-
-def trigger_bot(action):
-    if action == "buy":
-        print(">>> Notif bot: BUY! <<<")
-    elif action == "sell":
-        print(">>> Notif bot: SELL! <<<")
-    else:  # hold
-        print(">>> Notif bot: HOLD! <<<")
-    return
