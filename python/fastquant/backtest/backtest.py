@@ -251,6 +251,7 @@ def backtest(
         print("Strat names:", strat_names)
 
     order_history_dfs = []
+    periodic_history_dfs = []
     for strat_idx, stratrun in enumerate(stratruns):
         strats_params = {}
 
@@ -311,6 +312,13 @@ def backtest(
                 order_history_df['csum'] = (order_history_df.pnl-order_history_df.commission).cumsum()+init_cash
                 order_history_df['returns'] = order_history_df.csum.pct_change()
                 order_history_dfs.append(order_history_df)
+
+                periodic_history_df = strat.periodic_history_df
+                periodic_history_df["dt"] = pd.to_datetime(periodic_history_df.dt)
+                periodic_history_df.insert(0, "strat_name", history_key)
+                periodic_history_df.insert(0, "strat_id", strat_idx)
+                periodic_history_df['returns'] = periodic_history_df.value.pct_change()
+                periodic_history_dfs.append(periodic_history_df)                
 
         # We run metrics on the last strat since all the metrics will be the same for all strats
         returns = strat.analyzers.returns.get_analysis()
@@ -385,7 +393,10 @@ def backtest(
             )
     if return_history:
         order_history = pd.concat(order_history_dfs)
-        history_dict = dict(orders=order_history)
+        periodic_history = pd.concat(periodic_history_dfs)
+        history_dict = dict(orders=order_history,
+                            periodic=periodic_history
+        )
 
         return sorted_combined_df, history_dict
     else:
