@@ -55,8 +55,8 @@ class CustomStrategy(BaseStrategy):
         self.custom_indicator.plotinfo.plotyticks = [self.lower_limit, self.upper_limit]
 
         print("===Strategy level arguments===")
-        print("Upper limit :", self.upper_limit)
-        print("Lower limit :", self.lower_limit)
+        print("Upper limit: ", self.upper_limit)
+        print("Lower limit: ", self.lower_limit)
 
     # Buy when the custom indicator is below the lower limit, and sell when it's above the upper limit
     def buy_signal(self):
