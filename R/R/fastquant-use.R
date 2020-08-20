@@ -4,12 +4,9 @@
 #' have native support for backtesting according to the backtrader framework.
 #'
 #' @return A Python module object
-#' @import reticulate
+#' @import reticulate import
 #'
 #' @export
 use_fastquant_py <- function() {
-  use_env()
-  download_fastquant_repo()
-  install_fastquant_source()
-  reticulate::import("fastquant", delay_load = TRUE)
+  import("fastquant", delay_load = TRUE)
 }

@@ -1,5 +1,7 @@
 context("Port functionality from Python")
 
+library(fastquant)
+
 py_fq <- use_fastquant_py()
 
 test_that("use_fastquant_py returns python module object", {
