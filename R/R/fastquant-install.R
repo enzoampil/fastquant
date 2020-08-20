@@ -2,14 +2,11 @@
 #'
 #' @keywords Internal
 install_fastquant_source <- function() {
-  handler <- tryCatch(
-    {
-      system("cd ~/.fastquant/fastquant-master; pip install .")
-    },
-    warning = function(cond) {
-      message("pip does not exist. Using pip3 . . .")
-      system("cd ~/.fastquant/fastquant-master; pip3 install .")
-    }
-  )
-  return(handler)
+  fq_env <- reticulate::virtualenv_python("fastquant-env")
+  pkgs <- system2(fq_env, c("-m", "pip", "list"), stdout = TRUE)
+  if (!any(grepl("^fastquant", pkgs))) {
+    system2(fq_env,
+            c("-m", "pip", "install", "~/.fastquant/fastquant-master"))
+  }
+  invisible(pkgs)
 }
