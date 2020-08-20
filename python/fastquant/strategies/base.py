@@ -59,6 +59,15 @@ class BaseStrategy(bt.Strategy):
         dt = dt or self.datas[0].datetime.date(0)
         print("%s, %s" % (dt.isoformat(), txt))
 
+    def update_order_history(self, order):
+        self.order_history["dt"].append(self.datas[0].datetime.date(0))
+        self.order_history["type"].append("buy" if order.isbuy() else "sell")
+        self.order_history["price"].append(order.executed.price)
+        self.order_history["size"].append(order.executed.size)
+        self.order_history["value"].append(order.executed.value)
+        self.order_history["commission"].append(order.executed.comm)
+        self.order_history["pnl"].append(order.executed.pnl)
+
     def __init__(self):
         # Global variables
         self.init_cash = self.params.init_cash
@@ -77,6 +86,16 @@ class BaseStrategy(bt.Strategy):
         print("buy_prop : {}".format(self.buy_prop))
         print("sell_prop : {}".format(self.sell_prop))
         print("commission : {}".format(self.commission))
+        self.order_history = {
+            "dt": [],
+            "type": [],
+            "price": [],
+            "size": [],
+            "value": [],
+            "commission": [],
+            "pnl": [],
+        }
+        self.order_history_df = None
 
         self.dataclose = self.datas[0].close
         self.dataopen = self.datas[0].open
@@ -98,14 +117,17 @@ class BaseStrategy(bt.Strategy):
             return
 
         if order.status in [order.Completed]:
+            # Update order history whenever an order is completed
+            self.update_order_history(order)
             if order.isbuy():
                 if self.transaction_logging:
                     self.log(
-                        "BUY EXECUTED, Price: %.2f, Cost: %.2f, Comm %.2f"
+                        "BUY EXECUTED, Price: %.2f, Cost: %.2f, Comm: %.2f, Size: %.2f"
                         % (
                             order.executed.price,
                             order.executed.value,
                             order.executed.comm,
+                            order.executed.size,
                         )
                     )
 
@@ -121,11 +143,12 @@ class BaseStrategy(bt.Strategy):
             else:  # Sell
                 if self.transaction_logging:
                     self.log(
-                        "SELL EXECUTED, Price: %.2f, Cost: %.2f, Comm %.2f"
+                        "SELL EXECUTED, Price: %.2f, Cost: %.2f, Comm: %.2f, Size: %.2f"
                         % (
                             order.executed.price,
                             order.executed.value,
                             order.executed.comm,
+                            order.executed.size,
                         )
                     )
                 if (
@@ -155,7 +178,7 @@ class BaseStrategy(bt.Strategy):
             return
         if self.transaction_logging:
             self.log(
-                "OPERATION PROFIT, GROSS %.2f, NET %.2f"
+                "OPERATION PROFIT, GROSS: %.2f, NET: %.2f"
                 % (trade.pnl, trade.pnlcomm)
             )
 
@@ -172,6 +195,7 @@ class BaseStrategy(bt.Strategy):
         self.pnl = round(self.final_value - self.init_cash, 2)
         print("Final Portfolio Value: {}".format(self.final_value))
         print("Final PnL: {}".format(self.pnl))
+        self.order_history_df = pd.DataFrame(self.order_history)
 
     def next(self):
         if self.periodic_logging:
