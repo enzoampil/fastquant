@@ -4,7 +4,7 @@
 #' have native support for backtesting according to the backtrader framework.
 #'
 #' @return A Python module object
-#' @import reticulate import
+#' @importFrom reticulate import
 #'
 #' @export
 use_fastquant_py <- function() {
