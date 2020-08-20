@@ -6,6 +6,7 @@ use_env <- function() {
   } else {
     reticulate::use_virtualenv("fastquant-env")
   }
+  invisible()
 }
 
 env_exists <- function() {
