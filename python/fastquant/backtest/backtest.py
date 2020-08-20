@@ -84,6 +84,7 @@ def backtest(
     sentiments=None,
     strats=None,  # Only used when strategy = "multi"
     data_format=None,  # No longer needed but will leave for now to warn removal in a coming release
+    return_history=False,
     **kwargs
 ):
     """Backtest financial data with a specified trading strategy
@@ -106,6 +107,8 @@ def backtest(
         df of sentiment [0, 1] indexed by time (applicable if `strategy`=='senti')
     strats : dict
         dictionary of strategy parameters (applicable if `strategy`=='multi')
+    return_history : bool
+        return history of transactions (i.e. buy and sell timestamps) (default=False)
 
     {0}
     """
@@ -148,7 +151,7 @@ def backtest(
             commission=commission,
             **kwargs
         )
-        strat_names.append(STRATEGY_MAPPING[strategy])
+        strat_names.append(strategy)
 
     # Apply Total, Average, Compound and Annualized Returns calculated using a logarithmic approach
     cerebro.addanalyzer(btanalyzers.Returns, _name="returns")
@@ -246,28 +249,66 @@ def backtest(
         print("Number of strat runs:", len(stratruns))
         print("Number of strats per run:", len(stratruns[0]))
         print("Strat names:", strat_names)
-    for stratrun in stratruns:
+
+    order_history_dfs = []
+    for strat_idx, stratrun in enumerate(stratruns):
         strats_params = {}
 
         if verbose:
             print("**************************************************")
+
         for i, strat in enumerate(stratrun):
+            strat_name = strat_names[i]
             p_raw = strat.p._getkwargs()
-            p = {}
+            p, selected_p = {}, {}
             for k, v in p_raw.items():
                 if k not in ["periodic_logging", "transaction_logging"]:
                     # Make sure the parameters are mapped to the corresponding strategy
                     if strategy == "multi":
                         key = (
-                            "{}.{}".format(strat_names[i], k)
+                            "{}.{}".format(strat_name, k)
                             if k not in GLOBAL_PARAMS
                             else k
                         )
+                        # make key with format: e.g. smac.slow_period40_fast_period10
+                        if k in strats[strat_name]:
+                            selected_p[k] = v
+                        pkeys = "_".join(
+                            ["{}{}".format(*i) for i in selected_p.items()]
+                        )
+                        history_key = "{}.{}".format(strat_name, pkeys)
                     else:
                         key = k
+
+                        # make key with format: e.g. slow_period40_fast_period10
+                        if k not in [
+                            "periodic_logging",
+                            "transaction_logging",
+                            "init_cash",
+                            "buy_prop",
+                            "sell_prop",
+                            "commission",
+                            "execution_type",
+                            "custom_column",
+                        ]:
+                            selected_p[k] = v
+                        history_key = "_".join(
+                            ["{}{}".format(*i) for i in selected_p.items()]
+                        )
                     p[key] = v
 
             strats_params = {**strats_params, **p}
+
+            if return_history:
+                # columns are decided in log method of BaseStrategy class in base.py
+                order_history_df = strat.order_history_df
+                order_history_df["dt"] = pd.to_datetime(order_history_df.dt)
+                # combine rows with identical index
+                # history_df = order_history_df.set_index('dt').dropna(how='all')
+                # history_dfs[history_key] = order_history_df.stack().unstack().astype(float)
+                order_history_df.insert(0, "strat_name", history_key)
+                order_history_df.insert(0, "strat_id", strat_idx)
+                order_history_dfs.append(order_history_df)
 
         # We run metrics on the last strat since all the metrics will be the same for all strats
         returns = strat.analyzers.returns.get_analysis()
@@ -289,14 +330,17 @@ def backtest(
             print(sharpe)
 
     params_df = pd.DataFrame(params)
+    # Set the index as a separate strat id column, so that we retain the information after sorting
+    strat_ids = pd.DataFrame({"strat_id": params_df.index.values})
     metrics_df = pd.DataFrame(metrics)
 
     # Get indices based on `sort_by` metric
     optim_idxs = np.argsort(metrics_df[sort_by].values)[::-1]
     sorted_params_df = params_df.iloc[optim_idxs].reset_index(drop=True)
     sorted_metrics_df = metrics_df.iloc[optim_idxs].reset_index(drop=True)
+    sorted_strat_ids = strat_ids.iloc[optim_idxs].reset_index(drop=True)
     sorted_combined_df = pd.concat(
-        [sorted_params_df, sorted_metrics_df], axis=1
+        [sorted_strat_ids, sorted_params_df, sorted_metrics_df], axis=1
     )
 
     # print out the result
@@ -309,7 +353,11 @@ def backtest(
     print("Optimal metrics:", optim_metrics)
 
     if plot and strategy != "multi":
-        has_volume = data_format_dict["volume"] is not None if "volume" in data_format_dict.keys() else False
+        has_volume = (
+            data_format_dict["volume"] is not None
+            if "volume" in data_format_dict.keys()
+            else False
+        )
         # Plot only with the optimal parameters when multiple strategy runs are required
         if params_df.shape[0] == 1:
             # This handles the Colab Plotting
@@ -333,5 +381,10 @@ def backtest(
                 sort_by=sort_by,
                 **optim_params
             )
+    if return_history:
+        order_history = pd.concat(order_history_dfs)
+        history_dict = dict(orders=order_history)
 
-    return sorted_combined_df
+        return sorted_combined_df, history_dict
+    else:
+        return sorted_combined_df
