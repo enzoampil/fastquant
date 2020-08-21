@@ -4,6 +4,9 @@ from fastquant.data.stocks.stocks import get_stock_data
 import json
 import pandas as pd
 import subprocess
+import requests
+import os
+from datetime import datetime
 
 
 def daily_fetch(file_dir, symbol, today):
@@ -18,9 +21,28 @@ def daily_fetch(file_dir, symbol, today):
     return df
 
 
-def trigger_bot(action, script_dir, today, symbol):
-    if script_dir:
-        subprocess.run(["python", script_dir, action, today, symbol])
+def slack_post(message, webhook_url):
+    # See https://api.slack.com/tutorials/slack-apps-hello-world for more information about Slack apps
+
+    requests.post(
+        webhook_url,
+        data=json.dumps({"text": message}),
+        headers={"Content-Type": "application/json"},
+    )
+
+
+def slack_notif(symbol, action, date=None):
+    webhook_url = os.getenv('SLACK_URL')
+    assert webhook_url, "Please set your slack webhook url as an evironment variable: SLACK_URL"
+    # Set date to the current date (UTC + 0) if no date argument is passed
+    date = date if date else datetime.utcnow().strftime("%Y-%m-%d")
+    message = "Today is " + date + ": " + action + " " + symbol
+    slack_post(message, webhook_url)
+
+
+def trigger_bot(symbol, action, date, channel=None):
+    if channel == "slack":
+        slack_notif(symbol, action, date=date)
     else:
         if action == "buy":
             print(">>> Notif bot: BUY! <<<")
@@ -28,5 +50,4 @@ def trigger_bot(action, script_dir, today, symbol):
             print(">>> Notif bot: SELL! <<<")
         else:  # hold
             print(">>> Notif bot: HOLD! <<<")
-
     return
