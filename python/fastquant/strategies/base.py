@@ -183,9 +183,10 @@ class BaseStrategy(bt.Strategy):
         print("Final PnL: {}".format(self.pnl))
         self.order_history_df = pd.DataFrame(self.order_history)
         last_date = str(self.datas[0].datetime.date(0))
-        trigger_bot(
-            self.symbol, self.action, last_date,
-        )
+        if self.channel:
+            trigger_bot(
+                self.symbol, self.action, last_date,
+            )
 
     def next(self):
 
