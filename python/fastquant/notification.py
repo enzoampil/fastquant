@@ -3,7 +3,6 @@
 from fastquant.data.stocks.stocks import get_stock_data
 import json
 import pandas as pd
-import subprocess
 import requests
 import os
 from datetime import datetime, timedelta
