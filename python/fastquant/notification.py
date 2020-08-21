@@ -45,9 +45,9 @@ def trigger_bot(symbol, action, date, channel=None):
         slack_notif(symbol, action, date=date)
     else:
         if action == "buy":
-            print(">>> Notif bot: BUY! <<<")
+            print(">>> Notif bot: Today is " + date + ": " + action + " " + symbol + " <<<")
         elif action == "sell":
-            print(">>> Notif bot: SELL! <<<")
+            print(">>> Notif bot: Today is " + date + ": " + action + " " + symbol + " <<<")
         else:  # hold
-            print(">>> Notif bot: HOLD! <<<")
+            print(">>> Notif bot: Today is " + date + ": " + action + " " + symbol + " <<<")
     return
