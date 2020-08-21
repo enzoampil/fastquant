@@ -15,7 +15,7 @@ jobs:
       cache: packages
       before_install:
         - sudo apt-get update
-        - sudo apt-get -y install python3
+        - alias python=python3
       install:
         - R -e 'install.packages("devtools")'
         - R -e 'devtools::install_deps("R", dependencies = TRUE)'
