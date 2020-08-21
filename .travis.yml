@@ -11,6 +11,7 @@ jobs:
     - language: r
       r:
         - devel
+        - release
       cache: packages
       before_install:
         - sudo apt-get update
