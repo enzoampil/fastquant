@@ -50,7 +50,7 @@ class BaseStrategy(bt.Strategy):
         ("periodic_logging", False),
         ("transaction_logging", True),
         ("channel", None),
-        ("symbol", ""),
+        ("symbol", None),
     )
 
     def log(self, txt, dt=None):
