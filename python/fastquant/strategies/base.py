@@ -118,6 +118,7 @@ class BaseStrategy(bt.Strategy):
             # Update order history whenever an order is completed
             self.update_order_history(order)
             if order.isbuy():
+                self.action = "buy"
                 if self.transaction_logging:
                     self.log(
                         "BUY EXECUTED, Price: %.2f, Cost: %.2f, Comm: %.2f, Size: %.2f"
@@ -132,6 +133,7 @@ class BaseStrategy(bt.Strategy):
                 self.buyprice = order.executed.price
                 self.buycomm = order.executed.comm
             else:  # Sell
+                self.action = "sell"
                 if self.transaction_logging:
                     self.log(
                         "SELL EXECUTED, Price: %.2f, Cost: %.2f, Comm: %.2f, Size: %.2f"
@@ -195,17 +197,16 @@ class BaseStrategy(bt.Strategy):
         if self.periodic_logging:
             self.log("CURRENT POSITION SIZE: {}".format(self.position.size))
 
+        # Skip the last observation since purchases are based on next day closing prices (no value for the last observation)
+        if len(self) + 1 >= self.len_data:
+            return
+
         # Only sell if you hold least one unit of the stock (and sell only that stock, so no short selling)
         stock_value = self.value - self.cash
 
         # Only buy if there is enough cash for at least one stock
         if self.buy_signal():
             if self.cash >= self.dataclose[0]:
-
-                self.action = "buy"
-                # Skip the last observation since purchases are based on next day closing prices (no value for the last observation)
-                if len(self) + 1 >= self.len_data:
-                    return
 
                 if self.transaction_logging:
                     self.log("BUY CREATE, %.2f" % self.dataclose[0])
@@ -219,7 +220,7 @@ class BaseStrategy(bt.Strategy):
                     / (self.dataclose[0] * (1 + self.commission + 0.001))
                 )
                 buy_prop_size = int(afforded_size * self.buy_prop)
-                # Buy based on the closing price of the next closing day
+                # Buy based on the closing price of the previous closing day
                 if self.execution_type == "close":
                     final_size = min(buy_prop_size, afforded_size)
                     if self.transaction_logging:
@@ -244,17 +245,8 @@ class BaseStrategy(bt.Strategy):
                         self.log("Final size: {}".format(final_size))
                     self.order = self.buy(size=final_size)
 
-            else:
-                self.action = "neutral"
-
         elif self.sell_signal():
             if stock_value > 0:
-
-                self.action = "sell"
-
-                # Skip the last observation since purchases are based on next day closing prices (no value for the last observation)
-                if len(self) + 1 >= self.len_data:
-                    return
 
                 if self.transaction_logging:
                     self.log("SELL CREATE, %.2f" % self.dataclose[1])
@@ -282,9 +274,3 @@ class BaseStrategy(bt.Strategy):
                             * self.sell_prop
                         )
                     )
-            
-            else:
-                self.action = "neutral"
-        
-        else:
-            self.action = "neutral"
