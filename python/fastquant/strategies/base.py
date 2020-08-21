@@ -258,7 +258,7 @@ class BaseStrategy(bt.Strategy):
                             size=self.position.size, exectype=bt.Order.Close
                         )
                     else:
-                        # Sell based on the closing price of the next closing day
+                        # Sell based on the closing price of the previous closing day
                         self.order = self.sell(
                             size=int(
                                 (stock_value / (self.dataclose[1]))
