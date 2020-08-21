@@ -131,13 +131,6 @@ class BaseStrategy(bt.Strategy):
 
                 self.buyprice = order.executed.price
                 self.buycomm = order.executed.comm
-                if (
-                    self.channel
-                    and str(self.datas[0].datetime.date(0)) == self.today
-                ):
-                    trigger_bot(
-                        "buy", self.notif_script_dir, self.today, self.symbol
-                    )
             else:  # Sell
                 if self.transaction_logging:
                     self.log(
@@ -148,13 +141,6 @@ class BaseStrategy(bt.Strategy):
                             order.executed.comm,
                             order.executed.size,
                         )
-                    )
-                if (
-                    self.channel
-                    and str(self.datas[0].datetime.date(0)) == self.today
-                ):
-                    trigger_bot(
-                        "sell", self.notif_script_dir, self.today, self.symbol
                     )
 
             self.bar_executed = len(self)
