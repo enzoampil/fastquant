@@ -6,16 +6,21 @@ import pandas as pd
 import subprocess
 import requests
 import os
-from datetime import datetime
+from datetime import datetime, timedelta
 
 
-def daily_fetch(file_dir, symbol, today):
+def daily_fetch(file_dir, symbol, today, add_tomorrow_dummy=False):
     today_df = get_stock_data(symbol, today, today)
 
     # Retrieve saved historical data on disk and append new data
     # TODO: add checks if daily updates were broken
     df = pd.read_csv(file_dir, parse_dates=["dt"]).set_index("dt")
     df = df.append(today_df)
+    if add_tomorrow_dummy:
+        tomorrow_dummy = today_df.iloc[-1:].copy()
+        tomorrow_dummy.index = tomorrow_dummy.index + timedelta(days=1)
+        df = df.append(tomorrow_dummy)
+
     df.to_csv(file_dir)
 
     return df
