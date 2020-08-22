@@ -19,6 +19,7 @@ import pandas as pd
 import numpy as np
 from collections.abc import Iterable
 import time
+from fastquant.notification import trigger_bot
 
 from fastquant.config import (
     INIT_CASH,
@@ -48,6 +49,8 @@ class BaseStrategy(bt.Strategy):
         ),  # Either open or close, to indicate if a purchase is executed based on the next open or close
         ("periodic_logging", False),
         ("transaction_logging", True),
+        ("channel", None),
+        ("symbol", None),
     )
 
     def log(self, txt, dt=None):
@@ -72,6 +75,8 @@ class BaseStrategy(bt.Strategy):
         self.periodic_logging = self.params.periodic_logging
         self.transaction_logging = self.params.transaction_logging
         self.commission = self.params.commission
+        self.channel = self.params.channel
+        self.symbol = self.params.symbol
         print("===Global level arguments===")
         print("init_cash : {}".format(self.init_cash))
         print("buy_prop : {}".format(self.buy_prop))
@@ -96,6 +101,8 @@ class BaseStrategy(bt.Strategy):
         self.buycomm = None
         # Number of ticks in the input data
         self.len_data = len(list(self.datas[0]))
+        # Sets the latest action as "buy", "sell", or "neutral"
+        self.action = None
 
     def buy_signal(self):
         return True
@@ -111,6 +118,7 @@ class BaseStrategy(bt.Strategy):
             # Update order history whenever an order is completed
             self.update_order_history(order)
             if order.isbuy():
+                self.action = "buy"
                 if self.transaction_logging:
                     self.log(
                         "BUY EXECUTED, Price: %.2f, Cost: %.2f, Comm: %.2f, Size: %.2f"
@@ -124,8 +132,8 @@ class BaseStrategy(bt.Strategy):
 
                 self.buyprice = order.executed.price
                 self.buycomm = order.executed.comm
-
             else:  # Sell
+                self.action = "sell"
                 if self.transaction_logging:
                     self.log(
                         "SELL EXECUTED, Price: %.2f, Cost: %.2f, Comm: %.2f, Size: %.2f"
@@ -174,22 +182,32 @@ class BaseStrategy(bt.Strategy):
         print("Final Portfolio Value: {}".format(self.final_value))
         print("Final PnL: {}".format(self.pnl))
         self.order_history_df = pd.DataFrame(self.order_history)
+        last_date = str(self.datas[0].datetime.date(0))
+        if self.channel:
+            trigger_bot(
+                self.symbol, self.action, last_date,
+            )
 
     def next(self):
+
         if self.periodic_logging:
             self.log("Close, %.2f" % self.dataclose[0])
         if self.order:
             return
 
+        if self.periodic_logging:
+            self.log("CURRENT POSITION SIZE: {}".format(self.position.size))
+
         # Skip the last observation since purchases are based on next day closing prices (no value for the last observation)
         if len(self) + 1 >= self.len_data:
             return
 
-        if self.periodic_logging:
-            self.log("CURRENT POSITION SIZE: {}".format(self.position.size))
+        # Only sell if you hold least one unit of the stock (and sell only that stock, so no short selling)
+        stock_value = self.value - self.cash
+
         # Only buy if there is enough cash for at least one stock
-        if self.cash >= self.dataclose[0]:
-            if self.buy_signal():
+        if self.buy_signal():
+            if self.cash >= self.dataclose[0]:
 
                 if self.transaction_logging:
                     self.log("BUY CREATE, %.2f" % self.dataclose[0])
@@ -203,7 +221,7 @@ class BaseStrategy(bt.Strategy):
                     / (self.dataclose[0] * (1 + self.commission + 0.001))
                 )
                 buy_prop_size = int(afforded_size * self.buy_prop)
-                # Buy based on the closing price of the next closing day
+                # Buy based on the closing price of the previous closing day
                 if self.execution_type == "close":
                     final_size = min(buy_prop_size, afforded_size)
                     if self.transaction_logging:
@@ -228,10 +246,9 @@ class BaseStrategy(bt.Strategy):
                         self.log("Final size: {}".format(final_size))
                     self.order = self.buy(size=final_size)
 
-        # Only sell if you hold least one unit of the stock (and sell only that stock, so no short selling)
-        stock_value = self.value - self.cash
-        if stock_value > 0:
-            if self.sell_signal():
+        elif self.sell_signal():
+            if stock_value > 0:
+
                 if self.transaction_logging:
                     self.log("SELL CREATE, %.2f" % self.dataclose[1])
                 # Sell a 5% sell position (or whatever is afforded by the current stock holding)
@@ -242,7 +259,7 @@ class BaseStrategy(bt.Strategy):
                             size=self.position.size, exectype=bt.Order.Close
                         )
                     else:
-                        # Sell based on the closing price of the next closing day
+                        # Sell based on the closing price of the previous closing day
                         self.order = self.sell(
                             size=int(
                                 (stock_value / (self.dataclose[1]))
