@@ -85,6 +85,8 @@ def backtest(
     strats=None,  # Only used when strategy = "multi"
     data_format=None,  # No longer needed but will leave for now to warn removal in a coming release
     return_history=False,
+    channel=None,
+    symbol=None,
     **kwargs
 ):
     """Backtest financial data with a specified trading strategy
@@ -109,7 +111,10 @@ def backtest(
         dictionary of strategy parameters (applicable if `strategy`=='multi')
     return_history : bool
         return history of transactions (i.e. buy and sell timestamps) (default=False)
-
+    channel : str
+        Channel to be used for last day notification - e.g. "slack" (default=None)
+    symbol : str
+        Symbol to be referenced in the channel notification if not None (default=None)
     {0}
     """
 
@@ -140,6 +145,8 @@ def backtest(
                 init_cash=[init_cash],
                 transaction_logging=[verbose],
                 commission=commission,
+                channel=None,
+                symbol=None,
                 **params
             )
             strat_names.append(strat)
@@ -149,6 +156,8 @@ def backtest(
             init_cash=[init_cash],
             transaction_logging=[verbose],
             commission=commission,
+            channel=None,
+            symbol=None,
             **kwargs
         )
         strat_names.append(strategy)
@@ -251,6 +260,7 @@ def backtest(
         print("Strat names:", strat_names)
 
     order_history_dfs = []
+    periodic_history_dfs = []
     for strat_idx, stratrun in enumerate(stratruns):
         strats_params = {}
 
@@ -281,16 +291,7 @@ def backtest(
                         key = k
 
                         # make key with format: e.g. slow_period40_fast_period10
-                        if k not in [
-                            "periodic_logging",
-                            "transaction_logging",
-                            "init_cash",
-                            "buy_prop",
-                            "sell_prop",
-                            "commission",
-                            "execution_type",
-                            "custom_column",
-                        ]:
+                        if k in kwargs.keys():
                             selected_p[k] = v
                         history_key = "_".join(
                             ["{}{}".format(*i) for i in selected_p.items()]
@@ -309,6 +310,13 @@ def backtest(
                 order_history_df.insert(0, "strat_name", history_key)
                 order_history_df.insert(0, "strat_id", strat_idx)
                 order_history_dfs.append(order_history_df)
+
+                periodic_history_df = strat.periodic_history_df
+                periodic_history_df["dt"] = pd.to_datetime(periodic_history_df.dt)
+                periodic_history_df.insert(0, "strat_name", history_key)
+                periodic_history_df.insert(0, "strat_id", strat_idx)
+                periodic_history_df['return'] = periodic_history_df.portfolio_value.pct_change()
+                periodic_history_dfs.append(periodic_history_df)                
 
         # We run metrics on the last strat since all the metrics will be the same for all strats
         returns = strat.analyzers.returns.get_analysis()
@@ -383,7 +391,10 @@ def backtest(
             )
     if return_history:
         order_history = pd.concat(order_history_dfs)
-        history_dict = dict(orders=order_history)
+        periodic_history = pd.concat(periodic_history_dfs)
+        history_dict = dict(orders=order_history,
+                            periodic=periodic_history
+        )
 
         return sorted_combined_df, history_dict
     else:

@@ -66,6 +66,11 @@ class BaseStrategy(bt.Strategy):
         self.order_history["commission"].append(order.executed.comm)
         self.order_history["pnl"].append(order.executed.pnl)
 
+    def update_periodic_history(self):
+        self.periodic_history["dt"].append(self.datas[0].datetime.date(0))
+        self.periodic_history["portfolio_value"].append(self.broker.getvalue())
+        self.periodic_history["cash"].append(self.broker.getcash())
+
     def __init__(self):
         # Global variables
         self.init_cash = self.params.init_cash
@@ -91,7 +96,13 @@ class BaseStrategy(bt.Strategy):
             "commission": [],
             "pnl": [],
         }
+        self.periodic_history = {
+            "dt": [],
+            "portfolio_value": [],
+            "cash": [],
+        }
         self.order_history_df = None
+        self.periodic_history_df = None
 
         self.dataclose = self.datas[0].close
         self.dataopen = self.datas[0].open
@@ -182,14 +193,15 @@ class BaseStrategy(bt.Strategy):
         print("Final Portfolio Value: {}".format(self.final_value))
         print("Final PnL: {}".format(self.pnl))
         self.order_history_df = pd.DataFrame(self.order_history)
+        self.periodic_history_df = pd.DataFrame(self.periodic_history)
+
+    def next(self):
+        self.update_periodic_history()
         last_date = str(self.datas[0].datetime.date(0))
         if self.channel:
             trigger_bot(
                 self.symbol, self.action, last_date,
             )
-
-    def next(self):
-
         if self.periodic_logging:
             self.log("Close, %.2f" % self.dataclose[0])
         if self.order:
