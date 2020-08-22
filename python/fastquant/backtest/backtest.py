@@ -85,6 +85,8 @@ def backtest(
     strats=None,  # Only used when strategy = "multi"
     data_format=None,  # No longer needed but will leave for now to warn removal in a coming release
     return_history=False,
+    channel=None,
+    symbol=None,
     **kwargs
 ):
     """Backtest financial data with a specified trading strategy
@@ -109,7 +111,10 @@ def backtest(
         dictionary of strategy parameters (applicable if `strategy`=='multi')
     return_history : bool
         return history of transactions (i.e. buy and sell timestamps) (default=False)
-
+    channel : str
+        Channel to be used for last day notification - e.g. "slack" (default=None)
+    symbol : str
+        Symbol to be referenced in the channel notification if not None (default=None)
     {0}
     """
 
@@ -140,6 +145,8 @@ def backtest(
                 init_cash=[init_cash],
                 transaction_logging=[verbose],
                 commission=commission,
+                channel=None,
+                symbol=None,
                 **params
             )
             strat_names.append(strat)
@@ -149,6 +156,8 @@ def backtest(
             init_cash=[init_cash],
             transaction_logging=[verbose],
             commission=commission,
+            channel=None,
+            symbol=None,
             **kwargs
         )
         strat_names.append(strategy)
