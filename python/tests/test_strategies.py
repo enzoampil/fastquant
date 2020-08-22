@@ -1,5 +1,6 @@
 import pandas as pd
 import numpy as np
+import pickle
 from pathlib import Path
 from datetime import datetime
 from fastquant import (
@@ -10,6 +11,7 @@ from fastquant import (
     get_bt_news_sentiment,
 )
 
+SENTI_PKL = Path(DATA_PATH, "bt_sentiments_tests.pkl")
 SAMPLE_CSV = Path(DATA_PATH, "JFC_20180101_20190110_DCV.csv")
 SAMPLE_STRAT_DICT = {
     "smac": {"fast_period": 35, "slow_period": [40, 50]},
@@ -28,7 +30,10 @@ def test_backtest():
     for strategy in STRATEGY_MAPPING.keys():
         if strategy == "sentiment":
             data = get_yahoo_data("TSLA", "2020-01-01", "2020-07-04")
-            sentiments = get_bt_news_sentiment(keyword="tesla", page_nums=2)
+            # use cached data instead of scraping for tests purposes.
+            # sentiments = get_bt_news_sentiment(keyword="tesla", page_nums=2)
+            with open(SENTI_PKL, "rb") as handle:
+                sentiments = pickle.load(handle)
             cerebro = backtest(
                 strategy, data, sentiments=sentiments, senti=0.4, plot=False
             )
@@ -60,7 +65,9 @@ def test_grid_backtest():
     Test grid search
     """
     sample = pd.read_csv(SAMPLE_CSV, parse_dates=["dt"])
-    cerebro = backtest("smac", sample, fast_period=[20, 25], slow_period=[40, 50], plot=False)
+    cerebro = backtest(
+        "smac", sample, fast_period=[20, 25], slow_period=[40, 50], plot=False
+    )
     assert (
         cerebro is not None
     ), "Backtest encountered error doing grid search on SMAC!"
