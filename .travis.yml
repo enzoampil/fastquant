@@ -11,11 +11,10 @@ jobs:
     - language: r
       r:
         - devel
-        - release
       cache: packages
       before_install:
         - sudo apt-get update
-        - alias python=python3
+        - sudo apt-get install -y python-is-python3
       install:
         - R -e 'install.packages("devtools")'
         - R -e 'devtools::install_deps("R", dependencies = TRUE)'
