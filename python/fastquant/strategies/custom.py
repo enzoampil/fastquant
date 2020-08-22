@@ -48,11 +48,13 @@ class CustomStrategy(BaseStrategy):
         self.lower_limit = self.params.lower_limit
         self.custom_column = self.params.custom_column
         self.custom_indicator = CustomIndicator(
-            self.data,
-            custom_column=self.custom_column,
+            self.data, custom_column=self.custom_column,
         )
         # Plotting lines are based on the upper and lower limits
-        self.custom_indicator.plotinfo.plotyticks = [self.lower_limit, self.upper_limit]
+        self.custom_indicator.plotinfo.plotyticks = [
+            self.lower_limit,
+            self.upper_limit,
+        ]
 
         print("===Strategy level arguments===")
         print("Upper limit: ", self.upper_limit)
@@ -93,11 +95,13 @@ class TernaryStrategy(BaseStrategy):
         self.sell_int = self.params.sell_int
         self.custom_column = self.params.custom_column
         self.custom_indicator = CustomIndicator(
-            self.data,
-            custom_column=self.custom_column,
+            self.data, custom_column=self.custom_column,
         )
         # Plotting lines are based on the upper and lower limits
-        self.custom_indicator.plotinfo.plotyticks = [self.sell_int, self.buy_int]
+        self.custom_indicator.plotinfo.plotyticks = [
+            self.sell_int,
+            self.buy_int,
+        ]
 
         print("===Strategy level arguments===")
         print("Buy Int: ", self.buy_int)
