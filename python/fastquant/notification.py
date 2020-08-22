@@ -9,14 +9,14 @@ import os
 from datetime import datetime, timedelta
 
 
-def daily_fetch(file_dir, symbol, today, add_tomorrow_dummy=False):
+def periodic_fetch(file_dir, symbol, today, next_period_dummy=False):
     today_df = get_stock_data(symbol, today, today)
 
     # Retrieve saved historical data on disk and append new data
     # TODO: add checks if daily updates were broken
     df = pd.read_csv(file_dir, parse_dates=["dt"]).set_index("dt")
     df = df.append(today_df)
-    if add_tomorrow_dummy:
+    if next_period_dummy:
         tomorrow_dummy = today_df.iloc[-1:].copy()
         tomorrow_dummy.index = tomorrow_dummy.index + timedelta(days=1)
         df = df.append(tomorrow_dummy)
@@ -40,7 +40,7 @@ def slack_notif(symbol, action, date=None):
     webhook_url = os.getenv('SLACK_URL')
     assert webhook_url, "Please set your slack webhook url as an evironment variable: SLACK_URL"
     # Set date to the current date (UTC + 0) if no date argument is passed
-    date = date if date else datetime.utcnow().strftime("%Y-%m-%d")
+    date = date or datetime.utcnow().strftime("%Y-%m-%d")
     message = "Today is " + date + ": " + action + " " + symbol or ""
     slack_post(message, webhook_url)
 
