@@ -22,4 +22,6 @@ jobs:
         - cd R
         - R CMD build .
         - R CMD INSTALL *tar.gz
+      script:
+        - R CMD check --as-cran *tar.gz
 
