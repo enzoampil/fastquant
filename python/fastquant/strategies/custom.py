@@ -76,6 +76,10 @@ class TernaryStrategy(BaseStrategy):
 
     Parameters
     ----------
+    buy_int : int
+        The value of the custom column that indicates a "buy" signal (default=1)
+    sell_int : int
+        The value of the custom column that indicates a "sell" signal (default=-1)
     custom_column : str
         The name of the column in the dataframe that corresponds to the custom ternary indicator
 
