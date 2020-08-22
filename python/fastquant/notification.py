@@ -3,7 +3,6 @@
 from fastquant.data.stocks.stocks import get_stock_data
 import json
 import pandas as pd
-import subprocess
 import requests
 import os
 from datetime import datetime, timedelta
@@ -38,7 +37,7 @@ def slack_post(message, webhook_url):
 
 def slack_notif(symbol, action, date=None):
     webhook_url = os.getenv('SLACK_URL')
-    assert webhook_url, "Please set your slack webhook url as an evironment variable: SLACK_URL"
+    assert webhook_url, "Please set your slack webhook url as an environment variable: SLACK_URL"
     # Set date to the current date (UTC + 0) if no date argument is passed
     date = date or datetime.utcnow().strftime("%Y-%m-%d")
     message = "Today is " + date + ": " + action + " " + symbol or ""
