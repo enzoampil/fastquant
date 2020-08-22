@@ -68,7 +68,7 @@ class BaseStrategy(bt.Strategy):
 
     def update_periodic_history(self):
         self.periodic_history["dt"].append(self.datas[0].datetime.date(0))
-        self.periodic_history["value"].append(self.broker.getvalue())
+        self.periodic_history["portfolio_value"].append(self.broker.getvalue())
         self.periodic_history["cash"].append(self.broker.getcash())
 
     def __init__(self):
@@ -98,7 +98,7 @@ class BaseStrategy(bt.Strategy):
         }
         self.periodic_history = {
             "dt": [],
-            "value": [],
+            "portfolio_value": [],
             "cash": [],
         }
         self.order_history_df = None

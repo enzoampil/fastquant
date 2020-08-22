@@ -282,16 +282,7 @@ def backtest(
                         key = k
 
                         # make key with format: e.g. slow_period40_fast_period10
-                        if k not in [
-                            "periodic_logging",
-                            "transaction_logging",
-                            "init_cash",
-                            "buy_prop",
-                            "sell_prop",
-                            "commission",
-                            "execution_type",
-                            "custom_column",
-                        ]:
+                        if k in kwargs.keys():
                             selected_p[k] = v
                         history_key = "_".join(
                             ["{}{}".format(*i) for i in selected_p.items()]
@@ -309,15 +300,13 @@ def backtest(
                 # history_dfs[history_key] = order_history_df.stack().unstack().astype(float)
                 order_history_df.insert(0, "strat_name", history_key)
                 order_history_df.insert(0, "strat_id", strat_idx)
-                order_history_df['csum'] = (order_history_df.pnl-order_history_df.commission).cumsum()+init_cash
-                order_history_df['returns'] = order_history_df.csum.pct_change()
                 order_history_dfs.append(order_history_df)
 
                 periodic_history_df = strat.periodic_history_df
                 periodic_history_df["dt"] = pd.to_datetime(periodic_history_df.dt)
                 periodic_history_df.insert(0, "strat_name", history_key)
                 periodic_history_df.insert(0, "strat_id", strat_idx)
-                periodic_history_df['returns'] = periodic_history_df.value.pct_change()
+                periodic_history_df['return'] = periodic_history_df.portfolio_value.pct_change()
                 periodic_history_dfs.append(periodic_history_df)                
 
         # We run metrics on the last strat since all the metrics will be the same for all strats
