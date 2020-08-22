@@ -275,3 +275,6 @@ class BaseStrategy(bt.Strategy):
                             * self.sell_prop
                         )
                     )
+
+        else:
+            self.action = "neutral"
