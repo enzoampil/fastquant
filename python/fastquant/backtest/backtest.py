@@ -30,6 +30,7 @@ from fastquant.strategies import (
     BuyAndHoldStrategy,
     SentimentStrategy,
     CustomStrategy,
+    TernaryStrategy,
 )
 
 
@@ -52,6 +53,7 @@ STRATEGY_MAPPING = {
     "buynhold": BuyAndHoldStrategy,
     "sentiment": SentimentStrategy,
     "custom": CustomStrategy,
+    "ternary": TernaryStrategy,
 }
 
 strat_docs = "\nExisting strategies:\n\n" + "\n".join(
