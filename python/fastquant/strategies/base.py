@@ -195,13 +195,14 @@ class BaseStrategy(bt.Strategy):
         self.order_history_df = pd.DataFrame(self.order_history)
         self.periodic_history_df = pd.DataFrame(self.periodic_history)
 
-    def next(self):
-        self.update_periodic_history()
         last_date = str(self.datas[0].datetime.date(0))
         if self.channel:
             trigger_bot(
                 self.symbol, self.action, last_date,
             )
+
+    def next(self):
+        self.update_periodic_history()
         if self.periodic_logging:
             self.log("Close, %.2f" % self.dataclose[0])
         if self.order:
