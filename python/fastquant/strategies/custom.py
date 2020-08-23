@@ -19,7 +19,7 @@ from fastquant.indicators.custom import CustomIndicator
 
 class CustomStrategy(BaseStrategy):
     """
-    implements a chosen dataframe column as a custom indicator (column name set as "custom" by default).
+    Implements a chosen dataframe column as a custom indicator (column name set as "custom" by default).
     
     The strategy is structured similar to RSIStrategy where you can set an upper_limit, above which the asset is sold (considered "overbought"), and a lower_limit, below which the asset is sold (considered "underbought). upper_limit is set to 95 by default, while lower_limit is set to 5 by default.
 
@@ -48,11 +48,13 @@ class CustomStrategy(BaseStrategy):
         self.lower_limit = self.params.lower_limit
         self.custom_column = self.params.custom_column
         self.custom_indicator = CustomIndicator(
-            self.data,
-            custom_column=self.custom_column,
+            self.data, custom_column=self.custom_column,
         )
         # Plotting lines are based on the upper and lower limits
-        self.custom_indicator.plotinfo.plotyticks = [self.lower_limit, self.upper_limit]
+        self.custom_indicator.plotinfo.plotyticks = [
+            self.lower_limit,
+            self.upper_limit,
+        ]
 
         print("===Strategy level arguments===")
         print("Upper limit: ", self.upper_limit)
@@ -64,3 +66,54 @@ class CustomStrategy(BaseStrategy):
 
     def sell_signal(self):
         return self.custom_indicator[0] > self.upper_limit
+
+
+class TernaryStrategy(BaseStrategy):
+    """
+    Implements a chosen dataframe column as a custom "buy" (1), "sell" (-1), and "neutral" (0).
+    
+    The strategy is to simply buy when the custom indicator is equal to the buy_int (1), sell when equal to the sell_int (-1), and do nothing otherwise (0).
+
+    Parameters
+    ----------
+    buy_int : int
+        The value of the custom column that indicates a "buy" signal (default=1)
+    sell_int : int
+        The value of the custom column that indicates a "sell" signal (default=-1)
+    custom_column : str
+        The name of the column in the dataframe that corresponds to the custom ternary indicator
+
+    """
+
+    params = (
+        ("buy_int", 1),
+        ("sell_int", -1),
+        ("custom_column", "custom"),
+    )
+
+    def __init__(self):
+        # Initialize global variables
+        super().__init__()
+        # Strategy level variables
+        self.buy_int = self.params.buy_int
+        self.sell_int = self.params.sell_int
+        self.custom_column = self.params.custom_column
+        self.custom_indicator = CustomIndicator(
+            self.data, custom_column=self.custom_column,
+        )
+        # Plotting lines are based on the upper and lower limits
+        self.custom_indicator.plotinfo.plotyticks = [
+            self.sell_int,
+            self.buy_int,
+        ]
+
+        print("===Strategy level arguments===")
+        print("Buy Int: ", self.buy_int)
+        print("Sell Int: ", self.sell_int)
+
+    # Buy when the custom indicator is equal to buy_int (+1), and sell when custom indicator is equal to sell_int (-1)
+    def buy_signal(self):
+        return int(self.custom_indicator[0]) == self.buy_int
+
+    def sell_signal(self):
+        return int(self.custom_indicator[0]) == self.sell_int
