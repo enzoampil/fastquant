@@ -43,6 +43,8 @@ class BaseStrategy(bt.Strategy):
         ("buy_prop", BUY_PROP),
         ("sell_prop", SELL_PROP),
         ("commission", COMMISSION_PER_TRANSACTION),
+        ("stop_loss", None),
+        ("stop_trail", None),
         (
             "execution_type",
             "close",
@@ -81,7 +83,8 @@ class BaseStrategy(bt.Strategy):
         self.transaction_logging = self.params.transaction_logging
         self.commission = self.params.commission
         self.channel = self.params.channel
-        self.symbol = self.params.symbol
+        self.stop_loss = self.params.stop_loss
+        self.stop_trail = self.params.stop_trail
         print("===Global level arguments===")
         print("init_cash : {}".format(self.init_cash))
         print("buy_prop : {}".format(self.buy_prop))
@@ -143,6 +146,14 @@ class BaseStrategy(bt.Strategy):
 
                 self.buyprice = order.executed.price
                 self.buycomm = order.executed.comm
+
+                if self.stop_loss:
+                    stop_price = order.executed.price * (1.0 - self.stop_loss)
+                    self.sell(exectype=bt.Order.Stop, price=stop_price)
+
+                if self.stop_trail:
+                    self.sell(exectype=bt.Order.StopTrail, trailamount=self.stop_trail)
+                    
             else:  # Sell
                 self.action = "sell"
                 if self.transaction_logging:
