@@ -15,5 +15,9 @@ plt <- NULL
                             as = "plt",
                             convert = TRUE,
                             delay_load = TRUE)
+  fq <<- reticulate::import("fastquant",
+                            as = "fq",
+                            convert = TRUE,
+                            delay_load = TRUE)
   invisible()
 }
