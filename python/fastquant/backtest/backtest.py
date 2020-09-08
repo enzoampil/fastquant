@@ -189,7 +189,12 @@ def backtest(
         )
         data = data.reset_index()
 
-    # If data has `dt` as the index and `dt` and `datetime` are not already columns, set `dt` as the first column
+    # If a `close` column exists but an `open` column doesn't, create a new `open` column with the same values as the `close` column
+    # This is for easier handling of next day trades (w/ the assumption that next day open is equal to current day close)
+    if "close" in data.columns and "open" not in data.columns:
+        data["open"] = data.close.values
+
+    # If data has `dt` as the index and `dt` or `datetime` are not already columns, set `dt` as the first column
     # This means `backtest` supports the dataframe whether `dt` is the index or a column
     if len(set(["dt", "datetime"]).intersection(data.columns)) == 0:
         if data.index.name == "dt":
