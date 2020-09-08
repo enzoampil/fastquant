@@ -257,13 +257,11 @@ class BaseStrategy(bt.Strategy):
                     if self.stop_loss:
                         stop_price = self.data.close[0] * (1.0 - self.stop_loss)
                         self.log("Stop price: {}".format(stop_price))
-                        #self.sell(exectype=bt.Order.Close, price=stop_price, size=final_size)
                         self.sell(exectype=bt.Order.Stop, price=stop_price, size=final_size)
 
                     if self.stop_trail:
                         self.log("Stop trail: {}".format(self.stop_trail))
-                        #self.sell(exectype=bt.Order.Close, trailamount=self.stop_trail, size=final_size)
-                        self.sell(exectype=bt.Order.StopTrail, trailamount=self.stop_trail, size=final_size)
+                        self.sell(exectype=bt.Order.StopTrail, trailpercent=self.stop_trail, size=final_size)
                         
 
                 # Buy based on the opening price of the next closing day (only works "open" data exists in the dataset)
@@ -288,7 +286,7 @@ class BaseStrategy(bt.Strategy):
 
                     if self.stop_trail:
                         self.log("Stop trail: {}".format(self.stop_trail))
-                        self.sell(exectype=bt.Order.StopTrail, trailamount=self.stop_trail, size=final_size)
+                        self.sell(exectype=bt.Order.StopTrail, trailpercent=self.stop_trail, size=final_size)
 
         elif self.sell_signal():
             if stock_value > 0:
