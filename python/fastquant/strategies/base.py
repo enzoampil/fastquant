@@ -43,6 +43,8 @@ class BaseStrategy(bt.Strategy):
         ("buy_prop", BUY_PROP),
         ("sell_prop", SELL_PROP),
         ("commission", COMMISSION_PER_TRANSACTION),
+        ("stop_loss", None),
+        ("stop_trail", None),
         (
             "execution_type",
             "close",
@@ -81,12 +83,16 @@ class BaseStrategy(bt.Strategy):
         self.transaction_logging = self.params.transaction_logging
         self.commission = self.params.commission
         self.channel = self.params.channel
-        self.symbol = self.params.symbol
+        self.stop_loss = self.params.stop_loss
+        self.stop_trail = self.params.stop_trail
+        self.broker.set_coc(True)
         print("===Global level arguments===")
         print("init_cash : {}".format(self.init_cash))
         print("buy_prop : {}".format(self.buy_prop))
         print("sell_prop : {}".format(self.sell_prop))
         print("commission : {}".format(self.commission))
+        print("stop_loss : {}".format(self.stop_loss))
+        print("stop_trail : {}".format(self.stop_trail))
         self.order_history = {
             "dt": [],
             "type": [],
@@ -143,6 +149,7 @@ class BaseStrategy(bt.Strategy):
 
                 self.buyprice = order.executed.price
                 self.buycomm = order.executed.comm
+                    
             else:  # Sell
                 self.action = "sell"
                 if self.transaction_logging:
@@ -245,6 +252,18 @@ class BaseStrategy(bt.Strategy):
                         self.log("Final size: {}".format(final_size))
                     # Explicitly setting exectype=bt.Order.Close will make the next day's closing the reference price
                     self.order = self.buy(size=final_size)
+
+                    # Implement stop loss at the purchase level (only this specific trade is closed)
+                    if self.stop_loss:
+                        stop_price = self.data.close[0] * (1.0 - self.stop_loss)
+                        self.log("Stop price: {}".format(stop_price))
+                        self.sell(exectype=bt.Order.Stop, price=stop_price, size=final_size)
+
+                    if self.stop_trail:
+                        self.log("Stop trail: {}".format(self.stop_trail))
+                        self.sell(exectype=bt.Order.StopTrail, trailpercent=self.stop_trail, size=final_size)
+                        
+
                 # Buy based on the opening price of the next closing day (only works "open" data exists in the dataset)
                 else:
                     # Margin is required for buy commission
@@ -258,6 +277,16 @@ class BaseStrategy(bt.Strategy):
                         self.log("Afforded size: {}".format(afforded_size))
                         self.log("Final size: {}".format(final_size))
                     self.order = self.buy(size=final_size)
+
+                    # Implement stop loss at the purchase level (only this specific trade is closed)
+                    if self.stop_loss:
+                        stop_price = self.data.close[0] * (1.0 - self.stop_loss)
+                        self.log("Stop price: {}".format(stop_price))
+                        self.sell(exectype=bt.Order.Stop, price=stop_price, size=final_size)
+
+                    if self.stop_trail:
+                        self.log("Stop trail: {}".format(self.stop_trail))
+                        self.sell(exectype=bt.Order.StopTrail, trailpercent=self.stop_trail, size=final_size)
 
         elif self.sell_signal():
             if stock_value > 0:
