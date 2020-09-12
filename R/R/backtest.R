@@ -4,7 +4,7 @@
 #' @param strat Character string indicating the strategy to backtest
 #' @param ... Paramters to be passed on to the Python backtest function
 #'
-#' @importFrom rlang list2 inform
+#' @importFrom rlang list2 warn
 #' @importFrom assertthat assert_that
 #'
 #' @export
@@ -80,7 +80,9 @@ backtest <- function(data, strat, ...) {
     kwargs$sell_int <- as.integer(kwargs$sell_int)
   }
 
-  # TODO Coerce the rest of the arguments to integer types
+  if (strat %in% c("custom", "macd", "senti", "ternary")) {
+    kwargs <- lapply(kwargs, as.integer)
+  }
 
   kwargs$strategy <- strat
   kwargs$data <- data
