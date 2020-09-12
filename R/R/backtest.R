@@ -31,7 +31,7 @@ backtest <- function(data, strat, ...) {
   if (strat == "macd") {
     assert_that(
       names(kwargs) == c("fast_period", "slow_period", "signal_period", "allowance"),
-      msg = "args for `custom` strategy must be fast_period, slow_period, signal_period, allowance"
+      msg = "args for `macd` strategy must be fast_period, slow_period, signal_period, allowance"
     )
     assert_that(
       is.numeric(kwargs$fast_period) &
@@ -49,8 +49,18 @@ backtest <- function(data, strat, ...) {
     kwargs$allowance <- as.double(kwargs$allowance)
   }
 
+  if (strat == "senti") {
+    assert_that(
+      names(kwargs) == c("senti"),
+      msg = "arg for `senti` strategy should be `senti`"
+    )
+    assert_that(
+      is.double(kwargs$senti),
+      msg = "senti should be double"
+    )
+  }
 
-  # TODO Exceptions for senti, ternary
+  # TODO Exceptions for ternary
   # TODO Coerce the rest of the arguments to integer types
 
   kwargs$strategy <- strat
