@@ -4,7 +4,7 @@
 #' @param strat Character string indicating the strategy to backtest
 #' @param ... Paramters to be passed on to the Python backtest function
 #'
-#' @importFrom rlang list2
+#' @importFrom rlang list2 inform
 #' @importFrom assertthat assert_that
 #'
 #' @export
@@ -27,7 +27,30 @@ backtest <- function(data, strat, ...) {
     kwargs$upper_limit <- as.double(kwargs$upper_limit)
     kwargs$lower_limit <- as.double(kwargs$lower_limit)
   }
-  # TODO Exceptions for senti, multi, macd
+
+  if (strat == "macd") {
+    assert_that(
+      names(kwargs) == c("fast_period", "slow_period", "signal_period", "allowance"),
+      msg = "args for `custom` strategy must be fast_period, slow_period, signal_period, allowance"
+    )
+    assert_that(
+      is.numeric(kwargs$fast_period) &
+      is.numeric(kwargs$slow_period) &
+      is.numeric(kwargs$signal_period) &
+      is.numeric(kwargs$allowance),
+      msg = "all macd inputs should be numeric"
+    )
+    if (is.double(c(kwargs$fast_period, kwargs$slow_period, kwargs$signal_period))) {
+      inform("Coercing fast_period, slow_period, and signal_period to integers. `1.2` will become `1L`")
+      kwargs$fast_period <- as.integer(kwargs$fast_period)
+      kwargs$slow_period <- as.integer(kwargs$slow_period)
+      kwargs$signal_period <- as.integer(kwargs$signal_period)
+    }
+    kwargs$allowance <- as.double(kwargs$allowance)
+  }
+
+
+  # TODO Exceptions for senti, ternary
   # TODO Coerce the rest of the arguments to integer types
 
   kwargs$strategy <- strat
