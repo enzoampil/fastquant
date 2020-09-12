@@ -17,12 +17,12 @@ backtest <- function(data, strat, ...) {
       msg = "args for `custom` strategy must be upper_limit, lower_limit, and custom_column"
     )
     assert_that(
-      is.numeric(kwargs$upper_limit) & is.numeric(kwargs$lower_limit),
-      msg = "upper_limit and or lower_limit are not numeric inputs"
-    )
-    assert_that(
       is.character(kwargs$custom_column),
       msg = "custom_colum is not a character input"
+    )
+    assert_that(
+      is.numeric(kwargs$upper_limit) & is.numeric(kwargs$lower_limit),
+      msg = "upper_limit and or lower_limit are not numeric inputs"
     )
     kwargs$upper_limit <- as.double(kwargs$upper_limit)
     kwargs$lower_limit <- as.double(kwargs$lower_limit)
@@ -41,7 +41,7 @@ backtest <- function(data, strat, ...) {
       msg = "all macd inputs should be numeric"
     )
     if (is.double(c(kwargs$fast_period, kwargs$slow_period, kwargs$signal_period))) {
-      inform("Coercing fast_period, slow_period, and signal_period to integers. `1.2` will become `1L`")
+      warn("Coercing fast_period, slow_period, and signal_period to integers. `1.2` will become `1L`")
       kwargs$fast_period <- as.integer(kwargs$fast_period)
       kwargs$slow_period <- as.integer(kwargs$slow_period)
       kwargs$signal_period <- as.integer(kwargs$signal_period)
@@ -55,12 +55,31 @@ backtest <- function(data, strat, ...) {
       msg = "arg for `senti` strategy should be `senti`"
     )
     assert_that(
-      is.double(kwargs$senti),
-      msg = "senti should be double"
+      is.numeric(kwargs$senti),
+      msg = "senti should be numeric"
     )
+    kwargs$senti <- as.double(kwargs$senti)
   }
 
-  # TODO Exceptions for ternary
+  if (strat == "ternary") {
+    assert_that(
+      names(kwargs) == c("buy_int", "sell_int", "custom_column"),
+      msg = "args for `ternary` must be buy_int, sell_int and custom_column"
+    )
+    assert_that(
+      is.character(kwargs$custom_column),
+      msg = "custom_column must be character"
+    )
+    assert_that(
+      is.numeric(kwargs$buy_int) &
+      is.numeric(kwargs$sell_int),
+      msg = "buy_int and sell_int must be numeric"
+    )
+    warn("Coercing buy_int and sell_int to integers. `1.2` will become `1L`")
+    kwargs$buy_int <- as.integer(kwargs$buy_int)
+    kwargs$sell_int <- as.integer(kwargs$sell_int)
+  }
+
   # TODO Coerce the rest of the arguments to integer types
 
   kwargs$strategy <- strat
