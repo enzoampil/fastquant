@@ -303,3 +303,26 @@ Want to discuss more about fastquant with other users, and our team of developer
 Join the fastquant Slack community, and our bi-weekly remote meetups through this [link](https://join.slack.com/t/fastquant/shared_invite/zt-gaaoahkz-X~5qw0psNOLg1iFYKcpRlQ)!
 
 You can also [subscribe](https://forms.gle/HAPYdMp2YMu4qXPd7) to our monthly newsletter to receive updates on our latest tutorials, blog posts, and product features!
+
+## Run fastquant in a Docker Container
+
+```
+# Build the image
+docker build -t myimage .
+
+# Run the container
+docker run -t -d -p 5000:5000 myimage
+
+# Get the container id
+docker ps
+
+# SSH into the fastquant container
+docker exec -it <CONTAINER_ID> /bin/bash
+
+# Run python and use fastquant
+python
+
+>>> from fastquant import get_stock_data
+>>> df = get_stock_data("TSLA", "2019-01-01", "2020-01-01")
+>>> df.head()
+```
