@@ -8,7 +8,7 @@
 #' @importFrom assertthat assert_that
 #'
 #' @export
-backtest <- function(data, strat, ...) {
+backtest <- function(data, strat, verbose = FALSE, plot = FALSE, ...) {
   kwargs <- list2(...)
 
   if (strat == "custom") {
@@ -80,15 +80,27 @@ backtest <- function(data, strat, ...) {
     kwargs$sell_int <- as.integer(kwargs$sell_int)
   }
 
-  if (strat %in% c("custom", "macd", "senti", "ternary")) {
+  if (strat == "multi") {
+    assert_that(
+      names(kwargs) == c("strats"),
+      msg = "multi does not contain strats"
+    )
+    assert_that(
+      typeof(kwargs$strats),
+      msg = "multi must be list"
+    )
+  }
+
+  if (!strat %in% c("custom", "macd", "senti", "ternary")) {
     kwargs <- lapply(kwargs, as.integer)
   }
 
   kwargs$strategy <- strat
   kwargs$data <- data
 
-  kwargs$verbose <- FALSE
-  kwargs$plot <- FALSE
+  # R defaults to having these values as FALSE, export to methods
+  kwargs$verbose <- verbose
+  kwargs$plot <- plot
 
   result <- do.call(what = fq$backtest, args = kwargs)
   return(paste0("Returns ", typeof(result)))
