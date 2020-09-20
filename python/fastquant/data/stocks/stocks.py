@@ -35,6 +35,8 @@ def get_stock_data(
         First source to query from ("pse", "yahoo").
         If the stock is not found in the first source,
         the query is run on the other source.
+    format : str
+        Format of the output data
 
     Returns
     -------
@@ -47,10 +49,10 @@ def get_stock_data(
         # The query is run on 'yahoo', but if the symbol isn't found, the same query is run on 'phisix'.
         df = get_yahoo_data(symbol, start_date, end_date)
         if df is None:
-            df = get_pse_data(symbol, start_date, end_date, format=format)
+            df = get_pse_data(symbol, start_date, end_date, format="c")
     elif source == "phisix":
         # The query is run on 'phisix', but if the symbol isn't found, the same query is run on 'yahoo'.
-        df = get_pse_data(symbol, start_date, end_date, format=format)
+        df = get_pse_data(symbol, start_date, end_date, format="c")
         if df is None:
             df = get_yahoo_data(symbol, start_date, end_date)
     else:
