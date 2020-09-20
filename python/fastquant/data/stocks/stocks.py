@@ -15,7 +15,7 @@ from fastquant.data.stocks.pse import get_pse_data
 from fastquant.data.stocks.yahoofinance import get_yahoo_data
 
 
-def get_stock_data(symbol, start_date, end_date, source="phisix", format="c"):
+def get_stock_data(symbol, start_date, end_date, source="yahoo"):
     """Returns pricing data for a specified stock and source.
 
     Parameters
@@ -33,8 +33,6 @@ def get_stock_data(symbol, start_date, end_date, source="phisix", format="c"):
         First source to query from ("pse", "yahoo").
         If the stock is not found in the first source,
         the query is run on the other source.
-    format : str
-        Format of the output data
 
     Returns
     -------
@@ -43,16 +41,16 @@ def get_stock_data(symbol, start_date, end_date, source="phisix", format="c"):
     """
 
     df_columns = [DATA_FORMAT_COLS[c] for c in format]
-    if source == "phisix":
-        # The query is run on 'phisix', but if the symbol isn't found, the same query is run on 'yahoo'.
-        df = get_pse_data(symbol, start_date, end_date, format=format)
-        if df is None:
-            df = get_yahoo_data(symbol, start_date, end_date)
-    elif source == "yahoo":
+    if source == "yahoo":
         # The query is run on 'yahoo', but if the symbol isn't found, the same query is run on 'phisix'.
         df = get_yahoo_data(symbol, start_date, end_date)
         if df is None:
             df = get_pse_data(symbol, start_date, end_date)
+    elif source == "phisix":
+        # The query is run on 'phisix', but if the symbol isn't found, the same query is run on 'yahoo'.
+        df = get_pse_data(symbol, start_date, end_date)
+        if df is None:
+            df = get_yahoo_data(symbol, start_date, end_date, format="c")
     else:
         raise Exception("Source must be either 'phisix' or 'yahoo'")
 
