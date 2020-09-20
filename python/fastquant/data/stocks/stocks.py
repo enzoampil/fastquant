@@ -15,7 +15,9 @@ from fastquant.data.stocks.pse import get_pse_data
 from fastquant.data.stocks.yahoofinance import get_yahoo_data
 
 
-def get_stock_data(symbol, start_date, end_date, source="yahoo", format="c"):
+def get_stock_data(
+    symbol, start_date, end_date, source="yahoo", format="ohlcv"
+):
     """Returns pricing data for a specified stock and source.
 
     Parameters
@@ -45,10 +47,10 @@ def get_stock_data(symbol, start_date, end_date, source="yahoo", format="c"):
         # The query is run on 'yahoo', but if the symbol isn't found, the same query is run on 'phisix'.
         df = get_yahoo_data(symbol, start_date, end_date)
         if df is None:
-            df = get_pse_data(symbol, start_date, end_date, format=format)
+            df = get_pse_data(symbol, start_date, end_date, format="c")
     elif source == "phisix":
         # The query is run on 'phisix', but if the symbol isn't found, the same query is run on 'yahoo'.
-        df = get_pse_data(symbol, start_date, end_date, format=format)
+        df = get_pse_data(symbol, start_date, end_date, format="c")
         if df is None:
             df = get_yahoo_data(symbol, start_date, end_date)
     else:
