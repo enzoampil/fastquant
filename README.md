@@ -2,7 +2,7 @@
 [![Build Status](https://travis-ci.com/enzoampil/fastquant.svg?branch=master)](https://travis-ci.com/enzoampil/fastquant)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/ambv/black)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](https://raw.githubusercontent.com/enzoampil/fastquant/master/LICENSE)
-
+[![Downloads](https://pepy.tech/badge/fastquant/month)](https://pepy.tech/project/fastquant/month)
 ## Bringing backtesting to the mainstream
 
 **fastquant** allows you to easily backtest investment strategies with as few as 3 lines of python code. Its goal is to promote data driven investments by making quantitative analysis in finance accessible to everyone.
@@ -71,12 +71,10 @@ get_stock_data("JFC", "2018-01-01", "2018-02-01")
 #> ...
 ```
 
-*Note: Python has Yahoo Finance and phisix support. R has phisix support and porting to symbols from the `quantmod` package. Symbols from Yahoo Finance will return closing prices in USD, while symbols from PSE will return closing prices in PHP.*
-
-*R does NOT have support for cryptocurrency data pulling and backtesting yet as of v0.1.2*
-
 ## Get crypto data
 The data is pulled from Binance, and all the available tickers are found [here](https://coinmarketcap.com/exchanges/binance/).
+
+### Python
 
 ```
 from fastquant import get_crypto_data
@@ -91,6 +89,26 @@ crypto.head()
 # 2018-12-04  3884.76  4085.00  3781.00  3951.64  48489.551613
 # 2018-12-05  3950.98  3970.00  3745.00  3769.84  44004.799448
 ```
+### R
+
+```
+get_crypto_data("BTCUSDT", "2019-01-01", "2019-03-01")
+
+#> # A tibble: 59 x 6
+#>    dt          open  high   low close volume
+#>    <date>     <dbl> <dbl> <dbl> <dbl>  <dbl>
+#>  1 2019-01-01 3701. 3810. 3642  3797. 23742.
+#>  2 2019-01-02 3796. 3882. 3750. 3859. 35156.
+#>  3 2019-01-03 3858. 3863. 3730  3767. 29407.
+#>  4 2019-01-04 3767. 3824. 3704. 3792. 29520.
+#>  5 2019-01-05 3790. 3841. 3751  3771. 30491.
+#> # … with 54 more rows
+```
+
+
+*Note: Python has Yahoo Finance and phisix support. R has phisix support and porting to symbols from the `quantmod` package. Symbols from Yahoo Finance will return closing prices in USD, while symbols from PSE will return closing prices in PHP.*
+
+*R does NOT have support for backtesting yet*
 
 ## Backtest trading strategies
 
@@ -108,6 +126,8 @@ backtest('smac', df, fast_period=15, slow_period=40)
 ![](./docs/assets/smac_sample.png)
 
 ## Optimize trading strategies with automated grid search
+
+fastquant allows you to automatically measure the performance of your trading strategy on multiple combinations of parameters. All you need to do is to input the values as iterators (like as a `list` or `range`).
 
 ### Simple Moving Average Crossover (15 to 30 day MA vs 40 to 55 day MA)
 Daily Jollibee prices from 2018-01-01 to 2019-01-01
@@ -142,6 +162,8 @@ print(res[['fast_period', 'slow_period', 'final_value']].head())
 | Bollinger Bands | bbands | `period`, `devfactor` |
 | Buy and Hold | buynhold | `N/A` |
 | Sentiment Strategy | sentiment | `keyword` , `page_nums`, `senti` |
+| Custom Prediction Strategy | custom | `upper_limit`, `lower_limit`, `custom_column` |
+| Custom Ternary Strategy | ternary | `buy_int`, `sell_int`, `custom_column` |
 
 ### Relative Strength Index (RSI) Strategy
 ```
@@ -229,4 +251,78 @@ res_opt.shape
 # (4, 16)
 ```
 
+### Custom Strategy for Backtesting Machine Learning & Statistics Based Predictions
+
+This powerful strategy allows you to backtest your own trading strategies using any type of model w/ as few as 3 lines of code after the forecast!
+
+ Predictions based on any model can be used as a custom indicator to be backtested using fastquant. You just need to add a `custom` column in the input dataframe, and set values for `upper_limit` and `lower_limit`.
+
+The strategy is structured similar to `RSIStrategy` where you can set an `upper_limit`, above which the asset is sold (considered "overbought"), and a `lower_limit`, below which the asset is bought (considered "underbought). `upper_limit` is set to 95 by default, while `lower_limit` is set to 5 by default.
+
+In the example below, we show how to use the custom strategy to backtest a custom indicator based on in-sample time series forecasts. The forecasts were generated using Facebook's [Prophet](https://github.com/facebook/prophet) package on Bitcoin prices.
+
+```
+from fastquant import get_crypto_data, backtest
+from fbprophet import Prophet
+from matplotlib import pyplot as plt
+
+# Pull crypto data
+df = get_crypto_data("BTC/USDT", "2019-01-01", "2020-05-31")
+
+# Fit model on closing prices
+ts = df.reset_index()[["dt", "close"]]
+ts.columns = ['ds', 'y']
+m = Prophet(daily_seasonality=True, yearly_seasonality=True).fit(ts)
+forecast = m.make_future_dataframe(periods=0, freq='D')
+
+# Predict and plot
+pred = m.predict(forecast)
+fig1 = m.plot(pred)
+plt.title('BTC/USDT: Forecasted Daily Closing Price', fontsize=25)
+```
+
+![](./docs/assets/bitcoin_forecasts.png)
+
+```
+# Convert predictions to expected 1 day returns
+expected_1day_return = pred.set_index("ds").yhat.pct_change().shift(-1).multiply(100)
+
+# Backtest the predictions, given that we buy bitcoin when the predicted next day return is > +1.5%, and sell when it's < -1.5%.
+df["custom"] = expected_1day_return.multiply(-1)
+backtest("custom", df.dropna(),upper_limit=1.5, lower_limit=-1.5)
+```
+
+![](./docs/assets/bitcoin_prophet_backtest.png)
+
 See more examples [here](https://nbviewer.jupyter.org/github/enzoampil/fastquant/tree/master/examples/).
+
+## Be part of the growing fastquant community
+
+Want to discuss more about fastquant with other users, and our team of developers?
+
+Join the fastquant Slack community, and our bi-weekly remote meetups through this [link](https://join.slack.com/t/fastquant/shared_invite/zt-gaaoahkz-X~5qw0psNOLg1iFYKcpRlQ)!
+
+You can also [subscribe](https://forms.gle/HAPYdMp2YMu4qXPd7) to our monthly newsletter to receive updates on our latest tutorials, blog posts, and product features!
+
+## Run fastquant in a Docker Container
+
+```
+# Build the image
+docker build -t myimage .
+
+# Run the container
+docker run -t -d -p 5000:5000 myimage
+
+# Get the container id
+docker ps
+
+# SSH into the fastquant container
+docker exec -it <CONTAINER_ID> /bin/bash
+
+# Run python and use fastquant
+python
+
+>>> from fastquant import get_stock_data
+>>> df = get_stock_data("TSLA", "2019-01-01", "2020-01-01")
+>>> df.head()
+```

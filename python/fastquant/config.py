@@ -10,6 +10,17 @@ DATA_FILE = resource_filename(__name__, "data/JFC_20180101_20190110_DCV.csv")
 
 BUY_PROP = 1
 SELL_PROP = 1
+
+DEFAULT_PANDAS = (
+    ("datetime", None),
+    ("open", -1),
+    ("high", -1),
+    ("low", -1),
+    ("close", -1),
+    ("volume", -1),
+    ("openinterest", -1),
+)
+
 DATA_FORMAT_MAPPING = {
     "cv": {
         "datetime": 0,

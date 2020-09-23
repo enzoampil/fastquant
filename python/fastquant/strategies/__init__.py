@@ -7,3 +7,4 @@ from fastquant.strategies.ma_crossover import SMACStrategy, EMACStrategy
 from fastquant.strategies.macd import MACDStrategy
 from fastquant.strategies.rsi import RSIStrategy
 from fastquant.strategies.sentiment import SentimentStrategy
+from fastquant.strategies.custom import CustomStrategy, TernaryStrategy
