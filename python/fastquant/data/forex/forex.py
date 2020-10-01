@@ -7,10 +7,10 @@ import numpy as np
 from fastquant.config import DATA_FORMAT_COLS
 
 # Import package
-from fastquant.data.forex.forextester import get_forextester_data
+from fastquant.data.forex.forextester import get_forextester_data, get_local_data
 
 
-def get_forex_data(symbol, start_date=None, end_date=None, source="forextester", time_frame='day'):
+def get_forex_data(symbol, start_date=None, end_date=None, source="forextester", time_frame='D1', read_from_local=False):
     """Returns pricing data for a specified forex pair.
 
     Parameters
@@ -28,17 +28,22 @@ def get_forex_data(symbol, start_date=None, end_date=None, source="forextester",
          Source of forex history data
     time_frame : str
          time frame you want, support 1 minute,15 minutes,1 hour,1 day,1 week
-         this parameter must one of them:["M1", "M5", "M15", "H1", "D1", "W1"]
+         this parameter must one of them:["M1", "M15", "H1", "D1", "W1"]
+    read_from_local : bull
+        if this parameter set False, method get data from online
+        if set it to True, method get data from local pickle file, faster than set it to False
 
     Returns
     -------
     pandas.DataFrame
-        Forex data (in the specified `format`) for the specified company and date range
     """
 
     if source == "forextester":
-        df = get_forextester_data(symbol, start_date, end_date, time_frame)
+        if read_from_local is False:
+            df = get_forextester_data(symbol, start_date, end_date, time_frame)
+        else:
+            df = get_local_data(symbol, start_date, end_date, time_frame)
     else:
-        raise Exception("Source must be either 'phisix' or 'yahoo'")
+        raise Exception("Source must be forextester")
 
     return df
