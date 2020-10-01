@@ -396,6 +396,8 @@ def backtest(
                 sort_by=sort_by,
                 **optim_params
             )
+    # drop extra columns #248
+    sorted_combined_df.drop(['channel', 'symbol'], axis=1, inplace=True)
     if return_history:
         order_history = pd.concat(order_history_dfs)
         periodic_history = pd.concat(periodic_history_dfs)
