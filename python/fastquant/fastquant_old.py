@@ -8,10 +8,11 @@ Created on Tue Jun 25 19:48:03 2019
 # Import standard library
 import os
 import requests
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, date
 import time
 from pathlib import Path
 from pkg_resources import resource_filename
+import simplejson as json
 
 # Import modules
 import pandas as pd
@@ -650,3 +651,6 @@ def get_bt_news_sentiment(keyword, page_nums=None):
         ] = round(sum(v) / float(len(v)), 3)
 
     return date_sentiment
+
+
+

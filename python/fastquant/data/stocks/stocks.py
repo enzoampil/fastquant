@@ -15,7 +15,9 @@ from fastquant.data.stocks.pse import get_pse_data
 from fastquant.data.stocks.yahoofinance import get_yahoo_data
 
 
-def get_stock_data(symbol, start_date, end_date, source="phisix", format="c"):
+def get_stock_data(
+    symbol, start_date, end_date, source="yahoo", format="ohlcv"
+):
     """Returns pricing data for a specified stock and source.
 
     Parameters
@@ -42,20 +44,24 @@ def get_stock_data(symbol, start_date, end_date, source="phisix", format="c"):
         Stock data (in the specified `format`) for the specified company and date range
     """
 
-    df_columns = [DATA_FORMAT_COLS[c] for c in format]
-    if source == "phisix":
-        # The query is run on 'phisix', but if the symbol isn't found, the same query is run on 'yahoo'.
-        df = get_pse_data(symbol, start_date, end_date, format=format)
-        if df is None:
-            df = get_yahoo_data(symbol, start_date, end_date)
-    elif source == "yahoo":
+    if source == "yahoo":
         # The query is run on 'yahoo', but if the symbol isn't found, the same query is run on 'phisix'.
         df = get_yahoo_data(symbol, start_date, end_date)
         if df is None:
-            df = get_pse_data(symbol, start_date, end_date)
+            format = "c"
+            df = get_pse_data(symbol, start_date, end_date, format=format)
+
+    elif source == "phisix":
+        # The query is run on 'phisix', but if the symbol isn't found, the same query is run on 'yahoo'.
+        format = "c"
+        df = get_pse_data(symbol, start_date, end_date, format=format)
+        if df is None:
+            df = get_yahoo_data(symbol, start_date, end_date)
+
     else:
         raise Exception("Source must be either 'phisix' or 'yahoo'")
 
+    df_columns = [DATA_FORMAT_COLS[c] for c in format]
     missing_columns = [col for col in df_columns if col not in df.columns]
 
     # Fill missing columns with np.nan

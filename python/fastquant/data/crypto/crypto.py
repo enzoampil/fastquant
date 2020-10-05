@@ -22,17 +22,26 @@ def unix_time_millis(date):
     return int(dt.timestamp() * 1000)
 
 
-def get_crypto_data(ticker, start_date, end_date, exchange="binance"):
+def get_crypto_data(ticker, start_date, end_date, time_resolution="1d", exchange="binance"):
     """
     Get crypto data in OHLCV format
 
-    List of tickers here: https://coinmarketcap.com/exchanges/binance/
+    Parameters
+    ----------
+    ticker : str
+        List of ticker symbols here: https://coinmarketcap.com/exchanges/binance/
+    start_date, end_date : str
+        date in YYYY-MM-DD format
+    time_resolution : str
+       resolutions: '1w', '1d' (default), '1h', '1m'
+    exchange : str
+       market exchanges: 'binance' (default), 'coinbasepro', 'bithumb', 'kraken', 'kucoin', 'bitstamp'
     """
     start_date_epoch = unix_time_millis(start_date)
 
     if exchange in CRYPTO_EXCHANGES:
         ex = getattr(ccxt, exchange)({"verbose": False})
-        ohlcv_lol = ex.fetch_ohlcv(ticker, "1d", since=start_date_epoch)
+        ohlcv_lol = ex.fetch_ohlcv(ticker, time_resolution, since=start_date_epoch)
         ohlcv_df = pd.DataFrame(
             ohlcv_lol, columns=["dt", "open", "high", "low", "close", "volume"]
         )
