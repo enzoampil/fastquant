@@ -335,6 +335,8 @@ def backtest(
         # Combine dicts for returns and sharpe
         m = {
             **returns,
+            **drawdown,
+            **timedraw,
             **sharpe,
             "pnl": strat.pnl,
             "final_value": strat.final_value,
