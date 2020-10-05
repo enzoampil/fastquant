@@ -167,6 +167,8 @@ def backtest(
     # Apply Total, Average, Compound and Annualized Returns calculated using a logarithmic approach
     cerebro.addanalyzer(btanalyzers.Returns, _name="returns")
     cerebro.addanalyzer(btanalyzers.SharpeRatio, _name="mysharpe")
+    cerebro.addanalyzer(btanalyzers.DrawDown, _name="drawdown")
+    cerebro.addanalyzer(btanalyzers.TimeDrawDown, _name="timedraw")
 
     cerebro.broker.setcommission(commission=commission)
 
@@ -328,6 +330,8 @@ def backtest(
         # We run metrics on the last strat since all the metrics will be the same for all strats
         returns = strat.analyzers.returns.get_analysis()
         sharpe = strat.analyzers.mysharpe.get_analysis()
+        drawdown = strat.analyzers.drawdown.get_analysis()
+        timedraw = strat.analyzers.timedraw.get_analysis()
         # Combine dicts for returns and sharpe
         m = {
             **returns,
@@ -343,6 +347,8 @@ def backtest(
             print(strats_params)
             print(returns)
             print(sharpe)
+            print(drawdown)
+            print(timedraw)
 
     params_df = pd.DataFrame(params)
     # Set the index as a separate strat id column, so that we retain the information after sorting
