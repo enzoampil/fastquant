@@ -8,10 +8,12 @@
 **fastquant** allows you to easily backtest investment strategies with as few as 3 lines of python code. Its goal is to promote data driven investments by making quantitative analysis in finance accessible to everyone.
 
 ## Features
-1. Easily access historical stock data
+1. Easily access historical stock and forex data
 2. Backtest and optimize trading strategies with only 3 lines of code
 
 <sup>`*` - Both Yahoo Finance and Philippine stock data data are accessible straight from fastquant<sup>
+
+<sup>`*` - Support one minute foreign exchange data from Forextester.com and conversion to other time scales<sup>
 
 Check out our blog posts in the fastquant [website](https://enzoampil.github.io/fastquant-blog/) and this intro [article](https://towardsdatascience.com/backtest-your-trading-strategy-with-only-3-lines-of-python-3859b4a4ab44?source=friends_link&sk=ec647b6bb43fe322013248fd1d473015) on Medium!
 
@@ -110,6 +112,39 @@ get_crypto_data("BTCUSDT", "2019-01-01", "2019-03-01")
 
 *R does NOT have support for backtesting yet*
 
+## Get forex data
+
+All symbols from [forextester.com](https://forextester.com/) are accessible via `get_forex_data`.This mehtod fetch one minute data from source and shape it to other time frame, M1, M15, H1, D1, W1 are supported time frame now.
+
+### Python
+First, call `get_forex_data` with the following parameters:
+```
+from fastquant import get_forex_data
+df = get_forex_data('EURUSD', time_frame='D1', read_from_local=False)
+print(df)
+                      dt    open    high     low   close
+    2001-01-02 23:01:00  0.9507  0.9509  0.9505  0.9507
+    2001-01-03 00:00:00  0.9506  0.9569  0.9262  0.9283
+    2001-01-04 00:00:00  0.9283  0.9536  0.9283  0.9532
+    2001-01-05 00:00:00  0.9532  0.9591  0.9464  0.9583
+    2001-01-07 23:02:00  0.9583  0.9585  0.9576  0.9584
+                  ...     ...     ...     ...     ...
+    2020-08-25 00:00:00  1.1792  1.1841  1.1784  1.1833
+    2020-08-26 00:00:00  1.1833  1.1839  1.1772  1.1839
+    2020-08-27 00:00:00  1.1839  1.1895  1.1767  1.1819
+    2020-08-28 00:00:00  1.1819  1.1918  1.1810  1.1906
+    2020-08-30 22:00:00  1.1906  1.1918  1.1901  1.1916
+[6127 rows x 5 columns]
+```
+this process download online data, transfer it, save cache files in disk, first call will need 25 minutes or more and 7GB free RAM to generate cache files.
+
+After then, set `read_from_local` to True and you get a second response if don't need update local data to newest.
+
+### R
+
+```
+pass
+```
 ## Backtest trading strategies
 
 *Note: Support for backtesting in R is pending*
