@@ -13,6 +13,7 @@ from pathlib import Path
 
 # Import modules
 import pandas as pd
+from pandas.io.json import json_normalize
 import numpy as np
 import lxml.html as LH
 from tqdm import tqdm
@@ -94,6 +95,21 @@ def get_stock_table(stock_table_fp=None):
         stock_table = stock_table.append(page_df)
     stock_table.to_csv(stock_table_fp, index=False)
     return stock_table
+
+
+def get_pse_all_stocks():
+    """
+    Returns dataframe containing all PSE listed stock symbols
+    """
+
+    ''' Note ID is taken from inkdrop.app '''
+    res = requests.get('http://phisix-api.appspot.com/stocks.json')
+    if not res:
+        return pd.DataFrame()
+
+    df = json_normalize(res.json(),'stock')['symbol'].sort_values()
+    df.columns = [ 'symbol' ]
+    return df
 
 
 def get_pse_data_old(
