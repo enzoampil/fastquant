@@ -30,6 +30,7 @@ from fastquant.strategies import (
     BuyAndHoldStrategy,
     SentimentStrategy,
     CustomStrategy,
+    TernaryStrategy,
 )
 
 
@@ -52,6 +53,7 @@ STRATEGY_MAPPING = {
     "buynhold": BuyAndHoldStrategy,
     "sentiment": SentimentStrategy,
     "custom": CustomStrategy,
+    "ternary": TernaryStrategy,
 }
 
 strat_docs = "\nExisting strategies:\n\n" + "\n".join(
@@ -84,6 +86,9 @@ def backtest(
     sentiments=None,
     strats=None,  # Only used when strategy = "multi"
     data_format=None,  # No longer needed but will leave for now to warn removal in a coming release
+    return_history=False,
+    channel=None,
+    symbol=None,
     **kwargs
 ):
     """Backtest financial data with a specified trading strategy
@@ -106,7 +111,12 @@ def backtest(
         df of sentiment [0, 1] indexed by time (applicable if `strategy`=='senti')
     strats : dict
         dictionary of strategy parameters (applicable if `strategy`=='multi')
-
+    return_history : bool
+        return history of transactions (i.e. buy and sell timestamps) (default=False)
+    channel : str
+        Channel to be used for last day notification - e.g. "slack" (default=None)
+    symbol : str
+        Symbol to be referenced in the channel notification if not None (default=None)
     {0}
     """
 
@@ -137,6 +147,8 @@ def backtest(
                 init_cash=[init_cash],
                 transaction_logging=[verbose],
                 commission=commission,
+                channel=None,
+                symbol=None,
                 **params
             )
             strat_names.append(strat)
@@ -146,13 +158,17 @@ def backtest(
             init_cash=[init_cash],
             transaction_logging=[verbose],
             commission=commission,
+            channel=None,
+            symbol=None,
             **kwargs
         )
-        strat_names.append(STRATEGY_MAPPING[strategy])
+        strat_names.append(strategy)
 
     # Apply Total, Average, Compound and Annualized Returns calculated using a logarithmic approach
     cerebro.addanalyzer(btanalyzers.Returns, _name="returns")
     cerebro.addanalyzer(btanalyzers.SharpeRatio, _name="mysharpe")
+    cerebro.addanalyzer(btanalyzers.DrawDown, _name="drawdown")
+    cerebro.addanalyzer(btanalyzers.TimeDrawDown, _name="timedraw")
 
     cerebro.broker.setcommission(commission=commission)
 
@@ -175,10 +191,21 @@ def backtest(
         )
         data = data.reset_index()
 
-    # If data has `dt` as the index, set `dt` as the first column
+    # If a `close` column exists but an `open` column doesn't, create a new `open` column with the same values as the `close` column
+    # This is for easier handling of next day trades (w/ the assumption that next day open is equal to current day close)
+    if "close" in data.columns and "open" not in data.columns:
+        data["open"] = data.close.shift().values
+
+    # If data has `dt` as the index and `dt` or `datetime` are not already columns, set `dt` as the first column
     # This means `backtest` supports the dataframe whether `dt` is the index or a column
-    if data.index.name == "dt":
-        data = data.reset_index()
+    if len(set(["dt", "datetime"]).intersection(data.columns)) == 0:
+        if data.index.name == "dt":
+            data = data.reset_index()
+        # If the index is a datetime index, set this as the datetime column
+        elif isinstance(data.index, pd.DatetimeIndex):
+            data.index.name = "dt"
+            data = data.reset_index()
+
     # Rename "dt" column to "datetime" to match the formal alias
     data = data.rename(columns={"dt": "datetime"})
     data["datetime"] = pd.to_datetime(data.datetime)
@@ -240,35 +267,76 @@ def backtest(
         print("Number of strat runs:", len(stratruns))
         print("Number of strats per run:", len(stratruns[0]))
         print("Strat names:", strat_names)
-    for stratrun in stratruns:
+
+    order_history_dfs = []
+    periodic_history_dfs = []
+    for strat_idx, stratrun in enumerate(stratruns):
         strats_params = {}
 
         if verbose:
             print("**************************************************")
+
         for i, strat in enumerate(stratrun):
+            strat_name = strat_names[i]
             p_raw = strat.p._getkwargs()
-            p = {}
+            p, selected_p = {}, {}
             for k, v in p_raw.items():
                 if k not in ["periodic_logging", "transaction_logging"]:
                     # Make sure the parameters are mapped to the corresponding strategy
                     if strategy == "multi":
                         key = (
-                            "{}.{}".format(strat_names[i], k)
+                            "{}.{}".format(strat_name, k)
                             if k not in GLOBAL_PARAMS
                             else k
                         )
+                        # make key with format: e.g. smac.slow_period40_fast_period10
+                        if k in strats[strat_name]:
+                            selected_p[k] = v
+                        pkeys = "_".join(
+                            ["{}{}".format(*i) for i in selected_p.items()]
+                        )
+                        history_key = "{}.{}".format(strat_name, pkeys)
                     else:
                         key = k
+
+                        # make key with format: e.g. slow_period40_fast_period10
+                        if k in kwargs.keys():
+                            selected_p[k] = v
+                        history_key = "_".join(
+                            ["{}{}".format(*i) for i in selected_p.items()]
+                        )
                     p[key] = v
 
             strats_params = {**strats_params, **p}
 
+            if return_history:
+                # columns are decided in log method of BaseStrategy class in base.py
+                order_history_df = strat.order_history_df
+                order_history_df["dt"] = pd.to_datetime(order_history_df.dt)
+                # combine rows with identical index
+                # history_df = order_history_df.set_index('dt').dropna(how='all')
+                # history_dfs[history_key] = order_history_df.stack().unstack().astype(float)
+                order_history_df.insert(0, "strat_name", history_key)
+                order_history_df.insert(0, "strat_id", strat_idx)
+                order_history_dfs.append(order_history_df)
+
+                periodic_history_df = strat.periodic_history_df
+                periodic_history_df["dt"] = pd.to_datetime(periodic_history_df.dt)
+                periodic_history_df.insert(0, "strat_name", history_key)
+                periodic_history_df.insert(0, "strat_id", strat_idx)
+                periodic_history_df['return'] = periodic_history_df.portfolio_value.pct_change()
+                periodic_history_dfs.append(periodic_history_df)                
+
         # We run metrics on the last strat since all the metrics will be the same for all strats
         returns = strat.analyzers.returns.get_analysis()
         sharpe = strat.analyzers.mysharpe.get_analysis()
+        drawdown = strat.analyzers.drawdown.get_analysis()
+        timedraw = strat.analyzers.timedraw.get_analysis()
         # Combine dicts for returns and sharpe
         m = {
             **returns,
+            **drawdown,
+            **timedraw,
             **sharpe,
             "pnl": strat.pnl,
             "final_value": strat.final_value,
@@ -281,16 +349,21 @@ def backtest(
             print(strats_params)
             print(returns)
             print(sharpe)
+            print(drawdown)
+            print(timedraw)
 
     params_df = pd.DataFrame(params)
+    # Set the index as a separate strat id column, so that we retain the information after sorting
+    strat_ids = pd.DataFrame({"strat_id": params_df.index.values})
     metrics_df = pd.DataFrame(metrics)
 
     # Get indices based on `sort_by` metric
     optim_idxs = np.argsort(metrics_df[sort_by].values)[::-1]
     sorted_params_df = params_df.iloc[optim_idxs].reset_index(drop=True)
     sorted_metrics_df = metrics_df.iloc[optim_idxs].reset_index(drop=True)
+    sorted_strat_ids = strat_ids.iloc[optim_idxs].reset_index(drop=True)
     sorted_combined_df = pd.concat(
-        [sorted_params_df, sorted_metrics_df], axis=1
+        [sorted_strat_ids, sorted_params_df, sorted_metrics_df], axis=1
     )
 
     # print out the result
@@ -303,7 +376,11 @@ def backtest(
     print("Optimal metrics:", optim_metrics)
 
     if plot and strategy != "multi":
-        has_volume = data_format_dict["volume"] is not None
+        has_volume = (
+            data_format_dict["volume"] is not None
+            if "volume" in data_format_dict.keys()
+            else False
+        )
         # Plot only with the optimal parameters when multiple strategy runs are required
         if params_df.shape[0] == 1:
             # This handles the Colab Plotting
@@ -322,11 +399,21 @@ def backtest(
             backtest(
                 strategy,
                 data,  # Treated as csv path is str, and dataframe of pd.DataFrame
-                commission=commission,
                 plot=plot,
                 verbose=verbose,
                 sort_by=sort_by,
                 **optim_params
             )
+    # drop extra columns #248
+    if len(set(['channel' 'symbol']).intersection(sorted_combined_df.columns.values)) == 2:
+        sorted_combined_df.drop(['channel', 'symbol'], axis=1, inplace=True)
+    if return_history:
+        order_history = pd.concat(order_history_dfs)
+        periodic_history = pd.concat(periodic_history_dfs)
+        history_dict = dict(orders=order_history,
+                            periodic=periodic_history
+        )
 
-    return sorted_combined_df
+        return sorted_combined_df, history_dict
+    else:
+        return sorted_combined_df
