@@ -43,7 +43,7 @@ class TestForexMethod(unittest.TestCase):
             zip_file = zipfile.ZipFile(Path(DATA_PATH, f'{symbol}.zip'))
             zip_file.extractall(Path(DATA_PATH))
             logger.info('unzip success')
-
+    
     def test_shape_and_make_tmp(self):
         '''
         transfer txt to pd.timestamp 6min
@@ -51,7 +51,7 @@ class TestForexMethod(unittest.TestCase):
         M1 to M15 15min
         M1 to W1 11min
         M1 to D1 13min
-
+    
         :return:
         '''
         for symbol in self.allowed_symbol_list:
@@ -89,7 +89,7 @@ class TestForexMethod(unittest.TestCase):
             logger.info('start transfer str datetime to pd.timestamp, this step requires 6 minutes on INTEL-9900k')
             forex_dataframe['dt'] = pd.to_datetime(forex_dataframe.dt)
             logger.info('transfer is done')
-
+    
             # make other timeframe pickle
             logger.info('start shape M1 data to other time frame, this step need 7GB RAM free')
             multi_jobs = [
@@ -101,27 +101,29 @@ class TestForexMethod(unittest.TestCase):
             while multi_jobs:
                 multi_jobs.pop().join()
             logger.info('shape other is done')
-
+    
             # make goal timeframe pickle
             logger.info(f'start shape {symbol} to {time_frame}')
             forex_dataframe = shape_data_from_1min_to_other(symbol, forex_dataframe, time_frame)
-
+    
             logger.info('all is done')
-
+    
     def test_combining_test(self):
         from fastquant import backtest
         df = get_forex_data('EURUSD')
         backtest('smac', df, fast_period=20, slow_period=40)
-
+    
         df = get_forex_data('EURUSD', start_date='2018-01-01', end_date='2019-01-01')
         backtest('smac', df, fast_period=20, slow_period=40)
-
+    
         df = get_forex_data('EURUSD', read_from_local=True)
         backtest('smac', df, fast_period=20, slow_period=40)
-
+    
         df = get_forex_data('EURUSD', start_date='2018-01-01', end_date='2019-01-01', read_from_local=True)
         backtest('smac', df, fast_period=20, slow_period=40)
-
-
+        
+    # def test_aaa(self):
+    #     df = get_forex_data('GBPUSD', start_date='2019-08-25', end_date='2019-09-10', time_frame='D1',read_from_local=True)
+    #     gen_candle_chart(df)
 if __name__ == '__main__':
     unittest.main()

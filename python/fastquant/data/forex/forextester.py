@@ -461,6 +461,7 @@ def shape_data_from_1min_to_other(symbol, df, time_frame, has_pickle=True):
 
 
 def gen_candle_chart(df, start_time=None, end_time=None):
+    df = df.reset_index()
     import mplfinance as mpf
     reformatted_data = dict()
     reformatted_data['Date'] = []
