@@ -293,7 +293,34 @@ class BaseStrategy(bt.Strategy):
                         self.sell(exectype=bt.Order.StopTrail, trailpercent=self.stop_trail, size=final_size)
 
         elif self.sell_signal():
-            if stock_value > 0 and self.allow_short == False:
+            if self.allow_short == True:
+
+                # Sell short based on the closing price of the previous day
+                if self.execution_type == "close":
+
+                    if self.transaction_logging:
+                        self.log("SELL CREATE, %.2f" % self.dataclose[0])
+
+                    sell_prop_size = int(self.short_max * 
+                                         self.cash / 
+                                         self.dataclose[0] /
+                                         (1 + self.commission + 0.001))
+                    self.order = self.sell(size=sell_prop_size)
+                
+                 # Buy based on the opening price of the next closing day (only works "open" data exists in the dataset)
+                else:
+
+                    if self.transaction_logging:
+                        self.log("SELL CREATE, %.2f" % self.dataclose[1])
+                    
+                    sell_prop_size = int(self.short_max *
+                                         self.cash /
+                                         self.dataclose[1] /
+                                         (1 + self.commission + 0.001))
+                    self.order = self.sell(size=sell_prop_size)
+
+
+            if stock_value > 0:
 
                 if self.transaction_logging:
                     self.log("SELL CREATE, %.2f" % self.dataclose[1])
