@@ -53,6 +53,8 @@ class BaseStrategy(bt.Strategy):
         ("transaction_logging", True),
         ("channel", None),
         ("symbol", None),
+        ("allow_short", False), 
+        ("short_max", SHORT_MAX)
     )
 
     def log(self, txt, dt=None):
@@ -85,6 +87,8 @@ class BaseStrategy(bt.Strategy):
         self.channel = self.params.channel
         self.stop_loss = self.params.stop_loss
         self.stop_trail = self.params.stop_trail
+        self.allow_short = self.params.allow_short
+        self.short_max = self.params.short_max
         self.broker.set_coc(True)
         print("===Global level arguments===")
         print("init_cash : {}".format(self.init_cash))
@@ -289,7 +293,7 @@ class BaseStrategy(bt.Strategy):
                         self.sell(exectype=bt.Order.StopTrail, trailpercent=self.stop_trail, size=final_size)
 
         elif self.sell_signal():
-            if stock_value > 0:
+            if stock_value > 0 and self.allow_short == False:
 
                 if self.transaction_logging:
                     self.log("SELL CREATE, %.2f" % self.dataclose[1])
