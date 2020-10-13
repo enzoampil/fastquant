@@ -27,6 +27,7 @@ from fastquant.config import (
     GLOBAL_PARAMS,
     BUY_PROP,
     SELL_PROP,
+    SHORT_MAX,
 )
 
 

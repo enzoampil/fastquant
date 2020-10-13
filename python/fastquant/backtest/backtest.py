@@ -90,7 +90,7 @@ def backtest(
     channel=None,
     symbol=None,
     allow_short=False, 
-    short_max=1.5
+    short_max=1.5,
     **kwargs
 ):
     """Backtest financial data with a specified trading strategy
