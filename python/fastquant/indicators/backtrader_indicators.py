@@ -16,6 +16,7 @@ from backtrader.indicators import (
     BBands,
     CommodityChannelIndex,
     CCI,
+    Crossover,
     ExponentialMovingAverage,
     EMA,
     Ichimoku,
@@ -28,4 +29,5 @@ from backtrader.indicators import (
     TripleExponentialMovingAverage,
     TRIX,
     WilliamsR,
+    
 )
