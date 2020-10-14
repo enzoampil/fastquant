@@ -20,7 +20,7 @@ Check out our blog posts in the fastquant [website](https://enzoampil.github.io/
 ### Python
 
 ```
-pip install fastquant
+python -m pip install fastquant
 ```
 
 ### R
