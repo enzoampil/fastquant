@@ -95,7 +95,7 @@ def backtest(
 
     Parameters
     ----------------
-    strategy : str
+    strategy : str or an instance of `fastquant.strategies.base.BaseStrategy`
         see list of accepted strategy keys below
     data : pandas.DataFrame
         dataframe with at least close price indexed with time
@@ -153,8 +153,16 @@ def backtest(
             )
             strat_names.append(strat)
     else:
+
+        # Allow instance of BaseStrategy or from the predefined mapping
+        if issubclass(strategy, BaseStrategy) or type(strategy) == str:
+            strat_name = str(strategy)
+        else:
+            strat_name = strategy
+            strategy = STRATEGY_MAPPING[strategy]
+
         cerebro.optstrategy(
-            STRATEGY_MAPPING[strategy],
+            strategy,
             init_cash=[init_cash],
             transaction_logging=[verbose],
             commission=commission,
@@ -162,7 +170,7 @@ def backtest(
             symbol=None,
             **kwargs
         )
-        strat_names.append(strategy)
+        strat_names.append(strat_name)
 
     # Apply Total, Average, Compound and Annualized Returns calculated using a logarithmic approach
     cerebro.addanalyzer(btanalyzers.Returns, _name="returns")
@@ -321,11 +329,15 @@ def backtest(
                 order_history_dfs.append(order_history_df)
 
                 periodic_history_df = strat.periodic_history_df
-                periodic_history_df["dt"] = pd.to_datetime(periodic_history_df.dt)
+                periodic_history_df["dt"] = pd.to_datetime(
+                    periodic_history_df.dt
+                )
                 periodic_history_df.insert(0, "strat_name", history_key)
                 periodic_history_df.insert(0, "strat_id", strat_idx)
-                periodic_history_df['return'] = periodic_history_df.portfolio_value.pct_change()
-                periodic_history_dfs.append(periodic_history_df)                
+                periodic_history_df[
+                    "return"
+                ] = periodic_history_df.portfolio_value.pct_change()
+                periodic_history_dfs.append(periodic_history_df)
 
         # We run metrics on the last strat since all the metrics will be the same for all strats
         returns = strat.analyzers.returns.get_analysis()
@@ -405,14 +417,19 @@ def backtest(
                 **optim_params
             )
     # drop extra columns #248
-    if len(set(['channel' 'symbol']).intersection(sorted_combined_df.columns.values)) == 2:
-        sorted_combined_df.drop(['channel', 'symbol'], axis=1, inplace=True)
+    if (
+        len(
+            set(["channel" "symbol"]).intersection(
+                sorted_combined_df.columns.values
+            )
+        )
+        == 2
+    ):
+        sorted_combined_df.drop(["channel", "symbol"], axis=1, inplace=True)
     if return_history:
         order_history = pd.concat(order_history_dfs)
         periodic_history = pd.concat(periodic_history_dfs)
-        history_dict = dict(orders=order_history,
-                            periodic=periodic_history
-        )
+        history_dict = dict(orders=order_history, periodic=periodic_history)
 
         return sorted_combined_df, history_dict
     else:
