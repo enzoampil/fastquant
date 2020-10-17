@@ -8,7 +8,9 @@ from fastquant import (
     STRATEGY_MAPPING,
     DATA_PATH,
     get_yahoo_data,
+    get_stock_data,
     get_bt_news_sentiment,
+    get_disclosure_sentiment,
 )
 
 SENTI_PKL = Path(DATA_PATH, "bt_sentiments_tests.pkl")
@@ -41,6 +43,31 @@ def test_backtest():
                 strategy
             )
             assert cerebro is not None, errmsg
+
+            data_disclosures = get_stock_data(
+                "JFC", "2015-01-01", "2020-09-30", source="phisix"
+            )
+
+            sentiments_disclosures = get_disclosure_sentiment(
+                stock_code="JFC",
+                start_date="2015-01-01",
+                end_date="2020-09-30",
+            )
+
+            cerebro_disclosures = backtest(
+                strategy,
+                data_disclosures,
+                sentiments=sentiments_disclosures,
+                senti=0.2,
+                plot=False,
+            )
+            errmsg_disclosures = (
+                "Backtest encountered error for strategy '{}'!".format(
+                    strategy
+                )
+            )
+            assert cerebro_disclosures is not None, errmsg_disclosures
+
         else:
             cerebro = backtest(strategy, sample, plot=False)
             errmsg = "Backtest encountered error for strategy '{}'!".format(
