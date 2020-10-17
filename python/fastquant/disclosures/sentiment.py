@@ -8,7 +8,7 @@ Created on Tue Jun 25 19:48:03 2019
 # Import standard library
 from datetime import datetime, timedelta
 import time
-from pse import DisclosuresPSE
+from fastquant.disclosures.pse import DisclosuresPSE
 
 # Import modules
 from tqdm import tqdm
@@ -36,7 +36,7 @@ def get_sentiments(passage):
     sia = SentimentIntensityAnalyzer()
     try:
         return sia.polarity_scores(passage)["compound"]
-    except TypeError:
+    except AttributeError:
         return 0
 
 
