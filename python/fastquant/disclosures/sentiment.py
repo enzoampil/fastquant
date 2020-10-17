@@ -75,7 +75,9 @@ def get_disclosure_sentiment(
         end_date = (
             datetime.strptime(end_date, "%Y-%m-%d").date().strftime("%m-%d-%Y")
         )
-    dpse = DisclosuresPSE(symbol=stock_code, start_date=start_date)
+    dpse = DisclosuresPSE(
+        symbol=stock_code, start_date=start_date, end_date=end_date
+    )
 
     df = dpse.get_combined_disclosures()[
         ["Announce Date and Time", "Background/Description of the Disclosure"]
