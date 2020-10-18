@@ -14,6 +14,7 @@ from fastquant import (
 )
 
 SENTI_PKL = Path(DATA_PATH, "bt_sentiments_tests.pkl")
+DISCLOSURE_PKL = Path(DATA_PATH, "senti_disclosures.pkl")
 SAMPLE_CSV = Path(DATA_PATH, "JFC_20180101_20190110_DCV.csv")
 SAMPLE_STRAT_DICT = {
     "smac": {"fast_period": 35, "slow_period": [40, 50]},
@@ -45,14 +46,17 @@ def test_backtest():
             assert cerebro is not None, errmsg
 
             data_disclosures = get_stock_data(
-                "JFC", "2015-01-01", "2020-09-30", source="phisix"
+                "JFC", "2020-01-01", "2020-09-30", source="phisix"
             )
 
-            sentiments_disclosures = get_disclosure_sentiment(
-                stock_code="JFC",
-                start_date="2015-01-01",
-                end_date="2020-09-30",
-            )
+            # sentiments_disclosures = get_disclosure_sentiment(
+            #     stock_code="JFC",
+            #     start_date="2020-07-01",
+            #     end_date="2020-09-30",
+            # )
+
+            with open("senti_disclosures.pkl", "rb") as handle:
+                sentiments_disclosures = pickle.load(handle)
 
             cerebro_disclosures = backtest(
                 strategy,
