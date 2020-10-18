@@ -55,7 +55,7 @@ def test_backtest():
             #     end_date="2020-09-30",
             # )
 
-            with open("senti_disclosures.pkl", "rb") as handle:
+            with open(DISCLOSURE_PKL, "rb") as handle:
                 sentiments_disclosures = pickle.load(handle)
 
             cerebro_disclosures = backtest(
