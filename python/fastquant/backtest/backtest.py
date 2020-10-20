@@ -155,7 +155,7 @@ def backtest(
     else:
 
         # Allow instance of BaseStrategy or from the predefined mapping
-        if issubclass(strategy, bt.Strategy):
+        if issubclass(bt.Strategy, strategy):
             strat_name = str(strategy)
         else:
             strat_name = strategy
