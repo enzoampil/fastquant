@@ -115,6 +115,8 @@ def backtest(
         return history of transactions (i.e. buy and sell timestamps) (default=False)
     channel : str
         Channel to be used for last day notification - e.g. "slack" (default=None)
+    verbose : int
+        Verbose can take values: [-1, 0, 1, 2], with increasing levels of verbosity (default=0).
     symbol : str
         Symbol to be referenced in the channel notification if not None (default=None)
     {0}
