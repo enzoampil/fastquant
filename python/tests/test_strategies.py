@@ -8,10 +8,13 @@ from fastquant import (
     STRATEGY_MAPPING,
     DATA_PATH,
     get_yahoo_data,
+    get_stock_data,
     get_bt_news_sentiment,
+    get_disclosure_sentiment,
 )
 
 SENTI_PKL = Path(DATA_PATH, "bt_sentiments_tests.pkl")
+DISCLOSURE_PKL = Path(DATA_PATH, "senti_disclosures.pkl")
 SAMPLE_CSV = Path(DATA_PATH, "JFC_20180101_20190110_DCV.csv")
 SAMPLE_STRAT_DICT = {
     "smac": {"fast_period": 35, "slow_period": [40, 50]},
@@ -41,6 +44,34 @@ def test_backtest():
                 strategy
             )
             assert cerebro is not None, errmsg
+
+            data_disclosures = get_stock_data(
+                "JFC", "2020-01-01", "2020-09-30", source="phisix"
+            )
+
+            # sentiments_disclosures = get_disclosure_sentiment(
+            #     stock_code="JFC",
+            #     start_date="2020-07-01",
+            #     end_date="2020-09-30",
+            # )
+
+            with open(DISCLOSURE_PKL, "rb") as handle_disclosures:
+                sentiments_disclosures = pickle.load(handle_disclosures)
+
+            cerebro_disclosures = backtest(
+                strategy,
+                data_disclosures,
+                sentiments=sentiments_disclosures,
+                senti=0.2,
+                plot=False,
+            )
+            errmsg_disclosures = (
+                "Backtest encountered error for strategy '{}'!".format(
+                    strategy
+                )
+            )
+            assert cerebro_disclosures is not None, errmsg_disclosures
+
         else:
             cerebro = backtest(strategy, sample, plot=False)
             errmsg = "Backtest encountered error for strategy '{}'!".format(

@@ -115,6 +115,8 @@ def backtest(
         return history of transactions (i.e. buy and sell timestamps) (default=False)
     channel : str
         Channel to be used for last day notification - e.g. "slack" (default=None)
+    verbose : int
+        Verbose can take values: [-1, 0, 1, 2], with increasing levels of verbosity (default=0).
     symbol : str
         Symbol to be referenced in the channel notification if not None (default=None)
     {0}
@@ -167,6 +169,8 @@ def backtest(
     # Apply Total, Average, Compound and Annualized Returns calculated using a logarithmic approach
     cerebro.addanalyzer(btanalyzers.Returns, _name="returns")
     cerebro.addanalyzer(btanalyzers.SharpeRatio, _name="mysharpe")
+    cerebro.addanalyzer(btanalyzers.DrawDown, _name="drawdown")
+    cerebro.addanalyzer(btanalyzers.TimeDrawDown, _name="timedraw")
 
     cerebro.broker.setcommission(commission=commission)
 
@@ -319,18 +323,26 @@ def backtest(
                 order_history_dfs.append(order_history_df)
 
                 periodic_history_df = strat.periodic_history_df
-                periodic_history_df["dt"] = pd.to_datetime(periodic_history_df.dt)
+                periodic_history_df["dt"] = pd.to_datetime(
+                    periodic_history_df.dt
+                )
                 periodic_history_df.insert(0, "strat_name", history_key)
                 periodic_history_df.insert(0, "strat_id", strat_idx)
-                periodic_history_df['return'] = periodic_history_df.portfolio_value.pct_change()
-                periodic_history_dfs.append(periodic_history_df)                
+                periodic_history_df[
+                    "return"
+                ] = periodic_history_df.portfolio_value.pct_change()
+                periodic_history_dfs.append(periodic_history_df)
 
         # We run metrics on the last strat since all the metrics will be the same for all strats
         returns = strat.analyzers.returns.get_analysis()
         sharpe = strat.analyzers.mysharpe.get_analysis()
+        drawdown = strat.analyzers.drawdown.get_analysis()
+        timedraw = strat.analyzers.timedraw.get_analysis()
         # Combine dicts for returns and sharpe
         m = {
             **returns,
+            **drawdown,
+            **timedraw,
             **sharpe,
             "pnl": strat.pnl,
             "final_value": strat.final_value,
@@ -343,6 +355,8 @@ def backtest(
             print(strats_params)
             print(returns)
             print(sharpe)
+            print(drawdown)
+            print(timedraw)
 
     params_df = pd.DataFrame(params)
     # Set the index as a separate strat id column, so that we retain the information after sorting
@@ -396,12 +410,20 @@ def backtest(
                 sort_by=sort_by,
                 **optim_params
             )
+    # drop extra columns #248
+    if (
+        len(
+            set(["channel" "symbol"]).intersection(
+                sorted_combined_df.columns.values
+            )
+        )
+        == 2
+    ):
+        sorted_combined_df.drop(["channel", "symbol"], axis=1, inplace=True)
     if return_history:
         order_history = pd.concat(order_history_dfs)
         periodic_history = pd.concat(periodic_history_dfs)
-        history_dict = dict(orders=order_history,
-                            periodic=periodic_history
-        )
+        history_dict = dict(orders=order_history, periodic=periodic_history)
 
         return sorted_combined_df, history_dict
     else:

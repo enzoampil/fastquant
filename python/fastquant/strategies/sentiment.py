@@ -46,7 +46,7 @@ class SentimentStrategy(BaseStrategy):
         return self.datasentiment[0] >= self.senti
 
     def sell_signal(self):
-        return self.datasentiment[0] <= self.senti
+        return self.datasentiment[0] <= -self.senti
 
 
 class SentimentDF(bt.feeds.PandasData):
