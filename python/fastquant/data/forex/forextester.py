@@ -1,9 +1,7 @@
-import os
 from pathlib import Path
 import zipfile
 import logging
 import pickle
-import multiprocessing
 
 import requests
 import pandas as pd
@@ -19,9 +17,7 @@ logger_handler.setFormatter(handler_format)
 logger.setLevel(logging.INFO)
 logger.addHandler(logger_handler)
 
-
-def get_forextester_data(symbol, start_date=None, end_date=None,  time_frame='D1'):
-    allowed_forex_symbol_list = [
+ALLOWED_SYMBOL_LIST = [
         'AUDJPY',
         'AUDUSD',
         'CHFJPY',
@@ -41,13 +37,9 @@ def get_forextester_data(symbol, start_date=None, end_date=None,  time_frame='D1
         'XAGUSD',
         'XAUUSD'
     ]
-    if symbol not in allowed_forex_symbol_list:
-        raise ValueError('your symbol is not supported by forextester')
 
-    if start_date is not None:
-        start_date = datestring_to_datetime(start_date)
-        end_date = datestring_to_datetime(end_date)
 
+def download_and_unzip_data_from_forextester(symbol):
     logger.info(f'start downloading forex {symbol} data zip file...')
     file_size = 0
     res = requests.get(f'http://www.forextester.com/templates/data/files/{symbol}.zip', stream=True)
@@ -60,13 +52,14 @@ def get_forextester_data(symbol, start_date=None, end_date=None,  time_frame='D1
     zip_file.extractall(Path(DATA_PATH))
     logger.info('unzip success')
 
+def load_data_from_text(symbol):
     forex_df = pd.read_csv(
         Path(DATA_PATH, f'{symbol}.txt'),
         dtype={'<DTYYYYMMDD>': str, '<TIME>': str, '<OPEN>': float, '<HIGH>': float, '<LOW>': float, '<CLOSE>': float}
     )
     logger.info('load txt success')
-    del(forex_df['<TICKER>'])
-    del(forex_df['<VOL>'])
+    del (forex_df['<TICKER>'])
+    del (forex_df['<VOL>'])
     rename_list = [
         'date',
         'time',
@@ -87,54 +80,18 @@ def get_forextester_data(symbol, start_date=None, end_date=None,  time_frame='D1
     logger.info('change column name success')
     forex_df['dt'] = forex_df['date'] + forex_df['time']
     logger.info('sum date and time success')
-    del(forex_df['date'])
-    del(forex_df['time'])
-    logger.info('start transfer str datetime to pd.timestamp, this step needs 6 minutes on INTEL-9900k')
+    del (forex_df['date'])
+    del (forex_df['time'])
+    logger.info('start normalize the datetime of 1-minute chart, this step needs 6 minutes on INTEL-9900k')
     forex_df['dt'] = pd.to_datetime(forex_df.dt)
     logger.info('transfer is done')
-    # make other timeframe pickle
-    logger.info('start shape M1 data to other time frame, this step needs 15 minutes and 7GB RAM free')
-    multi_jobs = [
-        multiprocessing.Process(target=shape_data_from_1min_to_other, args=((symbol, forex_df, _)))
-        for _ in {"M1", "M15", "H1", "D1", "W1"} - {time_frame}
-    ]
-    for job in multi_jobs:
-        job.start()
-    while multi_jobs:
-        multi_jobs.pop().join()
-    logger.info('shape data to other time frame is done')
-
-    # make goal timeframe pickle
-    logger.info(f'start shape {symbol} to {time_frame}')
-    forex_df = shape_data_from_1min_to_other(symbol, forex_df, time_frame)
-    logger.info('all is done')
-
-    if start_date is not None:
-        forex_df = forex_df[(forex_df['dt'] >= start_date) & (forex_df['dt'] <= end_date)]
-    return forex_df.set_index('dt')
+    return forex_df
 
 
-def get_local_data(symbol, start_date=None, end_date=None,  time_frame='D1'):
-    if start_date is not None:
-        start_date = datestring_to_datetime(start_date)
-        end_date = datestring_to_datetime(end_date)
-    logger.info(f'start load {symbol} pickle to memory')
-    try:
-        with open(Path(DATA_PATH, f'{symbol}_{time_frame}.pickle'), 'rb') as df_file:
-            df = pickle.load(df_file)
-    except Exception as e:
-        raise FileNotFoundError('backup file not found, try get_forextester_data method first')
-    if start_date is None:
-        return df.set_index('dt')
-    else:
-        df = df[(df['dt'] >= start_date) & (df['dt'] <= end_date)]
-        return df.set_index('dt')
-
-
-def shape_data_from_1min_to_other(symbol, df, time_frame, has_pickle=True):
-    if time_frame not in ["M1", "M15", "H1", "D1", "W1"]:
+def convert_data_from_1min_to_other(symbol, df, period, has_pickle=True):
+    if period not in ["M1", "M15", "H1", "D1", "W1"]:
         raise ValueError('time_frame must in this list:["M1", "M15", "H1", "D1", "W1"]')
-    logger.info(f'start shape {symbol} to {time_frame}')
+    logger.info(f'start shape {symbol} to {period}, this step needs 13 minutes on INTEL-9900K')
     tmp_dict = {
         'dt': [],
         'open': [],
@@ -143,9 +100,9 @@ def shape_data_from_1min_to_other(symbol, df, time_frame, has_pickle=True):
         'close': []
     }
 
-    if time_frame == 'M1':
+    if period == 'M1':
         pass
-    elif time_frame == 'M15':
+    elif period == 'M15':
         tmp_datetime = None
         tmp_day = None
         tmp_hour = None
@@ -344,7 +301,7 @@ def shape_data_from_1min_to_other(symbol, df, time_frame, has_pickle=True):
                 else:
                     raise ValueError(f'M1 to M15 unkown error, start datetime:{tmp_hour} {tmp_minute} end datetime:{row["dt"].hour} {row["dt"].minute}')
         df = DataFrame(tmp_dict, columns=list(tmp_dict.keys()))
-    elif time_frame == 'H1':
+    elif period == 'H1':
         tmp_datetime = None
         tmp_hour = None
         tmp_open = None
@@ -380,7 +337,7 @@ def shape_data_from_1min_to_other(symbol, df, time_frame, has_pickle=True):
                 else:
                     continue
         df = DataFrame(tmp_dict, columns=list(tmp_dict.keys()))
-    elif time_frame == 'D1':
+    elif period == 'D1':
         tmp_datetime = None
         tmp_day = None
         tmp_open = None
@@ -416,7 +373,7 @@ def shape_data_from_1min_to_other(symbol, df, time_frame, has_pickle=True):
                 else:
                     continue
         df = DataFrame(tmp_dict, columns=list(tmp_dict.keys()))
-    elif time_frame == 'W1':
+    elif period == 'W1':
         tmp_datetime = None
         tmp_week = None
         tmp_open = None
@@ -455,12 +412,50 @@ def shape_data_from_1min_to_other(symbol, df, time_frame, has_pickle=True):
     else:
         pass
     if has_pickle:
-        with open(Path(DATA_PATH, f'{symbol}_{time_frame}.pickle'), 'wb') as df_file:
+        with open(Path(DATA_PATH, f'{symbol}_{period}.pickle'), 'wb') as df_file:
             pickle.dump(df, df_file, True)
     return df
 
 
-def gen_candle_chart(df, start_time=None, end_time=None):
+def get_forextester_data(symbol, start_date=None, end_date=None,  period='D1'):
+
+    if symbol not in ALLOWED_SYMBOL_LIST:
+        raise ValueError('your symbol is not supported by forextester')
+
+    if start_date is not None:
+        start_date = datestring_to_datetime(start_date)
+        end_date = datestring_to_datetime(end_date)
+
+    download_and_unzip_data_from_forextester(symbol)
+    forex_df = load_data_from_text(symbol)
+
+    # make goal timeframe pickle
+    logger.info(f'start shape {symbol} to {period}')
+    forex_df = convert_data_from_1min_to_other(symbol, forex_df, period)
+    logger.info('all is done')
+    if start_date is not None:
+        forex_df = forex_df[(forex_df['dt'] >= start_date) & (forex_df['dt'] <= end_date)]
+    return forex_df.set_index('dt')
+
+
+def get_local_data(symbol, start_date=None, end_date=None,  period='D1'):
+    if start_date is not None:
+        start_date = datestring_to_datetime(start_date)
+        end_date = datestring_to_datetime(end_date)
+    logger.info(f'start load {symbol} pickle to memory')
+    try:
+        with open(Path(DATA_PATH, f'{symbol}_{period}.pickle'), 'rb') as df_file:
+            df = pickle.load(df_file)
+    except Exception as e:
+        raise FileNotFoundError('backup file not found, try get_forex_data method setting read_from_local=False')
+    if start_date is None:
+        return df.set_index('dt')
+    else:
+        df = df[(df['dt'] >= start_date) & (df['dt'] <= end_date)]
+        return df.set_index('dt')
+
+
+def _gen_candle_chart_for_test(df, start_time=None, end_time=None):
     df = df.reset_index()
     import mplfinance as mpf
     reformatted_data = dict()
