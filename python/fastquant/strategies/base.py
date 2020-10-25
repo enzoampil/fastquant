@@ -304,7 +304,7 @@ class BaseStrategy(bt.Strategy):
 
                     sell_prop_size = int(SELL_PROP * 
                                          self.broker.getvalue() / 
-                                         self.dataclose[0])
+                                         self.dataclose[1])
                     self.order = self.sell(size=sell_prop_size)
                 
                  # Buy based on the opening price of the next closing day (only works "open" data exists in the dataset)
