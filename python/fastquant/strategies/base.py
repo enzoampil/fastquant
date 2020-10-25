@@ -311,7 +311,7 @@ class BaseStrategy(bt.Strategy):
                 else:
 
                     if self.transaction_logging:
-                        self.log("SELL CREATE, %.2f" % self.dataclose[1])
+                        self.log("SELL CREATE, %.2f" % self.dataopen[1])
                     
                     sell_prop_size = int(self.short_max *
                                          self.cash /
