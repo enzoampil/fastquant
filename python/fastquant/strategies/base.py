@@ -320,7 +320,7 @@ class BaseStrategy(bt.Strategy):
                     self.order = self.sell(size=min(sell_prop_size, self.init_cash * SHORT_MAX))
 
 
-            if stock_value > 0:
+            elif stock_value > 0:
 
                 if self.transaction_logging:
                     self.log("SELL CREATE, %.2f" % self.dataclose[1])
