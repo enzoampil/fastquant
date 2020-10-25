@@ -299,7 +299,6 @@ class BaseStrategy(bt.Strategy):
                 # Sell short based on the closing price of the previous day
                 if self.execution_type == "close":
 
-                    if self.transaction_logging:
                         self.log("SELL CREATE, %.2f" % self.dataclose[1])
 
                     sell_prop_size = int(SELL_PROP * 
