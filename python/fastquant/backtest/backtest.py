@@ -282,7 +282,7 @@ def backtest(
         for i, strat in enumerate(stratrun):
             # Get indicator history
             indicators = strat.getindicators()
-            indicators_dict = {ind.plotlabel(): ind.lines[0].array for ind in indicators}
+            indicators_dict = {ind.plotlabel() if hasattr(ind, "plotlabel") else "indicator{}".format(i): ind.lines[0].array for i, ind in enumerate(indicators)}
             indicators_df = pd.DataFrame(indicators_dict)
             indicators_df.insert(0, "dt", data["datetime"].values)
 
