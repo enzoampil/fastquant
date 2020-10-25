@@ -319,7 +319,6 @@ class BaseStrategy(bt.Strategy):
                     sell_prop_size = int(self.short_max *
                                          self.cash /
                                          self.dataopen[1])
-                                         (1 + self.commission + 0.001))
                     self.order = self.sell(size=min(sell_prop_size, self.init_cash * SHORT_MAX))
 
 
