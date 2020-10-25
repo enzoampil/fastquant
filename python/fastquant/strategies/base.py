@@ -300,7 +300,7 @@ class BaseStrategy(bt.Strategy):
                 if self.execution_type == "close":
 
                     if self.transaction_logging:
-                        self.log("SELL CREATE, %.2f" % self.dataclose[0])
+                        self.log("SELL CREATE, %.2f" % self.dataclose[1])
 
                     sell_prop_size = int(SELL_PROP * 
                                          self.broker.getvalue() / 
