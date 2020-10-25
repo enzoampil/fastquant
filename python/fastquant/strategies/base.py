@@ -303,7 +303,7 @@ class BaseStrategy(bt.Strategy):
                         self.log("SELL CREATE, %.2f" % self.dataclose[0])
 
                     sell_prop_size = int(self.short_max * 
-                                         self.cash / 
+                                         self.broker.getvalue() / 
                                          self.dataclose[0] /
                                          (1 + self.commission + 0.001))
                     self.order = self.sell(size=sell_prop_size)
