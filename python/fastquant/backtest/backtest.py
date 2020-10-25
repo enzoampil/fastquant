@@ -30,6 +30,7 @@ from fastquant.strategies import (
     BuyAndHoldStrategy,
     SentimentStrategy,
     CustomStrategy,
+    TernaryStrategy,
 )
 
 
@@ -52,6 +53,7 @@ STRATEGY_MAPPING = {
     "buynhold": BuyAndHoldStrategy,
     "sentiment": SentimentStrategy,
     "custom": CustomStrategy,
+    "ternary": TernaryStrategy,
 }
 
 strat_docs = "\nExisting strategies:\n\n" + "\n".join(
@@ -85,6 +87,8 @@ def backtest(
     strats=None,  # Only used when strategy = "multi"
     data_format=None,  # No longer needed but will leave for now to warn removal in a coming release
     return_history=False,
+    channel=None,
+    symbol=None,
     **kwargs
 ):
     """Backtest financial data with a specified trading strategy
@@ -109,7 +113,12 @@ def backtest(
         dictionary of strategy parameters (applicable if `strategy`=='multi')
     return_history : bool
         return history of transactions (i.e. buy and sell timestamps) (default=False)
-
+    channel : str
+        Channel to be used for last day notification - e.g. "slack" (default=None)
+    verbose : int
+        Verbose can take values: [-1, 0, 1, 2], with increasing levels of verbosity (default=0).
+    symbol : str
+        Symbol to be referenced in the channel notification if not None (default=None)
     {0}
     """
 
@@ -140,6 +149,8 @@ def backtest(
                 init_cash=[init_cash],
                 transaction_logging=[verbose],
                 commission=commission,
+                channel=None,
+                symbol=None,
                 **params
             )
             strat_names.append(strat)
@@ -149,6 +160,8 @@ def backtest(
             init_cash=[init_cash],
             transaction_logging=[verbose],
             commission=commission,
+            channel=None,
+            symbol=None,
             **kwargs
         )
         strat_names.append(strategy)
@@ -156,6 +169,8 @@ def backtest(
     # Apply Total, Average, Compound and Annualized Returns calculated using a logarithmic approach
     cerebro.addanalyzer(btanalyzers.Returns, _name="returns")
     cerebro.addanalyzer(btanalyzers.SharpeRatio, _name="mysharpe")
+    cerebro.addanalyzer(btanalyzers.DrawDown, _name="drawdown")
+    cerebro.addanalyzer(btanalyzers.TimeDrawDown, _name="timedraw")
 
     cerebro.broker.setcommission(commission=commission)
 
@@ -178,7 +193,12 @@ def backtest(
         )
         data = data.reset_index()
 
-    # If data has `dt` as the index and `dt` and `datetime` are not already columns, set `dt` as the first column
+    # If a `close` column exists but an `open` column doesn't, create a new `open` column with the same values as the `close` column
+    # This is for easier handling of next day trades (w/ the assumption that next day open is equal to current day close)
+    if "close" in data.columns and "open" not in data.columns:
+        data["open"] = data.close.shift().values
+
+    # If data has `dt` as the index and `dt` or `datetime` are not already columns, set `dt` as the first column
     # This means `backtest` supports the dataframe whether `dt` is the index or a column
     if len(set(["dt", "datetime"]).intersection(data.columns)) == 0:
         if data.index.name == "dt":
@@ -251,6 +271,7 @@ def backtest(
         print("Strat names:", strat_names)
 
     order_history_dfs = []
+    periodic_history_dfs = []
     for strat_idx, stratrun in enumerate(stratruns):
         strats_params = {}
 
@@ -281,16 +302,7 @@ def backtest(
                         key = k
 
                         # make key with format: e.g. slow_period40_fast_period10
-                        if k not in [
-                            "periodic_logging",
-                            "transaction_logging",
-                            "init_cash",
-                            "buy_prop",
-                            "sell_prop",
-                            "commission",
-                            "execution_type",
-                            "custom_column",
-                        ]:
+                        if k in kwargs.keys():
                             selected_p[k] = v
                         history_key = "_".join(
                             ["{}{}".format(*i) for i in selected_p.items()]
@@ -310,12 +322,27 @@ def backtest(
                 order_history_df.insert(0, "strat_id", strat_idx)
                 order_history_dfs.append(order_history_df)
 
+                periodic_history_df = strat.periodic_history_df
+                periodic_history_df["dt"] = pd.to_datetime(
+                    periodic_history_df.dt
+                )
+                periodic_history_df.insert(0, "strat_name", history_key)
+                periodic_history_df.insert(0, "strat_id", strat_idx)
+                periodic_history_df[
+                    "return"
+                ] = periodic_history_df.portfolio_value.pct_change()
+                periodic_history_dfs.append(periodic_history_df)
+
         # We run metrics on the last strat since all the metrics will be the same for all strats
         returns = strat.analyzers.returns.get_analysis()
         sharpe = strat.analyzers.mysharpe.get_analysis()
+        drawdown = strat.analyzers.drawdown.get_analysis()
+        timedraw = strat.analyzers.timedraw.get_analysis()
         # Combine dicts for returns and sharpe
         m = {
             **returns,
+            **drawdown,
+            **timedraw,
             **sharpe,
             "pnl": strat.pnl,
             "final_value": strat.final_value,
@@ -328,6 +355,8 @@ def backtest(
             print(strats_params)
             print(returns)
             print(sharpe)
+            print(drawdown)
+            print(timedraw)
 
     params_df = pd.DataFrame(params)
     # Set the index as a separate strat id column, so that we retain the information after sorting
@@ -381,9 +410,20 @@ def backtest(
                 sort_by=sort_by,
                 **optim_params
             )
+    # drop extra columns #248
+    if (
+        len(
+            set(["channel" "symbol"]).intersection(
+                sorted_combined_df.columns.values
+            )
+        )
+        == 2
+    ):
+        sorted_combined_df.drop(["channel", "symbol"], axis=1, inplace=True)
     if return_history:
         order_history = pd.concat(order_history_dfs)
-        history_dict = dict(orders=order_history)
+        periodic_history = pd.concat(periodic_history_dfs)
+        history_dict = dict(orders=order_history, periodic=periodic_history)
 
         return sorted_combined_df, history_dict
     else:
