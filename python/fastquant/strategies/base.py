@@ -316,7 +316,7 @@ class BaseStrategy(bt.Strategy):
                     if self.transaction_logging:
                         self.log("SELL CREATE, %.2f" % self.dataopen[1])
                     
-                    sell_prop_size = int(self.short_max *
+                    sell_prop_size = int(SELL_PROP * 
                                          self.cash /
                                          self.dataopen[1])
                     # The max incremental short allowed is the short that would lead to a cumulative short position
