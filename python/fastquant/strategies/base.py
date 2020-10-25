@@ -317,7 +317,7 @@ class BaseStrategy(bt.Strategy):
                                          self.cash /
                                          self.dataclose[1] /
                                          (1 + self.commission + 0.001))
-                    self.order = self.sell(size=sell_prop_size)
+                    self.order = self.sell(size=min(sell_prop_size, self.init_cash * SHORT_MAX))
 
 
             if stock_value > 0:
