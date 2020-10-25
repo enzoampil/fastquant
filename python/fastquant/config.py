@@ -10,6 +10,7 @@ DATA_FILE = resource_filename(__name__, "data/JFC_20180101_20190110_DCV.csv")
 
 BUY_PROP = 1
 SELL_PROP = 1
+SHORT_MAX = 1.5
 
 DEFAULT_PANDAS = (
     ("datetime", None),

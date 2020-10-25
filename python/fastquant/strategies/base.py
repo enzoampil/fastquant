@@ -27,6 +27,7 @@ from fastquant.config import (
     GLOBAL_PARAMS,
     BUY_PROP,
     SELL_PROP,
+    SHORT_MAX,
 )
 
 
@@ -53,6 +54,8 @@ class BaseStrategy(bt.Strategy):
         ("transaction_logging", True),
         ("channel", None),
         ("symbol", None),
+        ("allow_short", False), 
+        ("short_max", SHORT_MAX)
     )
 
     def log(self, txt, dt=None):
@@ -85,6 +88,8 @@ class BaseStrategy(bt.Strategy):
         self.channel = self.params.channel
         self.stop_loss = self.params.stop_loss
         self.stop_trail = self.params.stop_trail
+        self.allow_short = self.params.allow_short
+        self.short_max = self.params.short_max
         self.broker.set_coc(True)
         print("===Global level arguments===")
         print("init_cash : {}".format(self.init_cash))
@@ -289,7 +294,40 @@ class BaseStrategy(bt.Strategy):
                         self.sell(exectype=bt.Order.StopTrail, trailpercent=self.stop_trail, size=final_size)
 
         elif self.sell_signal():
-            if stock_value > 0:
+            if self.allow_short == True:
+
+                # Sell short based on the closing price of the previous day
+                if self.execution_type == "close":
+
+
+                    sell_prop_size = int(SELL_PROP * 
+                                         self.broker.getvalue() / 
+                                         self.dataclose[1])
+                    # The max incremental short allowed is the short that would lead to a cumulative short position
+                    # equal to the maximum short position (initial cash times the maximum short ratio, which is 1.5 by default)
+                    max_position_size = max(int(self.broker.getvalue() * self.short_max / self.dataclose[1]) + self.position.size, 0)
+                    if max_position_size > 0:
+                        if self.transaction_logging:
+                            self.log("SELL CREATE, %.2f" % self.dataclose[1])
+                        self.order = self.sell(size=min(sell_prop_size, max_position_size))
+                
+                 # Buy based on the opening price of the next closing day (only works "open" data exists in the dataset)
+                else:
+
+                    
+                    sell_prop_size = int(SELL_PROP * 
+                                         self.broker.getvalue() / 
+                                         self.dataopen[1])
+                    # The max incremental short allowed is the short that would lead to a cumulative short position
+                    # equal to the maximum short position (initial cash times the maximum short ratio, which is 1.5 by default)
+                    max_position_size = max(int(self.broker.getvalue() * self.short_max / self.dataopen[1]) + self.position.size, 0)
+                    if max_position_size > 0:
+                        if self.transaction_logging:
+                            self.log("SELL CREATE, %.2f" % self.dataopen[1])
+                        self.order = self.sell(size=min(sell_prop_size, max_position_size))
+
+
+            elif stock_value > 0:
 
                 if self.transaction_logging:
                     self.log("SELL CREATE, %.2f" % self.dataclose[1])

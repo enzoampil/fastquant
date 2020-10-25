@@ -89,6 +89,8 @@ def backtest(
     return_history=False,
     channel=None,
     symbol=None,
+    allow_short=False, 
+    short_max=1.5,
     **kwargs
 ):
     """Backtest financial data with a specified trading strategy
@@ -151,6 +153,8 @@ def backtest(
                 commission=commission,
                 channel=None,
                 symbol=None,
+                allow_short=allow_short,
+                short_max=short_max,  
                 **params
             )
             strat_names.append(strat)
@@ -162,6 +166,8 @@ def backtest(
             commission=commission,
             channel=None,
             symbol=None,
+            allow_short=allow_short,
+            short_max=short_max,  
             **kwargs
         )
         strat_names.append(strategy)
