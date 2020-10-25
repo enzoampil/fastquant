@@ -307,6 +307,8 @@ class BaseStrategy(bt.Strategy):
                     # equal to the maximum short position (initial cash times the maximum short ratio, which is 1.5 by default)
                     max_position_size = max(int(self.broker.getvalue() * self.short_max / self.dataclose[1]) + self.position.size, 0)
                     if max_position_size > 0:
+                        if self.transaction_logging:
+                            self.log("SELL CREATE, %.2f" % self.dataclose[1])
                         self.order = self.sell(size=min(sell_prop_size, max_position_size))
                 
                  # Buy based on the opening price of the next closing day (only works "open" data exists in the dataset)
