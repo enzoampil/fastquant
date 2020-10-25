@@ -321,7 +321,7 @@ class BaseStrategy(bt.Strategy):
                                          self.dataopen[1])
                     # The max incremental short allowed is the short that would lead to a cumulative short position
                     # equal to the maximum short position (initial cash times the maximum short ratio, which is 1.5 by default)
-                    max_position_size = max((self.init_cash * SHORT_MAX / self.dataopen[1]) + self.position.size, 0)
+                    max_position_size = max(int(self.init_cash * SHORT_MAX / self.dataopen[1]) + self.position.size, 0)
                     self.order = self.sell(size=min(sell_prop_size, max_position_size))
 
 
