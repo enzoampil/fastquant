@@ -21,6 +21,8 @@ Check out our blog posts in the fastquant [website](https://enzoampil.github.io/
 
 ```
 pip install fastquant
+or
+python -m pip install fastquant
 ```
 
 ### R
