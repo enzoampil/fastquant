@@ -439,4 +439,4 @@ def backtest(
 
         return sorted_combined_df, history_dict
     else:
-        return sorted_combined_df, stratruns
+        return sorted_combined_df
