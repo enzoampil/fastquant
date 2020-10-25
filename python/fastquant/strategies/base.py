@@ -317,7 +317,7 @@ class BaseStrategy(bt.Strategy):
                         self.log("SELL CREATE, %.2f" % self.dataopen[1])
                     
                     sell_prop_size = int(SELL_PROP * 
-                                         self.cash /
+                                         self.broker.getvalue() / 
                                          self.dataopen[1])
                     # The max incremental short allowed is the short that would lead to a cumulative short position
                     # equal to the maximum short position (initial cash times the maximum short ratio, which is 1.5 by default)
