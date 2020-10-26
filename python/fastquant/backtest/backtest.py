@@ -142,6 +142,7 @@ def backtest(
     }
 
     strat_names = []
+    strat_name = None
     if strategy == "multi" and strats is not None:
         for strat, params in strats.items():
             cerebro.optstrategy(
@@ -189,7 +190,7 @@ def backtest(
         # Rename dt to datetime
         data = pd.read_csv(data, header=0, parse_dates=["dt"])
 
-    if strategy == "sentiment":
+    if strat_name == "sentiment":
         # initialize series for sentiments
         senti_series = pd.Series(
             sentiments, name="sentiment_score", dtype=float
@@ -246,7 +247,7 @@ def backtest(
         params = params_tuple
 
     # extend the dataframe with sentiment score
-    if strategy == "sentiment":
+    if strat_name == "sentiment":
         data_format_dict = tuple_to_dict(params_tuple)
         # create CustomData which inherits from PandasData
         pd_data = CustomData(dataname=data, **data_format_dict)
