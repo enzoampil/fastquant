@@ -97,7 +97,7 @@ def backtest(
 
     Parameters
     ----------------
-    strategy : str
+    strategy : str or an instance of `fastquant.strategies.base.BaseStrategy`
         see list of accepted strategy keys below
     data : pandas.DataFrame
         dataframe with at least close price indexed with time
@@ -144,6 +144,7 @@ def backtest(
     }
 
     strat_names = []
+    strat_name = None
     if strategy == "multi" and strats is not None:
         for strat, params in strats.items():
             cerebro.optstrategy(
@@ -159,8 +160,16 @@ def backtest(
             )
             strat_names.append(strat)
     else:
+
+        # Allow instance of BaseStrategy or from the predefined mapping
+        if not isinstance(strategy, str) and issubclass(strategy, bt.Strategy):
+            strat_name = str(strategy)
+        else:
+            strat_name = strategy
+            strategy = STRATEGY_MAPPING[strategy]
+
         cerebro.optstrategy(
-            STRATEGY_MAPPING[strategy],
+            strategy,
             init_cash=[init_cash],
             transaction_logging=[verbose],
             commission=commission,
@@ -170,7 +179,7 @@ def backtest(
             short_max=short_max,  
             **kwargs
         )
-        strat_names.append(strategy)
+        strat_names.append(strat_name)
 
     # Apply Total, Average, Compound and Annualized Returns calculated using a logarithmic approach
     cerebro.addanalyzer(btanalyzers.Returns, _name="returns")
@@ -187,7 +196,7 @@ def backtest(
         # Rename dt to datetime
         data = pd.read_csv(data, header=0, parse_dates=["dt"])
 
-    if strategy == "sentiment":
+    if strat_name == "sentiment":
         # initialize series for sentiments
         senti_series = pd.Series(
             sentiments, name="sentiment_score", dtype=float
@@ -244,7 +253,7 @@ def backtest(
         params = params_tuple
 
     # extend the dataframe with sentiment score
-    if strategy == "sentiment":
+    if strat_name == "sentiment":
         data_format_dict = tuple_to_dict(params_tuple)
         # create CustomData which inherits from PandasData
         pd_data = CustomData(dataname=data, **data_format_dict)
