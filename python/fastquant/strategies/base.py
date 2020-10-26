@@ -220,13 +220,13 @@ class BaseStrategy(bt.Strategy):
 
     def start(self):
         start_date = self.datas[0].datetime.date(0)
-        cron = croniter.croniter(self.freq, start_date)
-        self.next_cash_datetime = cron.get_next(datetime.datetime)
+        self.cron = croniter.croniter(self.freq, start_date)
+        self.next_cash_datetime = self.cron.get_next(datetime.datetime)
 
     def next(self):
         if self.datas[0].datetime.date(0) == self.next_cash_datetime:
             self.broker.add_cash(self.income_amount)
-            self.next_cash_datetime = cron.get_next(datetime.datetime)
+            self.next_cash_datetime = self.cron.get_next(datetime.datetime)
 
         self.update_periodic_history()
         if self.periodic_logging:
