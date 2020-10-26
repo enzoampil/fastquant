@@ -282,7 +282,12 @@ def backtest(
         for i, strat in enumerate(stratrun):
             # Get indicator history
             indicators = strat.getindicators()
-            indicators_dict = {ind.plotlabel() if hasattr(ind, "plotlabel") else "indicator{}".format(i): ind.lines[0].array for i, ind in enumerate(indicators)}
+            indicators_dict = {
+                ind.plotlabel()
+                if hasattr(ind, "plotlabel")
+                else "indicator{}".format(i): ind.lines[0].array
+                for i, ind in enumerate(indicators)
+            }
             indicators_df = pd.DataFrame(indicators_dict)
             indicators_df.insert(0, "dt", data["datetime"].values)
 
@@ -435,7 +440,11 @@ def backtest(
         order_history = pd.concat(order_history_dfs)
         periodic_history = pd.concat(periodic_history_dfs)
         indicator_history = pd.concat(indicator_history_dfs)
-        history_dict = dict(orders=order_history, periodic=periodic_history, indicators=indicator_history)
+        history_dict = dict(
+            orders=order_history,
+            periodic=periodic_history,
+            indicators=indicator_history,
+        )
 
         return sorted_combined_df, history_dict
     else:
