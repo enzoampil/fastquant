@@ -287,6 +287,7 @@ def backtest(
 
     order_history_dfs = []
     periodic_history_dfs = []
+    indicator_history_dfs = []
     for strat_idx, stratrun in enumerate(stratruns):
         strats_params = {}
 
@@ -294,6 +295,17 @@ def backtest(
             print("**************************************************")
 
         for i, strat in enumerate(stratrun):
+            # Get indicator history
+            indicators = strat.getindicators()
+            indicators_dict = {
+                ind.plotlabel()
+                if hasattr(ind, "plotlabel")
+                else "indicator{}".format(i): ind.lines[0].array
+                for i, ind in enumerate(indicators)
+            }
+            indicators_df = pd.DataFrame(indicators_dict)
+            indicators_df.insert(0, "dt", data["datetime"].values)
+
             strat_name = strat_names[i]
             p_raw = strat.p._getkwargs()
             p, selected_p = {}, {}
@@ -347,6 +359,10 @@ def backtest(
                     "return"
                 ] = periodic_history_df.portfolio_value.pct_change()
                 periodic_history_dfs.append(periodic_history_df)
+
+                indicators_df.insert(0, "strat_name", history_key)
+                indicators_df.insert(0, "strat_id", strat_idx)
+                indicator_history_dfs.append(indicators_df)
 
         # We run metrics on the last strat since all the metrics will be the same for all strats
         returns = strat.analyzers.returns.get_analysis()
@@ -438,7 +454,12 @@ def backtest(
     if return_history:
         order_history = pd.concat(order_history_dfs)
         periodic_history = pd.concat(periodic_history_dfs)
-        history_dict = dict(orders=order_history, periodic=periodic_history)
+        indicator_history = pd.concat(indicator_history_dfs)
+        history_dict = dict(
+            orders=order_history,
+            periodic=periodic_history,
+            indicators=indicator_history,
+        )
 
         return sorted_combined_df, history_dict
     else:
