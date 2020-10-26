@@ -57,8 +57,8 @@ class BaseStrategy(bt.Strategy):
         ("symbol", None),
         ("allow_short", False),
         ("short_max", SHORT_MAX),
-        ("freq", "* * * * *"),
-        ("income_amount", 10000)
+        ("add_cash_freq", "* * * * *"),
+        ("add_cash_amount", 10000)
     )
 
     def log(self, txt, dt=None):
@@ -94,8 +94,8 @@ class BaseStrategy(bt.Strategy):
         self.allow_short = self.params.allow_short
         self.short_max = self.params.short_max
         self.broker.set_coc(True)
-        self.freq = self.params.freq
-        self.income_amount = self.params.income_amount
+        self.add_cash_freq = self.params.add_cash_freq
+        self.add_cash_amount = self.params.add_cash_amount
         print("===Global level arguments===")
         print("init_cash : {}".format(self.init_cash))
         print("buy_prop : {}".format(self.buy_prop))
@@ -219,13 +219,15 @@ class BaseStrategy(bt.Strategy):
             )
 
     def start(self):
+        # Initialize income date iterator, and set next
         start_date = self.datas[0].datetime.date(0)
-        self.cron = croniter.croniter(self.freq, start_date)
+        self.cron = croniter.croniter(self.add_cash_freq, start_date)
         self.next_cash_datetime = self.cron.get_next(datetime.datetime)
 
     def next(self):
+        # Add cash to broker if date is equal to the next income date
         if self.datas[0].datetime.date(0) == self.next_cash_datetime:
-            self.broker.add_cash(self.income_amount)
+            self.broker.add_cash(self.add_cash_amount)
             self.next_cash_datetime = self.cron.get_next(datetime.datetime)
 
         self.update_periodic_history()
