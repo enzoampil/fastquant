@@ -232,16 +232,28 @@ class BaseStrategy(bt.Strategy):
             )
 
     def start(self):
-        # Initialize income date iterator, and set next
-        start_date = self.datas[0].datetime.date(0)
-        self.cron = croniter.croniter(self.add_cash_freq, start_date)
-        self.next_cash_datetime = self.cron.get_next(datetime.datetime)
+        # Used to signal setting the first iteration
+        self.first_timepoint = True
 
     def next(self):
-        # Add cash to broker if date is equal to the next income date
-        if self.datas[0].datetime.date(0).strftime("%Y-%m-%d") == self.next_cash_datetime.strftime("%Y-%m-%d"):
+        if self.first_timepoint:
+            # Initialize income date iterator, and set next
+            start_date = self.datas[0].datetime.datetime(0)
+            self.cron = croniter.croniter(self.add_cash_freq, start_date)
+            self.next_cash_datetime = self.cron.get_next(datetime.datetime)
+            self.log("Start date: {}".format(start_date.strftime("%Y-%m-%d")))
+            self.log("Next cash date: {}".format(self.next_cash_datetime.strftime("%Y-%m-%d")))
+            
+            # Change state to indicate that the cash date iterator has been set
+            self.first_timepoint = False
+
+        # Add cash to broker if date is same or later to the next income date
+        # This means if the dataset is only for weekdays, a date on a weekend will be executed on the next monday
+        if self.datas[0].datetime.datetime(0) >= self.next_cash_datetime:
             self.broker.add_cash(self.add_cash_amount)
             self.next_cash_datetime = self.cron.get_next(datetime.datetime)
+            self.log("Cash added: {}".format(self.add_cash_amount))
+            self.log("Next cash date: {}".format(self.next_cash_datetime.strftime("%Y-%m-%d")))
 
         self.update_periodic_history()
         if self.periodic_logging:
