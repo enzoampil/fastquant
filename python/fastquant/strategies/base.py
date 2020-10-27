@@ -109,6 +109,8 @@ class BaseStrategy(bt.Strategy):
             self.add_cash_freq = add_cash_freq
 
         self.add_cash_amount = self.params.add_cash_amount
+        # Attribute that tracks how much cash was added over time
+        self.total_cash_added = 0
         print("===Global level arguments===")
         print("init_cash : {}".format(self.init_cash))
         print("buy_prop : {}".format(self.buy_prop))
@@ -219,7 +221,8 @@ class BaseStrategy(bt.Strategy):
     def stop(self):
         # Saving to self so it's accessible later during optimization
         self.final_value = self.broker.getvalue()
-        self.pnl = round(self.final_value - self.init_cash, 2)
+        # Note that PnL is the final portfolio value minus the initial cash balance minus the total cash added
+        self.pnl = round(self.final_value - self.init_cash - self.total_cash_added, 2)
         print("Final Portfolio Value: {}".format(self.final_value))
         print("Final PnL: {}".format(self.pnl))
         self.order_history_df = pd.DataFrame(self.order_history)
@@ -252,7 +255,10 @@ class BaseStrategy(bt.Strategy):
         if self.datas[0].datetime.datetime(0) >= self.next_cash_datetime:
             self.broker.add_cash(self.add_cash_amount)
             self.next_cash_datetime = self.cron.get_next(datetime.datetime)
+            self.total_cash_added += self.add_cash_amount
+
             self.log("Cash added: {}".format(self.add_cash_amount))
+            self.log("Total cash added: {}".format(self.total_cash_added))
             self.log("Next cash date: {}".format(self.next_cash_datetime.strftime("%Y-%m-%d")))
 
         self.update_periodic_history()
