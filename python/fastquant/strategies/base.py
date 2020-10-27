@@ -94,7 +94,20 @@ class BaseStrategy(bt.Strategy):
         self.allow_short = self.params.allow_short
         self.short_max = self.params.short_max
         self.broker.set_coc(True)
-        self.add_cash_freq = self.params.add_cash_freq
+        add_cash_freq = self.params.add_cash_freq
+
+        # Longer term, we plan to add `freq` like notation, similar to pandas datetime
+        # https://pandas.pydata.org/pandas-docs/stable/user_guide/timeseries.html
+        # M means add cash at the first day of each month
+        if add_cash_freq == "M":
+            self.add_cash_freq = "0 0 1 * *"
+        # W means add cash once a week on monday
+        elif add_cash_freq == "W":
+            self.add_cash_freq = "0 0 * * 1"
+        # Otherwise, it assumes the input is in cron notation (no change)
+        else:
+            self.add_cash_freq = add_cash_freq
+
         self.add_cash_amount = self.params.add_cash_amount
         print("===Global level arguments===")
         print("init_cash : {}".format(self.init_cash))
@@ -226,7 +239,7 @@ class BaseStrategy(bt.Strategy):
 
     def next(self):
         # Add cash to broker if date is equal to the next income date
-        if self.datas[0].datetime.date(0) == self.next_cash_datetime:
+        if self.datas[0].datetime.date(0).strftime("%Y-%m-%d") == self.next_cash_datetime.strftime("%Y-%m-%d"):
             self.broker.add_cash(self.add_cash_amount)
             self.next_cash_datetime = self.cron.get_next(datetime.datetime)
 
