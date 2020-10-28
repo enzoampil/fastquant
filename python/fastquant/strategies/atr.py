@@ -23,11 +23,11 @@ class ATRStrategy(BaseStrategy):
     ----------
     atr_period : int
         Period used as basis in computing ATR
-    atr_factor : int
+    atr_factor : float
         Value used as a multiplier against the ATR.
     """
 
-    params = (("atr_period", 14), ("atr_factor", 1))
+    params = (("atr_period", 14), ("atr_factor", 1.0))
 
     def __init__(self):
 
