@@ -12,6 +12,7 @@ from __future__ import (
 from backtrader.indicators import (
     AverageDirectionalMovementIndex,
     ADX,
+    AverageTrueRange,
     BollingerBands,
     BBands,
     CommodityChannelIndex,
