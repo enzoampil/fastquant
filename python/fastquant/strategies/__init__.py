@@ -6,5 +6,6 @@ from fastquant.strategies.buy_and_hold import BuyAndHoldStrategy
 from fastquant.strategies.ma_crossover import SMACStrategy, EMACStrategy
 from fastquant.strategies.macd import MACDStrategy
 from fastquant.strategies.rsi import RSIStrategy
+from fastquant.strategies.atr import ATRStrategy
 from fastquant.strategies.sentiment import SentimentStrategy
 from fastquant.strategies.custom import CustomStrategy, TernaryStrategy
