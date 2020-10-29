@@ -81,7 +81,7 @@ def backtest(
     commission=COMMISSION_PER_TRANSACTION,
     init_cash=INIT_CASH,
     plot=True,
-    verbose=True,
+    verbose=1,
     sort_by="rnorm",
     sentiments=None,
     strats=None,  # Only used when strategy = "multi"
@@ -89,7 +89,7 @@ def backtest(
     return_history=False,
     channel=None,
     symbol=None,
-    allow_short=False, 
+    allow_short=False,
     short_max=1.5,
     **kwargs
 ):
@@ -118,7 +118,7 @@ def backtest(
     channel : str
         Channel to be used for last day notification - e.g. "slack" (default=None)
     verbose : int
-        Verbose can take values: [-1, 0, 1, 2], with increasing levels of verbosity (default=0).
+        Verbose can take values: [0, 1, 2, 3], with increasing levels of verbosity (default=1).
     symbol : str
         Symbol to be referenced in the channel notification if not None (default=None)
     {0}
@@ -143,6 +143,10 @@ def backtest(
         for k, v in kwargs.items()
     }
 
+    # Add logging parameters based on the `verbose` parameter
+    logging_params = get_logging_params(verbose)
+    kwargs.update(logging_params)
+
     strat_names = []
     strat_name = None
     if strategy == "multi" and strats is not None:
@@ -150,12 +154,11 @@ def backtest(
             cerebro.optstrategy(
                 STRATEGY_MAPPING[strat],
                 init_cash=[init_cash],
-                transaction_logging=[verbose],
                 commission=commission,
                 channel=None,
                 symbol=None,
                 allow_short=allow_short,
-                short_max=short_max,  
+                short_max=short_max,
                 **params
             )
             strat_names.append(strat)
@@ -171,12 +174,11 @@ def backtest(
         cerebro.optstrategy(
             strategy,
             init_cash=[init_cash],
-            transaction_logging=[verbose],
             commission=commission,
             channel=None,
             symbol=None,
             allow_short=allow_short,
-            short_max=short_max,  
+            short_max=short_max,
             **kwargs
         )
         strat_names.append(strat_name)
@@ -191,7 +193,7 @@ def backtest(
 
     # Treat `data` as a path if it's a string; otherwise, it's treated as a pandas dataframe
     if isinstance(data, str):
-        if verbose:
+        if verbose > 0:
             print("Reading path as pandas dataframe ...")
         # Rename dt to datetime
         data = pd.read_csv(data, header=0, parse_dates=["dt"])
@@ -252,22 +254,15 @@ def backtest(
         # add the parameter to the parameters inherited from the base class
         params = params_tuple
 
-    # extend the dataframe with sentiment score
-    if strat_name == "sentiment":
-        data_format_dict = tuple_to_dict(params_tuple)
-        # create CustomData which inherits from PandasData
-        pd_data = CustomData(dataname=data, **data_format_dict)
-
-    else:
-        data_format_dict = tuple_to_dict(params_tuple)
-        pd_data = CustomData(dataname=data, **data_format_dict)
+    data_format_dict = tuple_to_dict(params_tuple)
+    pd_data = CustomData(dataname=data, **data_format_dict)
 
     cerebro.adddata(pd_data)
     cerebro.broker.setcash(init_cash)
     # Allows us to set buy price based on next day closing
     # (technically impossible, but reasonable assuming you use all your money to buy market at the end of the next day)
     cerebro.broker.set_coc(True)
-    if verbose:
+    if verbose > 0:
         print("Starting Portfolio Value: %.2f" % cerebro.broker.getvalue())
 
     # clock the start of the process
@@ -277,9 +272,13 @@ def backtest(
     # clock the end of the process
     tend = time.time()
 
+    if verbose > 0:
+        # print out the result
+        print("Time used (seconds):", str(tend - tstart))
+
     params = []
     metrics = []
-    if verbose:
+    if verbose > 0:
         print("==================================================")
         print("Number of strat runs:", len(stratruns))
         print("Number of strats per run:", len(stratruns[0]))
@@ -291,7 +290,7 @@ def backtest(
     for strat_idx, stratrun in enumerate(stratruns):
         strats_params = {}
 
-        if verbose:
+        if verbose > 0:
             print("**************************************************")
 
         for i, strat in enumerate(stratrun):
@@ -310,7 +309,11 @@ def backtest(
             p_raw = strat.p._getkwargs()
             p, selected_p = {}, {}
             for k, v in p_raw.items():
-                if k not in ["periodic_logging", "transaction_logging"]:
+                if k not in [
+                    "strategy_logging",
+                    "periodic_logging",
+                    "transaction_logging",
+                ]:
                     # Make sure the parameters are mapped to the corresponding strategy
                     if strategy == "multi":
                         key = (
@@ -381,13 +384,13 @@ def backtest(
 
         params.append(strats_params)
         metrics.append(m)
-        if verbose:
+        if verbose > 0:
             print("--------------------------------------------------")
-            print(strats_params)
-            print(returns)
-            print(sharpe)
-            print(drawdown)
-            print(timedraw)
+            print_dict(strats_params, "Strategy Parameters")
+            print_dict(returns, "Returns")
+            print_dict(sharpe, "Sharpe")
+            print_dict(drawdown, "Drawdown")
+            print_dict(timedraw, "Timedraw")
 
     params_df = pd.DataFrame(params)
     # Set the index as a separate strat id column, so that we retain the information after sorting
@@ -403,14 +406,13 @@ def backtest(
         [sorted_strat_ids, sorted_params_df, sorted_metrics_df], axis=1
     )
 
-    # print out the result
-    print("Time used (seconds):", str(tend - tstart))
-
     # Save optimal parameters as dictionary
     optim_params = sorted_params_df.iloc[0].to_dict()
     optim_metrics = sorted_metrics_df.iloc[0].to_dict()
-    print("Optimal parameters:", optim_params)
-    print("Optimal metrics:", optim_metrics)
+
+    if verbose > 0:
+        print_dict(optim_params, "Optimal parameters:")
+        print_dict(optim_metrics, "Optimal metrics:")
 
     if plot and strategy != "multi":
         has_volume = (
@@ -431,8 +433,9 @@ def backtest(
                 iplot = True
             cerebro.plot(volume=has_volume, figsize=(30, 15), iplot=iplot)
         else:
-            print("=============================================")
-            print("Plotting backtest for optimal parameters ...")
+            if verbose > 0:
+                print("=============================================")
+                print("Plotting backtest for optimal parameters ...")
             backtest(
                 strategy,
                 data,  # Treated as csv path is str, and dataframe of pd.DataFrame
@@ -464,3 +467,41 @@ def backtest(
         return sorted_combined_df, history_dict
     else:
         return sorted_combined_df
+
+
+def print_dict(d, title="", format="inline"):
+    if format is None:
+        print(title, d)
+
+    if format == "inline":
+        items = [title] + ["%s:%s" % (key, value) for key, value in d.items()]
+        print("\t".join(items))
+
+    if format == "indent":
+        if title != "":
+            print(title)
+        for key, value in d.items():
+            print("\t%s:%s" % (key, value))
+
+
+def get_logging_params(verbose):
+    """
+        Adjusts the logging verbosity based on the `verbose` parameter
+        0 - No logging
+        1 - Strategy Level logs
+        2 - Transaction Level logs
+        3 - Periodic Logs
+    """
+    verbosity_args = dict(
+        strategy_logging=False,
+        transaction_logging=False,
+        periodic_logging=False,
+    )
+    if verbose > 0:
+        verbosity_args["strategy_logging"] = True
+    if verbose > 1:
+        verbosity_args["transaction_logging"] = True
+    if verbose > 2:
+        verbosity_args["periodic_logging"] = True
+
+    return verbosity_args
