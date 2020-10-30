@@ -19,20 +19,6 @@ from collections.abc import Iterable
 import time
 from pandas.api.types import is_numeric_dtype
 
-# Import from package
-from fastquant.strategies import (
-    RSIStrategy,
-    SMACStrategy,
-    BaseStrategy,
-    MACDStrategy,
-    EMACStrategy,
-    BBandsStrategy,
-    BuyAndHoldStrategy,
-    SentimentStrategy,
-    CustomStrategy,
-    TernaryStrategy,
-)
-
 
 # Import backtest variables
 from fastquant.config import (
@@ -41,22 +27,12 @@ from fastquant.config import (
     GLOBAL_PARAMS,
     DEFAULT_PANDAS,
 )
+from fastquant.strategies.mappings import STRATEGY_MAPPING
 
+# Other backtest components
 from fastquant.backtest.data_prep import initalize_data
 from fastquant.backtest.post_backtest import params_and_metrics, plot_results
 
-STRATEGY_MAPPING = {
-    "rsi": RSIStrategy,
-    "smac": SMACStrategy,
-    "base": BaseStrategy,
-    "macd": MACDStrategy,
-    "emac": EMACStrategy,
-    "bbands": BBandsStrategy,
-    "buynhold": BuyAndHoldStrategy,
-    "sentiment": SentimentStrategy,
-    "custom": CustomStrategy,
-    "ternary": TernaryStrategy,
-}
 
 strat_docs = "\nExisting strategies:\n\n" + "\n".join(
     [key + "\n" + value.__doc__ for key, value in STRATEGY_MAPPING.items()]
@@ -145,6 +121,7 @@ def backtest(
     logging_params = get_logging_params(verbose)
     kwargs.update(logging_params)
 
+    # Add Strategy
     strat_names = []
     strat_name = None
     if strategy == "multi" and strats is not None:
@@ -234,9 +211,9 @@ def backtest(
                 print("Plotting backtest for optimal parameters ...")
             backtest(
                 strategy,
-                data,  # Treated as csv path is str, and dataframe of pd.DataFrame
+                data,
                 plot=plot,
-                verbose=verbose,
+                verbose=0,
                 sort_by=sort_by,
                 **optim_params,
             )
