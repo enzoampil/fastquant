@@ -46,7 +46,7 @@ def test_backtest():
             assert cerebro is not None, errmsg
 
             data_disclosures = get_stock_data(
-                "JFC", "2020-01-01", "2020-09-30", source="phisix"
+                "TSLA", "2020-01-01", "2020-09-30",  # source="phisix"
             )
 
             # sentiments_disclosures = get_disclosure_sentiment(
@@ -65,10 +65,8 @@ def test_backtest():
                 senti=0.2,
                 plot=False,
             )
-            errmsg_disclosures = (
-                "Backtest encountered error for strategy '{}'!".format(
-                    strategy
-                )
+            errmsg_disclosures = "Backtest encountered error for strategy '{}'!".format(
+                strategy
             )
             assert cerebro_disclosures is not None, errmsg_disclosures
 
