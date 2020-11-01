@@ -50,11 +50,11 @@ class ATRStrategy(BaseStrategy):
 
         self.atr_trailing_stop = 0
 
-        if self.dataclose > self.atr[1] & self.lastdataclose > self.atr[1] :
-            self.atr_trailing_stop = max(self.atr[1], self.dataclose - self.atr_factored)
-        elif self.dataclose < self.atr[1] & self.lastdataclose < self.atr[1]:
-            self.atr_trailing_stop = min(self.atr[1], self.dataclose + self.atr_factored)
-        elif self.dataclose > self.atr[1]:
+        if self.dataclose > self.atr[-1] & self.lastdataclose > self.atr[-1] :
+            self.atr_trailing_stop = max(self.atr[-1], self.dataclose - self.atr_factored)
+        elif self.dataclose < self.atr[-1] & self.lastdataclose < self.atr[-1]:
+            self.atr_trailing_stop = min(self.atr[-1], self.dataclose + self.atr_factored)
+        elif self.dataclose > self.atr[-1]:
             self.atr_trailing_stop = self.dataclose - self.atr_factored
         else:
             self.atr_trailing_stop = self.dataclose + self.atr_factored
