@@ -45,7 +45,7 @@ class ATRStrategy(BaseStrategy):
 
         self.dataclose = self.datas[0].close
         self.dataopen = self.datas[0].open
-        self.lastdataclose = self.datas[1].close
+        self.lastdataclose = self.datas[-1].close
         self.lastdataopen = self.datas[1].open
 
         self.atr_trailing_stop = 0
