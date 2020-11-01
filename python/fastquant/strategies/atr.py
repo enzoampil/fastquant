@@ -42,25 +42,24 @@ class ATRStrategy(BaseStrategy):
 
         self.atr = bt.indicators.AverageTrueRange(period=self.atr_period)
         self.atr_factored = bt.indicators.AverageTrueRange(period=self.atr_period) * self.atr_factor
-
         self.dataclose = self.datas[0].close
         self.dataopen = self.datas[0].open
-        self.lastdataclose = self.datas[-1].close
-        self.lastdataopen = self.datas[-1].open
-
         self.atr_trailing_stop = 0
 
-        if self.dataclose > self.atr[-1] & self.lastdataclose > self.atr[-1] :
-            self.atr_trailing_stop = max(self.atr[-1], self.dataclose - self.atr_factored)
-        elif self.dataclose < self.atr[-1] & self.lastdataclose < self.atr[-1]:
-            self.atr_trailing_stop = min(self.atr[-1], self.dataclose + self.atr_factored)
-        elif self.dataclose > self.atr[-1]:
-            self.atr_trailing_stop = self.dataclose - self.atr_factored
+    def set_trailing_stop(self):
+        if self.dataclose[0] > self.atr[-1] and self.dataclose[-1] > self.atr[-1]:
+            self.atr_trailing_stop = max(self.atr[-1], self.dataclose[0] - self.atr_factored[-1])
+        elif self.dataclose[0] < self.atr[-1] and self.dataclose[-1] < self.atr[-1]:
+            self.atr_trailing_stop = min(self.atr[-1], self.dataclose[0] + self.atr_factored[-1])
+        elif self.dataclose[0] > self.atr[-1]:
+            self.atr_trailing_stop = self.dataclose[0] - self.atr_factored[-1]
         else:
-            self.atr_trailing_stop = self.dataclose + self.atr_factored
+            self.atr_trailing_stop = self.dataclose[0] + self.atr_factored[-1]
 
     def buy_signal(self):
-        return self.dataclose > self.atr_trailing_stop[0]
+        self.set_trailing_stop()
+        return self.dataclose[0] > self.atr_trailing_stop
 
     def sell_signal(self):
-        return self.dataopen < self.atr_trailing_stop[0]
+        self.set_trailing_stop()
+        return self.dataopen[0] < self.atr_trailing_stop
