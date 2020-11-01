@@ -41,7 +41,7 @@ class ATRStrategy(BaseStrategy):
         print("atr_factor :", self.atr_factor)
 
         self.atr = bt.indicators.AverageTrueRange(period=self.atr_period)
-        self.atr_factored = bt.indicators.AverageTrueRange(period=self.atr_period) * self.atr_factor
+        self.atr_factored = self.atr * self.atr_factor
         self.dataclose = self.datas[0].close
         self.dataopen = self.datas[0].open
         self.atr_trailing_stop = 0
