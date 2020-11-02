@@ -45,9 +45,11 @@ def test_backtest():
             )
             assert cerebro is not None, errmsg
 
-            data_disclosures = get_stock_data(
-                "JFC", "2020-01-01", "2020-09-30", source="phisix"
-            )
+            #data_disclosures = get_stock_data(
+            #    "JFC", "2020-01-01", "2020-09-30", source="phisix"
+            #)
+            
+            data_disclosures = sample.copy()
 
             # sentiments_disclosures = get_disclosure_sentiment(
             #     stock_code="JFC",
