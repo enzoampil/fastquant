@@ -55,12 +55,13 @@ class MACDStrategy(BaseStrategy):
         self.sma_period = self.params.sma_period
         self.dir_period = self.params.dir_period
 
-        print("===Strategy level arguments===")
-        print("fast_period :", self.fast_period)
-        print("slow_period :", self.slow_period)
-        print("signal_period :", self.signal_period)
-        print("sma_period :", self.sma_period)
-        print("dir_period :", self.dir_period)
+        if self.strategy_logging:
+            print("===Strategy level arguments===")
+            print("fast_period :", self.fast_period)
+            print("slow_period :", self.slow_period)
+            print("signal_period :", self.signal_period)
+            print("sma_period :", self.sma_period)
+            print("dir_period :", self.dir_period)
         macd_ind = bt.ind.MACD(
             period_me1=self.fast_period,
             period_me2=self.slow_period,

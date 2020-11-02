@@ -38,8 +38,10 @@ class SentimentStrategy(BaseStrategy):
         super().__init__()
         # Strategy level variables
         self.senti = self.params.senti
-        print("===Strategy level arguments===")
-        print("sentiment threshold :", self.senti)
+
+        if self.strategy_logging:
+            print("===Strategy level arguments===")
+            print("sentiment threshold :", self.senti)
         self.datasentiment = Sentiment(self.data)
 
     def buy_signal(self):

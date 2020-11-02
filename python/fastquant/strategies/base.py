@@ -53,6 +53,7 @@ class BaseStrategy(bt.Strategy):
         ),  # Either open or close, to indicate if a purchase is executed based on the next open or close
         ("periodic_logging", False),
         ("transaction_logging", True),
+        ("strategy_logging", True),
         ("channel", None),
         ("symbol", None),
         ("allow_short", False),
@@ -87,6 +88,7 @@ class BaseStrategy(bt.Strategy):
         self.execution_type = self.params.execution_type
         self.periodic_logging = self.params.periodic_logging
         self.transaction_logging = self.params.transaction_logging
+        self.strategy_logging = self.params.strategy_logging
         self.commission = self.params.commission
         self.channel = self.params.channel
         self.stop_loss = self.params.stop_loss
@@ -111,13 +113,15 @@ class BaseStrategy(bt.Strategy):
         self.add_cash_amount = self.params.add_cash_amount
         # Attribute that tracks how much cash was added over time
         self.total_cash_added = 0
-        print("===Global level arguments===")
-        print("init_cash : {}".format(self.init_cash))
-        print("buy_prop : {}".format(self.buy_prop))
-        print("sell_prop : {}".format(self.sell_prop))
-        print("commission : {}".format(self.commission))
-        print("stop_loss : {}".format(self.stop_loss))
-        print("stop_trail : {}".format(self.stop_trail))
+
+        if self.strategy_logging:
+            self.log("===Global level arguments===")
+            self.log("init_cash : {}".format(self.init_cash))
+            self.log("buy_prop : {}".format(self.buy_prop))
+            self.log("sell_prop : {}".format(self.sell_prop))
+            self.log("commission : {}".format(self.commission))
+            self.log("stop_loss : {}".format(self.stop_loss))
+            self.log("stop_trail : {}".format(self.stop_trail))
         self.order_history = {
             "dt": [],
             "type": [],
@@ -161,34 +165,25 @@ class BaseStrategy(bt.Strategy):
             self.update_order_history(order)
             if order.isbuy():
                 self.action = "buy"
-                if self.transaction_logging:
-                    self.log(
-                        "BUY EXECUTED, Price: %.2f, Cost: %.2f, Comm: %.2f, Size: %.2f"
-                        % (
-                            order.executed.price,
-                            order.executed.value,
-                            order.executed.comm,
-                            order.executed.size,
-                        )
-                    )
-
                 self.buyprice = order.executed.price
                 self.buycomm = order.executed.comm
 
             else:  # Sell
                 self.action = "sell"
-                if self.transaction_logging:
-                    self.log(
-                        "SELL EXECUTED, Price: %.2f, Cost: %.2f, Comm: %.2f, Size: %.2f"
-                        % (
-                            order.executed.price,
-                            order.executed.value,
-                            order.executed.comm,
-                            order.executed.size,
-                        )
-                    )
 
             self.bar_executed = len(self)
+
+            if self.transaction_logging:
+                self.log(
+                    "%s EXECUTED, Price: %.2f, Cost: %.2f, Comm: %.2f, Size: %.2f"
+                    % (
+                        self.action.upper(),
+                        order.executed.price,
+                        order.executed.value,
+                        order.executed.comm,
+                        order.executed.size,
+                    )
+                )
 
         elif order.status in [order.Canceled, order.Margin, order.Rejected]:
             if self.transaction_logging:
@@ -222,9 +217,12 @@ class BaseStrategy(bt.Strategy):
         # Saving to self so it's accessible later during optimization
         self.final_value = self.broker.getvalue()
         # Note that PnL is the final portfolio value minus the initial cash balance minus the total cash added
-        self.pnl = round(self.final_value - self.init_cash - self.total_cash_added, 2)
-        print("Final Portfolio Value: {}".format(self.final_value))
-        print("Final PnL: {}".format(self.pnl))
+        self.pnl = round(
+            self.final_value - self.init_cash - self.total_cash_added, 2
+        )
+        if self.strategy_logging:
+            self.log("Final Portfolio Value: {}".format(self.final_value))
+            self.log("Final PnL: {}".format(self.pnl))
         self.order_history_df = pd.DataFrame(self.order_history)
         self.periodic_history_df = pd.DataFrame(self.periodic_history)
 
@@ -245,9 +243,19 @@ class BaseStrategy(bt.Strategy):
                 start_date = self.datas[0].datetime.datetime(0)
                 self.cron = croniter.croniter(self.add_cash_freq, start_date)
                 self.next_cash_datetime = self.cron.get_next(datetime.datetime)
-                self.log("Start date: {}".format(start_date.strftime("%Y-%m-%d")))
-                self.log("Next cash date: {}".format(self.next_cash_datetime.strftime("%Y-%m-%d")))
-                
+
+                if self.transaction_logging:
+                    self.log(
+                        "Start date: {}".format(
+                            start_date.strftime("%Y-%m-%d")
+                        )
+                    )
+                    self.log(
+                        "Next cash date: {}".format(
+                            self.next_cash_datetime.strftime("%Y-%m-%d")
+                        )
+                    )
+
                 # Change state to indicate that the cash date iterator has been set
                 self.first_timepoint = False
 
@@ -258,9 +266,16 @@ class BaseStrategy(bt.Strategy):
                 self.next_cash_datetime = self.cron.get_next(datetime.datetime)
                 self.total_cash_added += self.add_cash_amount
 
-                self.log("Cash added: {}".format(self.add_cash_amount))
-                self.log("Total cash added: {}".format(self.total_cash_added))
-                self.log("Next cash date: {}".format(self.next_cash_datetime.strftime("%Y-%m-%d")))
+                if self.transaction_logging:
+                    self.log("Cash added: {}".format(self.add_cash_amount))
+                    self.log(
+                        "Total cash added: {}".format(self.total_cash_added)
+                    )
+                    self.log(
+                        "Next cash date: {}".format(
+                            self.next_cash_datetime.strftime("%Y-%m-%d")
+                        )
+                    )
 
         self.update_periodic_history()
         if self.periodic_logging:
@@ -311,7 +326,8 @@ class BaseStrategy(bt.Strategy):
                         stop_price = self.data.close[0] * (
                             1.0 - self.stop_loss
                         )
-                        self.log("Stop price: {}".format(stop_price))
+                        if self.transaction_logging:
+                            self.log("Stop price: {}".format(stop_price))
                         self.sell(
                             exectype=bt.Order.Stop,
                             price=stop_price,
@@ -319,7 +335,8 @@ class BaseStrategy(bt.Strategy):
                         )
 
                     if self.stop_trail:
-                        self.log("Stop trail: {}".format(self.stop_trail))
+                        if self.transaction_logging:
+                            self.log("Stop trail: {}".format(self.stop_trail))
                         self.sell(
                             exectype=bt.Order.StopTrail,
                             trailpercent=self.stop_trail,
@@ -345,7 +362,8 @@ class BaseStrategy(bt.Strategy):
                         stop_price = self.data.close[0] * (
                             1.0 - self.stop_loss
                         )
-                        self.log("Stop price: {}".format(stop_price))
+                        if self.transaction_logging:
+                            self.log("Stop price: {}".format(stop_price))
                         self.sell(
                             exectype=bt.Order.Stop,
                             price=stop_price,
@@ -353,7 +371,8 @@ class BaseStrategy(bt.Strategy):
                         )
 
                     if self.stop_trail:
-                        self.log("Stop trail: {}".format(self.stop_trail))
+                        if self.transaction_logging:
+                            self.log("Stop trail: {}".format(self.stop_trail))
                         self.sell(
                             exectype=bt.Order.StopTrail,
                             trailpercent=self.stop_trail,
