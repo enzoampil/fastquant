@@ -1,1 +1,0 @@
-#' Backtest a trading strategy
