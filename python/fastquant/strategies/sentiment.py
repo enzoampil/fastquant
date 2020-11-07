@@ -38,15 +38,17 @@ class SentimentStrategy(BaseStrategy):
         super().__init__()
         # Strategy level variables
         self.senti = self.params.senti
-        print("===Strategy level arguments===")
-        print("sentiment threshold :", self.senti)
+
+        if self.strategy_logging:
+            print("===Strategy level arguments===")
+            print("sentiment threshold :", self.senti)
         self.datasentiment = Sentiment(self.data)
 
     def buy_signal(self):
         return self.datasentiment[0] >= self.senti
 
     def sell_signal(self):
-        return self.datasentiment[0] <= self.senti
+        return self.datasentiment[0] <= -self.senti
 
 
 class SentimentDF(bt.feeds.PandasData):

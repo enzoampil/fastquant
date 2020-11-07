@@ -56,7 +56,7 @@ class Portfolio:
     def get_data(self):
         dfs = []
         for i in self.stock_list:
-            df = get_stock_data(i, self.start_date, self.end_date)
+            df = get_stock_data(i, self.start_date, self.end_date, format="c")
             df.columns = [i]
             dfs.append(df)
         data = pd.concat(dfs, axis=1)

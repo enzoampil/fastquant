@@ -2,7 +2,7 @@
 [![Build Status](https://travis-ci.com/enzoampil/fastquant.svg?branch=master)](https://travis-ci.com/enzoampil/fastquant)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/ambv/black)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](https://raw.githubusercontent.com/enzoampil/fastquant/master/LICENSE)
-[![Downloads](https://pepy.tech/badge/fastquant/month)](https://pepy.tech/project/fastquant/month)
+[![Downloads](https://pepy.tech/badge/fastquant)](https://pepy.tech/project/fastquant)
 ## Bringing backtesting to the mainstream
 
 **fastquant** allows you to easily backtest investment strategies with as few as 3 lines of python code. Its goal is to promote data driven investments by making quantitative analysis in finance accessible to everyone.
@@ -21,6 +21,8 @@ Check out our blog posts in the fastquant [website](https://enzoampil.github.io/
 
 ```
 pip install fastquant
+or
+python -m pip install fastquant
 ```
 
 ### R
@@ -162,7 +164,8 @@ print(res[['fast_period', 'slow_period', 'final_value']].head())
 | Bollinger Bands | bbands | `period`, `devfactor` |
 | Buy and Hold | buynhold | `N/A` |
 | Sentiment Strategy | sentiment | `keyword` , `page_nums`, `senti` |
-| Custom Prediction Strategy | custom | `upper_limit`, `lower_limit` |
+| Custom Prediction Strategy | custom | `upper_limit`, `lower_limit`, `custom_column` |
+| Custom Ternary Strategy | ternary | `buy_int`, `sell_int`, `custom_column` |
 
 ### Relative Strength Index (RSI) Strategy
 ```
@@ -219,6 +222,17 @@ backtest("sentiment", data, sentiments=sentiments, senti=0.2)
 
 # Starting Portfolio Value: 100000.00
 # Final Portfolio Value: 313198.37
+# Note: Unfortunately, you can't recreate this scenario due to inconsistencies in the dates and sentiments that is scraped by get_bt_news_sentiment. In order to have a quickstart with News Sentiment Strategy you need to make the dates consistent with the sentiments that you are scraping.
+
+from fastquant import get_yahoo_data, get_bt_news_sentiment
+from datetime import datetime, timedelta
+
+# we get the current date and delta time of 30 days
+current_date = datetime.now().strftime("%Y-%m-%d")
+delta_date = (datetime.now() - timedelta(30)).strftime("%Y-%m-%d")
+data = get_yahoo_data("TSLA", delta_date, current_date)
+sentiments = get_bt_news_sentiment(keyword="tesla", page_nums=3)
+backtest("sentiment", data, sentiments=sentiments, senti=0.2)
 ```
 ![](./docs/assets/sentiment.png)
 
@@ -294,3 +308,34 @@ backtest("custom", df.dropna(),upper_limit=1.5, lower_limit=-1.5)
 ![](./docs/assets/bitcoin_prophet_backtest.png)
 
 See more examples [here](https://nbviewer.jupyter.org/github/enzoampil/fastquant/tree/master/examples/).
+
+## Be part of the growing fastquant community
+
+Want to discuss more about fastquant with other users, and our team of developers?
+
+Join the fastquant Slack community, and our bi-weekly remote meetups through this [link](https://join.slack.com/t/fastquant/shared_invite/zt-gaaoahkz-X~5qw0psNOLg1iFYKcpRlQ)!
+
+You can also [subscribe](https://forms.gle/HAPYdMp2YMu4qXPd7) to our monthly newsletter to receive updates on our latest tutorials, blog posts, and product features!
+
+## Run fastquant in a Docker Container
+
+```
+# Build the image
+docker build -t myimage .
+
+# Run the container
+docker run -t -d -p 5000:5000 myimage
+
+# Get the container id
+docker ps
+
+# SSH into the fastquant container
+docker exec -it <CONTAINER_ID> /bin/bash
+
+# Run python and use fastquant
+python
+
+>>> from fastquant import get_stock_data
+>>> df = get_stock_data("TSLA", "2019-01-01", "2020-01-01")
+>>> df.head()
+```
