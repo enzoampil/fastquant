@@ -31,7 +31,7 @@ from fastquant.strategies.mappings import STRATEGY_MAPPING
 
 # Other backtest components
 from fastquant.backtest.data_prep import initalize_data
-from fastquant.backtest.post_backtest import params_and_metrics, plot_results
+from fastquant.backtest.post_backtest import analyze_strategies, plot_results
 
 
 strat_docs = "\nExisting strategies:\n\n" + "\n".join(
@@ -190,7 +190,7 @@ def backtest(
         print("Time used (seconds):", str(tend - tstart))
 
     # Get History, Optimal Parameters and Strategy Metrics
-    sorted_combined_df, optim_params, history_dict = params_and_metrics(
+    sorted_combined_df, optim_params, history_dict = analyze_strategies(
         stratruns,
         data,
         strat_names,

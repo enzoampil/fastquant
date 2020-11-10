@@ -13,7 +13,7 @@ Post backtest functionalities
 """
 
 
-def params_and_metrics(
+def analyze_strategies(
     stratruns,
     data,
     strat_names,
