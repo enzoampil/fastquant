@@ -2,6 +2,7 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 
+from fastquant.backtest.backtest_indicators import get_indicators_as_dict
 from fastquant.config import GLOBAL_PARAMS
 
 """
@@ -43,13 +44,7 @@ def analyze_strategies(
 
         for i, strat in enumerate(stratrun):
             # Get indicator history
-            indicators = strat.getindicators()
-            indicators_dict = {
-                ind.plotlabel()
-                if hasattr(ind, "plotlabel")
-                else "indicator{}".format(i): ind.lines[0].array
-                for i, ind in enumerate(indicators)
-            }
+            indicators_dict = get_indicators_as_dict(strat)
             indicators_df = pd.DataFrame(indicators_dict)
             indicators_df.insert(0, "dt", data["datetime"].values)
 
