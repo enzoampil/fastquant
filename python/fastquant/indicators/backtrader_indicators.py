@@ -12,6 +12,8 @@ from __future__ import (
 from backtrader.indicators import (
     AverageDirectionalMovementIndex,
     ADX,
+    AverageTrueRange,
+    ATR,
     BollingerBands,
     BBands,
     CommodityChannelIndex,
@@ -21,6 +23,7 @@ from backtrader.indicators import (
     EMA,
     Ichimoku,
     MACD,
+    ParabolicSAR,
     RelativeStrengthIndex,
     RSI,
     SimpleMovingAverage,
