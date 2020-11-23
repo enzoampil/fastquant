@@ -26,6 +26,8 @@ from backtrader.utils.py3 import filter, string_types, integer_types
 from backtrader import date2num
 import backtrader.feed as feed
 import pandas as pd
+import queue
+import threading
 
 
 class PandasDirectData(feed.DataBase):
@@ -155,6 +157,8 @@ class PandasData(feed.DataBase):
         ('close', -1),
         ('volume', -1),
         ('openinterest', -1),
+        ('reconntimeout', 5.0),
+        ('update_cadence', "0 0 * * *")
     )
 
     datafields = [
@@ -164,6 +168,7 @@ class PandasData(feed.DataBase):
     def __init__(self):
         super(PandasData, self).__init__()
 
+        self.qlive = queue.Queue()
         # these "colnames" can be strings or numeric types
         colnames = list(self.p.dataname.columns.values)
         if self.p.datetime is None:
@@ -208,6 +213,8 @@ class PandasData(feed.DataBase):
         # reset the length with each start
         self._idx = -1
 
+        self.qlive = self.streaming_data(self.p.dataname, tmout=self.p.reconntimeout)
+
         # Transform names (valid for .ix) into indices (good for .iloc)
         if self.p.nocase:
             colnames = [x.lower() for x in self.p.dataname.columns.values]
@@ -242,6 +249,12 @@ class PandasData(feed.DataBase):
                 self.p.dataname = pd.concat([self.p.dataname, self.p.dataname.sample(1)])
             # exhausted all rows
             #return None  # None  # Experiment with changing to None, which means we allow for resampling
+
+            try:
+                update_df = self.qlive.get(timeout=self._qcheck)
+                self.p.dataname = pd.concat([self.p.dataname, update_df])
+            except queue.Empty:
+                return None  # indicate timeout situation
 
         # Set the standard datafields
         for datafield in self.getlinealiases():
@@ -284,3 +297,12 @@ class PandasData(feed.DataBase):
 
     def haslivedata(self):
         return True
+
+    def streaming_data(self, dataname, tmout=None):
+
+        q = queue.Queue()
+        kwargs = {'q': q, 'dataname': dataname, 'tmout': tmout}
+        t = threading.Thread(target=self._t_streaming_prices, kwargs=kwargs)
+        t.daemon = True
+        t.start()
+        return q
