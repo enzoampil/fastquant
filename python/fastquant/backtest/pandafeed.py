@@ -250,6 +250,7 @@ class PandasData(feed.DataBase):
             # exhausted all rows
             #return None  # None  # Experiment with changing to None, which means we allow for resampling
 
+            # Get new data from the queue when it's available; otherwise, keep listening till it is
             try:
                 update_df = self.qlive.get(timeout=self._qcheck)
                 self.p.dataname = pd.concat([self.p.dataname, update_df])
