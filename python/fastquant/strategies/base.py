@@ -241,7 +241,6 @@ class BaseStrategy(bt.Strategy):
         self.first_timepoint = True
 
     def next(self):
-        self._idx += 1
         if self.add_cash_amount:
             if self.first_timepoint:
                 # Initialize income date iterator, and set next
