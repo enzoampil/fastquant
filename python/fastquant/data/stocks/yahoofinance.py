@@ -37,4 +37,6 @@ def get_yahoo_data(symbol, start_date, end_date):
     rename_list = ["dt", "open", "high", "low", "close", "adj_close", "volume"]
     df = df.rename(columns=rename_dict)[rename_list].drop_duplicates()
     df["dt"] = pd.to_datetime(df.dt)
+    # Save symbol info in the dataframe object
+    df.symbol = symbol
     return df.set_index("dt")

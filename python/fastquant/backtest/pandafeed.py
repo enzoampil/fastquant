@@ -213,6 +213,7 @@ class PandasData(feed.DataBase):
         # reset the length with each start
         self._idx = -1
 
+        # Start the data streaming as its own thread
         self.qlive = self.streaming_data(self.p.dataname, tmout=self.p.reconntimeout)
 
         # Transform names (valid for .ix) into indices (good for .iloc)
