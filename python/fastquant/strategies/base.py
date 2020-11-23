@@ -59,6 +59,7 @@ class BaseStrategy(bt.Strategy):
         ("short_max", SHORT_MAX),
         ("add_cash_amount", None),
         ("add_cash_freq", "M"),
+        ("live", True),
     )
 
     def log(self, txt, dt=None):
@@ -93,6 +94,7 @@ class BaseStrategy(bt.Strategy):
         self.stop_trail = self.params.stop_trail
         self.allow_short = self.params.allow_short
         self.short_max = self.params.short_max
+        self.live = self.params.live
         self.broker.set_coc(True)
         add_cash_freq = self.params.add_cash_freq
 
@@ -239,6 +241,7 @@ class BaseStrategy(bt.Strategy):
         self.first_timepoint = True
 
     def next(self):
+        self._idx += 1
         if self.add_cash_amount:
             if self.first_timepoint:
                 # Initialize income date iterator, and set next
@@ -272,7 +275,8 @@ class BaseStrategy(bt.Strategy):
             self.log("CURRENT POSITION SIZE: {}".format(self.position.size))
 
         # Skip the last observation since purchases are based on next day closing prices (no value for the last observation)
-        if len(self) + 1 >= self.len_data:
+        # This ends up skipping everything when preload is false so have to cancel when live trading
+        if len(self) + 1 >= self.len_data and not self.live:
             return
 
         # Only sell if you hold least one unit of the stock (and sell only that stock, so no short selling)
@@ -365,72 +369,142 @@ class BaseStrategy(bt.Strategy):
 
                 # Sell short based on the closing price of the previous day
                 if self.execution_type == "close":
-
-                    sell_prop_size = int(
-                        SELL_PROP * self.broker.getvalue() / self.dataclose[1]
-                    )
+                    if self.live:
+                        sell_prop_size = int(
+                            SELL_PROP * self.broker.getvalue() / self.dataclose[1]
+                        )
+                    else:
+                        sell_prop_size = int(
+                            SELL_PROP * self.broker.getvalue() / self.dataclose[1]
+                        )
                     # The max incremental short allowed is the short that would lead to a cumulative short position
                     # equal to the maximum short position (initial cash times the maximum short ratio, which is 1.5 by default)
-                    max_position_size = max(
-                        int(
-                            self.broker.getvalue()
-                            * self.short_max
-                            / self.dataclose[1]
+                    if self.live:
+                        max_position_size = max(
+                            int(
+                                self.broker.getvalue()
+                                * self.short_max
+                                / self.dataclose[0]
+                            )
+                            + self.position.size,
+                            0,
                         )
-                        + self.position.size,
-                        0,
-                    )
-                    if max_position_size > 0:
-                        if self.transaction_logging:
-                            self.log("SELL CREATE, %.2f" % self.dataclose[1])
-                        self.order = self.sell(
-                            size=min(sell_prop_size, max_position_size)
+                        if max_position_size > 0:
+                            if self.transaction_logging:
+                                self.log("SELL CREATE, %.2f" % self.dataclose[0])
+                            self.order = self.sell(
+                                size=min(sell_prop_size, max_position_size)
+                            )
+                    else:
+                        max_position_size = max(
+                            int(
+                                self.broker.getvalue()
+                                * self.short_max
+                                / self.dataclose[1]
+                            )
+                            + self.position.size,
+                            0,
                         )
+                        if max_position_size > 0:
+                            if self.transaction_logging:
+                                self.log("SELL CREATE, %.2f" % self.dataclose[1])
+                            self.order = self.sell(
+                                size=min(sell_prop_size, max_position_size)
+                            )
 
                 # Buy based on the opening price of the next closing day (only works "open" data exists in the dataset)
                 else:
-
-                    sell_prop_size = int(
-                        SELL_PROP * self.broker.getvalue() / self.dataopen[1]
-                    )
-                    # The max incremental short allowed is the short that would lead to a cumulative short position
-                    # equal to the maximum short position (initial cash times the maximum short ratio, which is 1.5 by default)
-                    max_position_size = max(
-                        int(
-                            self.broker.getvalue()
-                            * self.short_max
-                            / self.dataopen[1]
+                    if self.live:
+                        sell_prop_size = int(
+                            SELL_PROP * self.broker.getvalue() / self.dataopen[0]
                         )
-                        + self.position.size,
-                        0,
-                    )
-                    if max_position_size > 0:
-                        if self.transaction_logging:
-                            self.log("SELL CREATE, %.2f" % self.dataopen[1])
-                        self.order = self.sell(
-                            size=min(sell_prop_size, max_position_size)
+                        # The max incremental short allowed is the short that would lead to a cumulative short position
+                        # equal to the maximum short position (initial cash times the maximum short ratio, which is 1.5 by default)
+                        max_position_size = max(
+                            int(
+                                self.broker.getvalue()
+                                * self.short_max
+                                / self.dataopen[1]
+                            )
+                            + self.position.size,
+                            0,
                         )
+                        if max_position_size > 0:
+                            if self.transaction_logging:
+                                self.log("SELL CREATE, %.2f" % self.dataopen[0])
+                            self.order = self.sell(
+                                size=min(sell_prop_size, max_position_size)
+                            )
+                    else:
+                        sell_prop_size = int(
+                            SELL_PROP * self.broker.getvalue() / self.dataopen[1]
+                        )
+                        # The max incremental short allowed is the short that would lead to a cumulative short position
+                        # equal to the maximum short position (initial cash times the maximum short ratio, which is 1.5 by default)
+                        max_position_size = max(
+                            int(
+                                self.broker.getvalue()
+                                * self.short_max
+                                / self.dataopen[1]
+                            )
+                            + self.position.size,
+                            0,
+                        )
+                        if max_position_size > 0:
+                            if self.transaction_logging:
+                                self.log("SELL CREATE, %.2f" % self.dataopen[1])
+                            self.order = self.sell(
+                                size=min(sell_prop_size, max_position_size)
+                            )
 
             elif stock_value > 0:
-
-                if self.transaction_logging:
-                    self.log("SELL CREATE, %.2f" % self.dataclose[1])
-                # Sell a 5% sell position (or whatever is afforded by the current stock holding)
-                # "size" refers to the number of stocks to purchase
-                if self.execution_type == "close":
-                    if SELL_PROP == 1:
-                        self.order = self.sell(
-                            size=self.position.size, exectype=bt.Order.Close
+                if self.live:
+                    if self.transaction_logging:
+                        self.log("SELL CREATE, %.2f" % self.dataclose[0])
+                    # Sell a 5% sell position (or whatever is afforded by the current stock holding)
+                    # "size" refers to the number of stocks to purchase
+                    if self.execution_type == "close":
+                        if SELL_PROP == 1:
+                            self.order = self.sell(
+                                size=self.position.size, exectype=bt.Order.Close
+                            )
+                        else:
+                            # Sell based on the closing price of the previous closing day
+                            self.order = self.sell(
+                                size=int(
+                                    (stock_value / (self.dataclose[0]))
+                                    * self.sell_prop
+                                ),
+                                exectype=bt.Order.Close,
+                            )
+                else:
+                    if self.transaction_logging:
+                        self.log("SELL CREATE, %.2f" % self.dataclose[1])
+                    # Sell a 5% sell position (or whatever is afforded by the current stock holding)
+                    # "size" refers to the number of stocks to purchase
+                    if self.execution_type == "close":
+                        if SELL_PROP == 1:
+                            self.order = self.sell(
+                                size=self.position.size, exectype=bt.Order.Close
+                            )
+                        else:
+                            # Sell based on the closing price of the previous closing day
+                            self.order = self.sell(
+                                size=int(
+                                    (stock_value / (self.dataclose[1]))
+                                    * self.sell_prop
+                                ),
+                                exectype=bt.Order.Close,
+                            )
+            else:
+                if self.live:
+                    # Sell based on the opening price of the next closing day (only works "open" data exists in the dataset)
+                    self.order = self.sell(
+                        size=int(
+                            (self.init_cash / self.dataopen[0])
+                            * self.sell_prop
                         )
-                    else:
-                        # Sell based on the closing price of the previous closing day
-                        self.order = self.sell(
-                            size=int(
-                                (stock_value / (self.dataclose[1]))
-                                * self.sell_prop
-                            ),
-                            exectype=bt.Order.Close,
-                        )
+                    )
                 else:
                     # Sell based on the opening price of the next closing day (only works "open" data exists in the dataset)
                     self.order = self.sell(
@@ -439,6 +513,5 @@ class BaseStrategy(bt.Strategy):
                             * self.sell_prop
                         )
                     )
-
         else:
             self.action = "neutral"

@@ -18,6 +18,7 @@ import numpy as np
 from collections.abc import Iterable
 import time
 from pandas.api.types import is_numeric_dtype
+from .pandafeed import PandasData
 
 # Import from package
 from fastquant.strategies import (
@@ -240,7 +241,7 @@ def backtest(
         [col for col, _ in params_tuple if col not in default_cols]
     )
 
-    class CustomData(bt.feeds.PandasData):
+    class CustomData(PandasData):
         """
         Data feed that includes all the columns in the input dataframe
         """
