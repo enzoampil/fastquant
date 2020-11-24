@@ -310,7 +310,8 @@ class PandasData(feed.DataBase):
 
         q = queue.Queue()
         kwargs = {'q': q, 'dataname': dataname, 'tmout': tmout}
-        schedule.every().day.at("17:30").do(self.add_data_threaded, kwargs)
+        # 17:00 is when NASDAQ closes trading
+        schedule.every().day.at("17:00").do(self.add_data_threaded, kwargs)
         return q
 
     def add_data(self, q, dataname, tmout):
