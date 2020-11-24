@@ -28,6 +28,10 @@ import backtrader.feed as feed
 import pandas as pd
 import queue
 import threading
+import time
+import schedule
+from fastquant.data.stocks.yahoofinance import get_yahoo_data
+from datetime import datetime, timedelta
 
 
 class PandasDirectData(feed.DataBase):
@@ -159,6 +163,7 @@ class PandasData(feed.DataBase):
         ('openinterest', -1),
         ('reconntimeout', 5.0),
         ('update_cadence', "0 0 * * *")
+        ('symbol', None)
     )
 
     datafields = [
@@ -168,6 +173,7 @@ class PandasData(feed.DataBase):
     def __init__(self):
         super(PandasData, self).__init__()
 
+        self.symbol = self.p.symbol
         self.qlive = queue.Queue()
         # these "colnames" can be strings or numeric types
         colnames = list(self.p.dataname.columns.values)
@@ -304,7 +310,28 @@ class PandasData(feed.DataBase):
 
         q = queue.Queue()
         kwargs = {'q': q, 'dataname': dataname, 'tmout': tmout}
-        t = threading.Thread(target=self._t_streaming_prices, kwargs=kwargs)
+        schedule.every().day.at("17:30").do(self.add_data_threaded, kwargs)
+        return q
+
+    def add_data(self, q, dataname, tmout):
+        if tmout is not None:
+            time.sleep(tmout)
+        current_datetime = self.get_current_datetime()
+        current_datestr = current_datetime.strftime("%Y-%m-%d")
+        current_df = get_yahoo_data(self.symbol, current_datestr, current_datestr)
+        q.put(current_df)
+
+    def add_data_threaded(self, kwargs):
+        t = threading.Thread(target=self.add_data, kwargs=kwargs)
         t.daemon = True
         t.start()
-        return q
+        
+    def get_current_datetime(self, tz="EST"):
+        # Setting default timezone to EST since this is the timezone of NASDAQ & NYSE
+        if tz == "EST":
+            return datetime.utcnow() - timedelta(hours=4)
+        elif tz == "UTC":
+            return datetime.utcnow()
+        # Otherwise, PHT / SGT
+        else:
+            return datetime.utcnow() + timedelta(hours=8)
