@@ -162,8 +162,9 @@ class PandasData(feed.DataBase):
         ('volume', -1),
         ('openinterest', -1),
         ('reconntimeout', 5.0),
-        ('update_cadence', "0 0 * * *")
-        ('symbol', None)
+        ('symbol', None),
+        ('qcheck', 0.5),
+        ('cadence', 'daily'),
     )
 
     datafields = [
@@ -174,6 +175,7 @@ class PandasData(feed.DataBase):
         super(PandasData, self).__init__()
 
         self.symbol = self.p.symbol
+        self.cadence = self.p.cadence
         self.qlive = queue.Queue()
         # these "colnames" can be strings or numeric types
         colnames = list(self.p.dataname.columns.values)
@@ -220,7 +222,7 @@ class PandasData(feed.DataBase):
         self._idx = -1
 
         # Start the data streaming as its own thread
-        self.qlive = self.streaming_data(self.p.dataname, tmout=self.p.reconntimeout)
+        self.qlive = self.streaming_data(tmout=self.p.reconntimeout)
 
         # Transform names (valid for .ix) into indices (good for .iloc)
         if self.p.nocase:
@@ -247,22 +249,18 @@ class PandasData(feed.DataBase):
             self._colmapping[k] = v
 
     def _load(self):
-        self._idx += 1
-        # self.p.dataname = pd.concat([self.p.dataname, self.p.dataname.head(1)])
-        if self._idx >= len(self.p.dataname):
-            if self._idx == 300:
-                return False
-            else:
-                self.p.dataname = pd.concat([self.p.dataname, self.p.dataname.sample(1)])
-            # exhausted all rows
-            #return None  # None  # Experiment with changing to None, which means we allow for resampling
+        # Utilize live updates when historical data is finished
+        if self._idx + 1 >= len(self.p.dataname):
 
             # Get new data from the queue when it's available; otherwise, keep listening till it is
             try:
                 update_df = self.qlive.get(timeout=self._qcheck)
-                self.p.dataname = pd.concat([self.p.dataname, update_df])
+                self.p.dataname = pd.concat([self.p.dataname, update_df]).reset_index(drop=True)
+                print(self.p.dataname.tail())
             except queue.Empty:
                 return None  # indicate timeout situation
+
+        self._idx += 1
 
         # Set the standard datafields
         for datafield in self.getlinealiases():
@@ -306,27 +304,38 @@ class PandasData(feed.DataBase):
     def haslivedata(self):
         return True
 
-    def streaming_data(self, dataname, tmout=None):
+    def streaming_data(self, tmout=None):
 
         q = queue.Queue()
-        kwargs = {'q': q, 'dataname': dataname, 'tmout': tmout}
-        # 17:00 is when NASDAQ closes trading
-        schedule.every().day.at("17:00").do(self.add_data_threaded, kwargs)
+        kwargs = {'q': q, 'cadence': self.cadence, 'tmout': tmout}
+        t = threading.Thread(target=self.add_data_periodic, kwargs=kwargs)
+        t.daemon = True
+        t.start()
         return q
 
-    def add_data(self, q, dataname, tmout):
+    def add_data(self, q, tmout):
         if tmout is not None:
             time.sleep(tmout)
         current_datetime = self.get_current_datetime()
         current_datestr = current_datetime.strftime("%Y-%m-%d")
+        current_datetimestr = current_datetime.strftime("%Y-%m-%dT%H:%M:%S")
+        print("Pulling data from yahoo ...")
         current_df = get_yahoo_data(self.symbol, current_datestr, current_datestr)
+        # Note that the datetime column should be the column, not an index
+        # Also, the column has to be called "datetime" exactly
+        current_df = current_df.reset_index().rename(columns={"dt": "datetime"})
         q.put(current_df)
+        print("Queue updated on", current_datetimestr)
 
-    def add_data_threaded(self, kwargs):
-        t = threading.Thread(target=self.add_data, kwargs=kwargs)
-        t.daemon = True
-        t.start()
-        
+    def add_data_periodic(self, cadence, **kwargs):
+        if cadence == "daily":
+            schedule.every().day.at("17:00").do(self.add_data, **kwargs)
+        else:
+            schedule.every(20).seconds.do(self.add_data, **kwargs)
+        while True:
+            schedule.run_pending()
+            time.sleep(1)
+
     def get_current_datetime(self, tz="EST"):
         # Setting default timezone to EST since this is the timezone of NASDAQ & NYSE
         if tz == "EST":
