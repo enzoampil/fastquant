@@ -257,11 +257,11 @@ def backtest(
     if strat_name == "sentiment":
         data_format_dict = tuple_to_dict(params_tuple)
         # create CustomData which inherits from PandasData
-        pd_data = CustomData(dataname=data, **data_format_dict)
+        pd_data = CustomData(dataname=data, symbol=symbol, **data_format_dict)
 
     else:
         data_format_dict = tuple_to_dict(params_tuple)
-        pd_data = CustomData(dataname=data, **data_format_dict)
+        pd_data = CustomData(dataname=data, symbol=symbol, **data_format_dict)
 
     cerebro.adddata(pd_data)
     cerebro.broker.setcash(init_cash)
