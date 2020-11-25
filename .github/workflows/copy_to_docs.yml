@@ -1,0 +1,22 @@
+name: copy-to-docs
+
+on: push
+
+jobs:
+  # Sync with fastquant repo docs
+  syncer:
+    name: Sync documentation
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Sync documentation
+      - run: | 
+            git clone https://.:${{ secrets.GITHUB_TOKEN }}@github.com/fastquant-org/fastquant-docs docusaurus
+            rm -rf docusaurus/docs
+            rm docusaurus/sidebars.js
+            cp -avr docs docusaurus
+            cp sidebars.js docusaurus
+            git add .
+            git commit -m "Automatic publish from github.com/enzoampil/fastquant"
+            git push docusaurus master
+            rm -rf docusaurus
