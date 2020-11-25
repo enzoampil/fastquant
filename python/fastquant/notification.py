@@ -48,7 +48,7 @@ def slack_notif(symbol, action, date=None):
 
 
 def email_notif(
-    to_address, message, subject, host="smtp.gmail.com", port=587
+    symbol, action, to_address, date=None, subject=None, message=None, host="smtp.gmail.com", port=587
 ):
     """
     Send email w/ credentials saved as environment variables for security
@@ -65,10 +65,13 @@ def email_notif(
 
     msg = MIMEMultipart()  # create a message
 
+    date = date or datetime.utcnow().strftime("%Y-%m-%d")
+    message = message or "Today is " + date + ": " + action + " " + symbol or ""
+
     # setup the parameters of the message
     msg["From"] = my_address
     msg["To"] = to_address
-    msg["Subject"] = subject
+    msg["Subject"] = subject or message
 
     # add in the message body
     msg.attach(MIMEText(message, "plain"))
