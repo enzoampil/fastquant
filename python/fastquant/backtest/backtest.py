@@ -93,6 +93,7 @@ def backtest(
     allow_short=False,
     short_max=1.5,
     data_class=None,
+    data_kwargs={},
     **kwargs
 ):
     """Backtest financial data with a specified trading strategy
@@ -254,7 +255,7 @@ def backtest(
 
             # automatically handle parameter with -1
             # add the parameter to the parameters inherited from the base class
-            params = params_tuple
+            params = params_tuple + (("symbol", symbol),)
     else:
         class CustomData(PandasData):
             """
@@ -266,17 +267,17 @@ def backtest(
 
             # automatically handle parameter with -1
             # add the parameter to the parameters inherited from the base class
-            params = params_tuple
+            params = params_tuple + (("symbol", symbol),)
 
     # extend the dataframe with sentiment score
     if strat_name == "sentiment":
         data_format_dict = tuple_to_dict(params_tuple)
         # create CustomData which inherits from PandasData
-        pd_data = CustomData(dataname=data, symbol=symbol, **data_format_dict)
+        pd_data = CustomData(dataname=data, symbol=symbol, **data_format_dict, **data_kwargs)
 
     else:
         data_format_dict = tuple_to_dict(params_tuple)
-        pd_data = CustomData(dataname=data, symbol=symbol, **data_format_dict)
+        pd_data = CustomData(dataname=data, symbol=symbol, **data_format_dict, **data_kwargs)
 
     cerebro.adddata(pd_data)
     cerebro.broker.setcash(init_cash)

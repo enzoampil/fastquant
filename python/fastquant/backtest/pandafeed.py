@@ -162,9 +162,8 @@ class PandasData(feed.DataBase):
         ('volume', -1),
         ('openinterest', -1),
         ('reconntimeout', 5.0),
-        ('symbol', None),
         ('qcheck', 0.5),
-        ('cadence', 'daily'),
+        ('cadence', 'sec'),
     )
 
     datafields = [
