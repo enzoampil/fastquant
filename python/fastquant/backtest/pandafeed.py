@@ -31,7 +31,11 @@ import threading
 import time
 import schedule
 from fastquant.data.stocks.yahoofinance import get_yahoo_data
+from fastquant.data.crypto.crypto import get_crypto_data
 from datetime import datetime, timedelta
+import logging
+
+logging.getLogger().setLevel(logging.INFO)
 
 
 class PandasDirectData(feed.DataBase):
@@ -164,6 +168,7 @@ class PandasData(feed.DataBase):
         ('reconntimeout', 5.0),
         ('qcheck', 0.5),
         ('cadence', 'sec'),
+        ('source', 'yahoo')
     )
 
     datafields = [
@@ -172,10 +177,15 @@ class PandasData(feed.DataBase):
 
     def __init__(self):
         super(PandasData, self).__init__()
-
         self.symbol = self.p.symbol
         self.cadence = self.p.cadence
+        self.source = self.p.source
         self.qlive = queue.Queue()
+        logging.info("===Datafeed level arguments===")
+        logging.info("symbol : {}".format(self.symbol))
+        logging.info("cadence : {}".format(self.cadence))
+        logging.info("source : {}".format(self.source))
+
         # these "colnames" can be strings or numeric types
         colnames = list(self.p.dataname.columns.values)
         if self.p.datetime is None:
@@ -255,7 +265,7 @@ class PandasData(feed.DataBase):
             try:
                 update_df = self.qlive.get(timeout=self._qcheck)
                 self.p.dataname = pd.concat([self.p.dataname, update_df]).reset_index(drop=True)
-                print(self.p.dataname.tail())
+                logging.info(self.p.dataname.tail())
             except queue.Empty:
                 return None  # indicate timeout situation
 
@@ -315,22 +325,31 @@ class PandasData(feed.DataBase):
     def add_data(self, q, tmout):
         if tmout is not None:
             time.sleep(tmout)
-        current_datetime = self.get_current_datetime()
+
+        # Previous day PHT is also safely previous day UTC, and EST (as of 9:00 PHT)
+        current_datetime = self.get_current_datetime(tz="PHT") - timedelta(days=1)
         current_datestr = current_datetime.strftime("%Y-%m-%d")
         current_datetimestr = current_datetime.strftime("%Y-%m-%dT%H:%M:%S")
-        print("Pulling data from yahoo ...")
-        current_df = get_yahoo_data(self.symbol, current_datestr, current_datestr)
+        logging.info("Pulling {} data from {} ...".format(self.symbol, self.source))
+        if self.source == "yahoo":
+            current_df = get_yahoo_data(self.symbol, current_datestr, current_datestr)
+        # Else pull crypto data
+        else:
+            current_df = get_crypto_data(self.symbol, current_datestr, current_datestr)
         # Note that the datetime column should be the column, not an index
         # Also, the column has to be called "datetime" exactly
         current_df = current_df.reset_index().rename(columns={"dt": "datetime"})
         q.put(current_df)
-        print("Queue updated on", current_datetimestr)
+        logging.info("Queue updated on {}".format(current_datetimestr))
 
     def add_data_periodic(self, cadence, **kwargs):
         if cadence == "daily":
-            schedule.every().day.at("17:00").do(self.add_data, **kwargs)
+            # This should actually depend on the data source, since different markets have different closing times
+            # Setting this to 9:00 for now, since should be okay for both UTC and EST markets
+            schedule.every().day.at("9:00").do(self.add_data, **kwargs)
         else:
-            schedule.every(20).seconds.do(self.add_data, **kwargs)
+            logging.info("Scheduling every 10 seconds")
+            schedule.every(10).seconds.do(self.add_data, **kwargs)
         while True:
             schedule.run_pending()
             time.sleep(1)
@@ -353,17 +372,26 @@ class YahooPandasData(PandasData):
         current_datetime = self.get_current_datetime()
         current_datestr = current_datetime.strftime("%Y-%m-%d")
         current_datetimestr = current_datetime.strftime("%Y-%m-%dT%H:%M:%S")
-        print("Pulling data from yahoo ...")
+        logging.info("Pulling data from yahoo ...")
         current_df = get_yahoo_data(self.symbol, current_datestr, current_datestr)
         # Note that the datetime column should be the column, not an index
         # Also, the column has to be called "datetime" exactly
         current_df = current_df.reset_index().rename(columns={"dt": "datetime"})
         q.put(current_df)
-        print("Queue updated on", current_datetimestr)
+        logging.info("Queue updated on {}".format(current_datetimestr))
 
 
 class CCXTPandasData(PandasData):
     def add_data(self, q, tmout):
         if tmout is not None:
             time.sleep(tmout)
-        pass
+        current_datetime = self.get_current_datetime()
+        current_datestr = current_datetime.strftime("%Y-%m-%d")
+        current_datetimestr = current_datetime.strftime("%Y-%m-%dT%H:%M:%S")
+        logging.info("Pulling data from ccxt ...")
+        current_df = get_crypto_data(self.symbol, current_datestr, current_datestr)
+        # Note that the datetime column should be the column, not an index
+        # Also, the column has to be called "datetime" exactly
+        current_df = current_df.reset_index().rename(columns={"dt": "datetime"})
+        q.put(current_df)
+        logging.info("Queue updated on {}".format(current_datetimestr))
