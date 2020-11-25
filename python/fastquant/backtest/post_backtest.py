@@ -1,6 +1,7 @@
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
+import backtrader as bt
 
 from fastquant.config import GLOBAL_PARAMS
 
@@ -44,6 +45,7 @@ def analyze_strategies(
         for i, strat in enumerate(stratrun):
             # Get indicator history
             indicators = strat.getindicators()
+            st_dtime = [bt.utils.date.num2date(num) for num in strat.lines.datetime.plot()]
             indicators_dict = {
                 ind.plotlabel()
                 if hasattr(ind, "plotlabel")
@@ -51,7 +53,7 @@ def analyze_strategies(
                 for i, ind in enumerate(indicators)
             }
             indicators_df = pd.DataFrame(indicators_dict)
-            indicators_df.insert(0, "dt", data["datetime"].values)
+            indicators_df.insert(0, "dt", st_dtime)
 
             strat_name = strat_names[i]
             p_raw = strat.p._getkwargs()
