@@ -1,8 +1,6 @@
 name: copy-to-docs
 
-on: 
-  schedule:
-    - cron: '*/15 * * * *'
+on: push
 
 jobs:
   # Sync with fastquant repo docs
