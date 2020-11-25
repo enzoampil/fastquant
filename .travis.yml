@@ -8,6 +8,7 @@ jobs:
         - cd python
       script:
         - pytest tests
+<<<<<<< HEAD
     - language: r
       r:
         - devel
@@ -25,3 +26,5 @@ jobs:
       script:
         - R CMD check --as-cran *tar.gz
 
+=======
+>>>>>>> master
