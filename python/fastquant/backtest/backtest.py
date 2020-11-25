@@ -147,7 +147,11 @@ def backtest(
 
         # Allow instance of BaseStrategy or from the predefined mapping
         if not isinstance(strategy, str) and issubclass(strategy, bt.Strategy):
-            strat_name = str(strategy)
+            strat_name = (
+                strategy.__name__
+                if hasattr(strategy, "__name__")
+                else str(strategy)
+            )
         else:
             strat_name = strategy
             strategy = STRATEGY_MAPPING[strategy]
