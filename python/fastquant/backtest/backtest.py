@@ -66,6 +66,7 @@ def backtest(
     short_max=1.5,
     figsize=(30, 15),
     data_class=None,
+    data_kwargs={},
     **kwargs,
 ):
     """Backtest financial data with a specified trading strategy
@@ -98,6 +99,8 @@ def backtest(
         Symbol to be referenced in the channel notification if not None (default=None)
     data_class : bt.feed.DataBase
         Custom backtrader database to be used as a parent class instead bt.feed. (default=None)
+    data_kwargs : dict
+        Data keyword arguments (empty dict by default)
     {0}
     """
 
@@ -171,7 +174,7 @@ def backtest(
 
     # Initalize and verify data
     pd_data, data, data_format_dict = initalize_data(
-        data, strat_name, data_class, sentiments
+        data, strat_name, symbol, data_class, sentiments, data_kwargs
     )
     cerebro.adddata(pd_data)
     cerebro.broker.setcash(init_cash)

@@ -6,7 +6,7 @@ from pandas.api.types import is_numeric_dtype
 from fastquant.config import DEFAULT_PANDAS
 
 
-def initalize_data(data, strategy_name, data_class=None, sentiments=None):
+def initalize_data(data, strategy_name, symbol=None, data_class=None, sentiments=None, data_kwargs={}):
 
     # Treat `data` as a path if it's a string; otherwise, it's treated as a pandas dataframe
     if isinstance(data, str):
@@ -62,7 +62,7 @@ def initalize_data(data, strategy_name, data_class=None, sentiments=None):
 
             # automatically handle parameter with -1
             # add the parameter to the parameters inherited from the base class
-            params = params_tuple
+            params = params_tuple + (("symbol", symbol),)
     else:
         class CustomData(bt.feeds.PandasData):
             """
@@ -74,10 +74,10 @@ def initalize_data(data, strategy_name, data_class=None, sentiments=None):
 
             # automatically handle parameter with -1
             # add the parameter to the parameters inherited from the base class
-            params = params_tuple
+            params = params_tuple + (("symbol", symbol),)
 
     data_format_dict = tuple_to_dict(params_tuple)
-    pd_data = CustomData(dataname=data, **data_format_dict)
+    pd_data = CustomData(dataname=data, symbol=symbol, **data_format_dict, **data_kwargs)
 
     return pd_data, data, data_format_dict
 
