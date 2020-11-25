@@ -19,19 +19,6 @@ from collections.abc import Iterable
 import time
 from pandas.api.types import is_numeric_dtype
 
-# Import from package
-from fastquant.strategies import (
-    RSIStrategy,
-    SMACStrategy,
-    BaseStrategy,
-    MACDStrategy,
-    EMACStrategy,
-    BBandsStrategy,
-    BuyAndHoldStrategy,
-    SentimentStrategy,
-    CustomStrategy,
-)
-
 
 # Import backtest variables
 from fastquant.config import (
@@ -40,19 +27,12 @@ from fastquant.config import (
     GLOBAL_PARAMS,
     DEFAULT_PANDAS,
 )
+from fastquant.strategies.mappings import STRATEGY_MAPPING
 
+# Other backtest components
+from fastquant.backtest.data_prep import initalize_data
+from fastquant.backtest.post_backtest import analyze_strategies, plot_results
 
-STRATEGY_MAPPING = {
-    "rsi": RSIStrategy,
-    "smac": SMACStrategy,
-    "base": BaseStrategy,
-    "macd": MACDStrategy,
-    "emac": EMACStrategy,
-    "bbands": BBandsStrategy,
-    "buynhold": BuyAndHoldStrategy,
-    "sentiment": SentimentStrategy,
-    "custom": CustomStrategy,
-}
 
 strat_docs = "\nExisting strategies:\n\n" + "\n".join(
     [key + "\n" + value.__doc__ for key, value in STRATEGY_MAPPING.items()]
@@ -67,11 +47,6 @@ def docstring_parameter(*sub):
     return dec
 
 
-def tuple_to_dict(tup):
-    di = dict(tup)
-    return di
-
-
 @docstring_parameter(strat_docs)
 def backtest(
     strategy,
@@ -79,18 +54,26 @@ def backtest(
     commission=COMMISSION_PER_TRANSACTION,
     init_cash=INIT_CASH,
     plot=True,
-    verbose=True,
+    verbose=1,
     sort_by="rnorm",
     sentiments=None,
     strats=None,  # Only used when strategy = "multi"
     data_format=None,  # No longer needed but will leave for now to warn removal in a coming release
-    **kwargs
+    return_history=False,
+    channel=None,
+    symbol=None,
+    allow_short=False,
+    short_max=1.5,
+    figsize=(30, 15),
+    data_class=None,
+    data_kwargs={},
+    **kwargs,
 ):
     """Backtest financial data with a specified trading strategy
 
     Parameters
     ----------------
-    strategy : str
+    strategy : str or an instance of `fastquant.strategies.base.BaseStrategy`
         see list of accepted strategy keys below
     data : pandas.DataFrame
         dataframe with at least close price indexed with time
@@ -106,7 +89,18 @@ def backtest(
         df of sentiment [0, 1] indexed by time (applicable if `strategy`=='senti')
     strats : dict
         dictionary of strategy parameters (applicable if `strategy`=='multi')
-
+    return_history : bool
+        return history of transactions (i.e. buy and sell timestamps) (default=False)
+    channel : str
+        Channel to be used for last day notification - e.g. "slack" (default=None)
+    verbose : int
+        Verbose can take values: [0, 1, 2, 3], with increasing levels of verbosity (default=1).
+    symbol : str
+        Symbol to be referenced in the channel notification if not None (default=None)
+    data_class : bt.feed.DataBase
+        Custom backtrader database to be used as a parent class instead bt.feed. (default=None)
+    data_kwargs : dict
+        Data keyword arguments (empty dict by default)
     {0}
     """
 
@@ -129,101 +123,69 @@ def backtest(
         for k, v in kwargs.items()
     }
 
+    # Add logging parameters based on the `verbose` parameter
+    logging_params = get_logging_params(verbose)
+    kwargs.update(logging_params)
+
+    # Add Strategy
     strat_names = []
+    strat_name = None
     if strategy == "multi" and strats is not None:
         for strat, params in strats.items():
             cerebro.optstrategy(
                 STRATEGY_MAPPING[strat],
                 init_cash=[init_cash],
-                transaction_logging=[verbose],
                 commission=commission,
-                **params
+                channel=None,
+                symbol=None,
+                allow_short=allow_short,
+                short_max=short_max,
+                **params,
             )
             strat_names.append(strat)
     else:
+
+        # Allow instance of BaseStrategy or from the predefined mapping
+        if not isinstance(strategy, str) and issubclass(strategy, bt.Strategy):
+            strat_name = (
+                strategy.__name__
+                if hasattr(strategy, "__name__")
+                else str(strategy)
+            )
+        else:
+            strat_name = strategy
+            strategy = STRATEGY_MAPPING[strategy]
+
         cerebro.optstrategy(
-            STRATEGY_MAPPING[strategy],
+            strategy,
             init_cash=[init_cash],
-            transaction_logging=[verbose],
             commission=commission,
-            **kwargs
+            channel=None,
+            symbol=None,
+            allow_short=allow_short,
+            short_max=short_max,
+            **kwargs,
         )
-        strat_names.append(STRATEGY_MAPPING[strategy])
+        strat_names.append(strat_name)
 
     # Apply Total, Average, Compound and Annualized Returns calculated using a logarithmic approach
     cerebro.addanalyzer(btanalyzers.Returns, _name="returns")
     cerebro.addanalyzer(btanalyzers.SharpeRatio, _name="mysharpe")
+    cerebro.addanalyzer(btanalyzers.DrawDown, _name="drawdown")
+    cerebro.addanalyzer(btanalyzers.TimeDrawDown, _name="timedraw")
 
     cerebro.broker.setcommission(commission=commission)
 
-    # Treat `data` as a path if it's a string; otherwise, it's treated as a pandas dataframe
-    if isinstance(data, str):
-        if verbose:
-            print("Reading path as pandas dataframe ...")
-        # Rename dt to datetime
-        data = pd.read_csv(data, header=0, parse_dates=["dt"])
-
-    if strategy == "sentiment":
-        # initialize series for sentiments
-        senti_series = pd.Series(
-            sentiments, name="sentiment_score", dtype=float
-        )
-
-        # join and reset the index for dt to become the first column
-        data = data.merge(
-            senti_series, left_index=True, right_index=True, how="left"
-        )
-        data = data.reset_index()
-
-    # If data has `dt` as the index, set `dt` as the first column
-    # This means `backtest` supports the dataframe whether `dt` is the index or a column
-    if data.index.name == "dt":
-        data = data.reset_index()
-    # Rename "dt" column to "datetime" to match the formal alias
-    data = data.rename(columns={"dt": "datetime"})
-    data["datetime"] = pd.to_datetime(data.datetime)
-
-    numeric_cols = [col for col in data.columns if is_numeric_dtype(data[col])]
-    params_tuple = tuple(
-        [
-            (col, i)
-            for i, col in enumerate(data.columns)
-            if col in numeric_cols + ["datetime"]
-        ]
+    # Initalize and verify data
+    pd_data, data, data_format_dict = initalize_data(
+        data, strat_name, symbol, data_class, sentiments, data_kwargs
     )
-    default_cols = [c for c, _ in DEFAULT_PANDAS]
-    non_default_numeric_cols = tuple(
-        [col for col, _ in params_tuple if col not in default_cols]
-    )
-
-    class CustomData(bt.feeds.PandasData):
-        """
-        Data feed that includes all the columns in the input dataframe
-        """
-
-        # Need to make sure that the new lines don't overlap w/ the default lines already in PandasData
-        lines = non_default_numeric_cols
-
-        # automatically handle parameter with -1
-        # add the parameter to the parameters inherited from the base class
-        params = params_tuple
-
-    # extend the dataframe with sentiment score
-    if strategy == "sentiment":
-        data_format_dict = tuple_to_dict(params_tuple)
-        # create CustomData which inherits from PandasData
-        pd_data = CustomData(dataname=data, **data_format_dict)
-
-    else:
-        data_format_dict = tuple_to_dict(params_tuple)
-        pd_data = CustomData(dataname=data, **data_format_dict)
-
     cerebro.adddata(pd_data)
     cerebro.broker.setcash(init_cash)
     # Allows us to set buy price based on next day closing
     # (technically impossible, but reasonable assuming you use all your money to buy market at the end of the next day)
     cerebro.broker.set_coc(True)
-    if verbose:
+    if verbose > 0:
         print("Starting Portfolio Value: %.2f" % cerebro.broker.getvalue())
 
     # clock the start of the process
@@ -233,100 +195,66 @@ def backtest(
     # clock the end of the process
     tend = time.time()
 
-    params = []
-    metrics = []
-    if verbose:
-        print("==================================================")
-        print("Number of strat runs:", len(stratruns))
-        print("Number of strats per run:", len(stratruns[0]))
-        print("Strat names:", strat_names)
-    for stratrun in stratruns:
-        strats_params = {}
+    if verbose > 0:
+        # print out the result
+        print("Time used (seconds):", str(tend - tstart))
 
-        if verbose:
-            print("**************************************************")
-        for i, strat in enumerate(stratrun):
-            p_raw = strat.p._getkwargs()
-            p = {}
-            for k, v in p_raw.items():
-                if k not in ["periodic_logging", "transaction_logging"]:
-                    # Make sure the parameters are mapped to the corresponding strategy
-                    if strategy == "multi":
-                        key = (
-                            "{}.{}".format(strat_names[i], k)
-                            if k not in GLOBAL_PARAMS
-                            else k
-                        )
-                    else:
-                        key = k
-                    p[key] = v
-
-            strats_params = {**strats_params, **p}
-
-        # We run metrics on the last strat since all the metrics will be the same for all strats
-        returns = strat.analyzers.returns.get_analysis()
-        sharpe = strat.analyzers.mysharpe.get_analysis()
-        # Combine dicts for returns and sharpe
-        m = {
-            **returns,
-            **sharpe,
-            "pnl": strat.pnl,
-            "final_value": strat.final_value,
-        }
-
-        params.append(strats_params)
-        metrics.append(m)
-        if verbose:
-            print("--------------------------------------------------")
-            print(strats_params)
-            print(returns)
-            print(sharpe)
-
-    params_df = pd.DataFrame(params)
-    metrics_df = pd.DataFrame(metrics)
-
-    # Get indices based on `sort_by` metric
-    optim_idxs = np.argsort(metrics_df[sort_by].values)[::-1]
-    sorted_params_df = params_df.iloc[optim_idxs].reset_index(drop=True)
-    sorted_metrics_df = metrics_df.iloc[optim_idxs].reset_index(drop=True)
-    sorted_combined_df = pd.concat(
-        [sorted_params_df, sorted_metrics_df], axis=1
+    # Get History, Optimal Parameters and Strategy Metrics
+    sorted_combined_df, optim_params, history_dict = analyze_strategies(
+        stratruns,
+        data,
+        strat_names,
+        strategy,
+        strats,
+        sort_by,
+        return_history,
+        verbose,
+        **kwargs,
     )
 
-    # print out the result
-    print("Time used (seconds):", str(tend - tstart))
-
-    # Save optimal parameters as dictionary
-    optim_params = sorted_params_df.iloc[0].to_dict()
-    optim_metrics = sorted_metrics_df.iloc[0].to_dict()
-    print("Optimal parameters:", optim_params)
-    print("Optimal metrics:", optim_metrics)
-
+    # Plot
     if plot and strategy != "multi":
-        has_volume = data_format_dict["volume"] is not None
         # Plot only with the optimal parameters when multiple strategy runs are required
-        if params_df.shape[0] == 1:
-            # This handles the Colab Plotting
-            # Simple Check if we are in Colab
-            try:
-                from google.colab import drive
-
-                iplot = False
-
-            except Exception:
-                iplot = True
-            cerebro.plot(volume=has_volume, figsize=(30, 15), iplot=iplot)
-        else:
-            print("=============================================")
-            print("Plotting backtest for optimal parameters ...")
+        if sorted_combined_df.shape[0] != 1:
+            if verbose > 0:
+                print("=============================================")
+                print("Plotting backtest for optimal parameters ...")
             backtest(
                 strategy,
-                data,  # Treated as csv path is str, and dataframe of pd.DataFrame
-                commission=commission,
+                data,
                 plot=plot,
-                verbose=verbose,
+                verbose=0,
                 sort_by=sort_by,
-                **optim_params
+                **optim_params,
             )
+        else:
+            plot_results(cerebro, data_format_dict, figsize)
 
-    return sorted_combined_df
+    if return_history:
+
+        return sorted_combined_df, history_dict
+    else:
+        return sorted_combined_df
+
+
+def get_logging_params(verbose):
+    """
+        Adjusts the logging verbosity based on the `verbose` parameter
+        0 - No logging
+        1 - Strategy Level logs
+        2 - Transaction Level logs
+        3 - Periodic Logs
+    """
+    verbosity_args = dict(
+        strategy_logging=False,
+        transaction_logging=False,
+        periodic_logging=False,
+    )
+    if verbose > 0:
+        verbosity_args["strategy_logging"] = True
+    if verbose > 1:
+        verbosity_args["transaction_logging"] = True
+    if verbose > 2:
+        verbosity_args["periodic_logging"] = True
+
+    return verbosity_args

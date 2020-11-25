@@ -8,15 +8,3 @@ jobs:
         - cd python
       script:
         - pytest tests
-    - language: r
-      r:
-        - devel
-      cache: packages
-      install:
-        - R -e 'install.packages("devtools")'
-        - R -e 'devtools::install_deps("R", dependencies = TRUE)'
-        - cd R
-        - R CMD build .
-        - R CMD INSTALL *tar.gz
-      script:
-        - R CMD check --as-cran *tar.gz

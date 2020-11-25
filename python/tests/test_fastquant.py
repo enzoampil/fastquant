@@ -15,7 +15,7 @@ DATE_END = "2019-01-01"
 
 
 def test_get_pse_data():
-    stock_df = get_pse_data(PHISIX_SYMBOL, DATE_START, DATE_END)
+    stock_df = get_pse_data(PHISIX_SYMBOL, DATE_START, DATE_END, format="c")
     assert isinstance(stock_df, pd.DataFrame)
 
 
