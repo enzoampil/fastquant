@@ -90,8 +90,9 @@ def backtest(
     return_history=False,
     channel=None,
     symbol=None,
-    allow_short=False, 
+    allow_short=False,
     short_max=1.5,
+    data_class=None,
     **kwargs
 ):
     """Backtest financial data with a specified trading strategy
@@ -241,17 +242,31 @@ def backtest(
         [col for col, _ in params_tuple if col not in default_cols]
     )
 
-    class CustomData(PandasData):
-        """
-        Data feed that includes all the columns in the input dataframe
-        """
+    # Use custom data class if input
+    if data_class:
+        class CustomData(data_class):
+            """
+            Data feed that includes all the columns in the input dataframe
+            """
 
-        # Need to make sure that the new lines don't overlap w/ the default lines already in PandasData
-        lines = non_default_numeric_cols
+            # Need to make sure that the new lines don't overlap w/ the default lines already in PandasData
+            lines = non_default_numeric_cols
 
-        # automatically handle parameter with -1
-        # add the parameter to the parameters inherited from the base class
-        params = params_tuple
+            # automatically handle parameter with -1
+            # add the parameter to the parameters inherited from the base class
+            params = params_tuple
+    else:
+        class CustomData(PandasData):
+            """
+            Data feed that includes all the columns in the input dataframe
+            """
+
+            # Need to make sure that the new lines don't overlap w/ the default lines already in PandasData
+            lines = non_default_numeric_cols
+
+            # automatically handle parameter with -1
+            # add the parameter to the parameters inherited from the base class
+            params = params_tuple
 
     # extend the dataframe with sentiment score
     if strat_name == "sentiment":
