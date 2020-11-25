@@ -345,3 +345,26 @@ class PandasData(feed.DataBase):
         # Otherwise, PHT / SGT
         else:
             return datetime.utcnow() + timedelta(hours=8)
+
+
+class YahooPandasData(feed.DataBase):
+    def add_data(self, q, tmout):
+        if tmout is not None:
+            time.sleep(tmout)
+        current_datetime = self.get_current_datetime()
+        current_datestr = current_datetime.strftime("%Y-%m-%d")
+        current_datetimestr = current_datetime.strftime("%Y-%m-%dT%H:%M:%S")
+        print("Pulling data from yahoo ...")
+        current_df = get_yahoo_data(self.symbol, current_datestr, current_datestr)
+        # Note that the datetime column should be the column, not an index
+        # Also, the column has to be called "datetime" exactly
+        current_df = current_df.reset_index().rename(columns={"dt": "datetime"})
+        q.put(current_df)
+        print("Queue updated on", current_datetimestr)
+
+
+class CCXTPandasData(feed.DataBase):
+    def add_data(self, q, tmout):
+        if tmout is not None:
+            time.sleep(tmout)
+        pass
