@@ -347,7 +347,7 @@ class PandasData(feed.DataBase):
             return datetime.utcnow() + timedelta(hours=8)
 
 
-class YahooPandasData(feed.DataBase):
+class YahooPandasData(PandasData):
     def add_data(self, q, tmout):
         if tmout is not None:
             time.sleep(tmout)
@@ -363,7 +363,7 @@ class YahooPandasData(feed.DataBase):
         print("Queue updated on", current_datetimestr)
 
 
-class CCXTPandasData(feed.DataBase):
+class CCXTPandasData(PandasData):
     def add_data(self, q, tmout):
         if tmout is not None:
             time.sleep(tmout)
