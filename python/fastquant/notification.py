@@ -77,9 +77,11 @@ def email_notif(
     s.send_message(msg)
 
 
-def trigger_bot(symbol, action, date, channel=None):
+def trigger_bot(symbol, action, date, channel=None, **kwargs):
     if channel == "slack":
         slack_notif(symbol, action, date=date)
+    elif channel == "email":
+        email_notif(**kwargs)
     else:
         if action == "buy":
             print(">>> Notif bot: Today is", date, ":", action, symbol or "", "<<<")
