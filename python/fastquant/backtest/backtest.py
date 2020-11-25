@@ -65,6 +65,7 @@ def backtest(
     allow_short=False,
     short_max=1.5,
     figsize=(30, 15),
+    data_class=None,
     **kwargs,
 ):
     """Backtest financial data with a specified trading strategy
@@ -95,6 +96,8 @@ def backtest(
         Verbose can take values: [0, 1, 2, 3], with increasing levels of verbosity (default=1).
     symbol : str
         Symbol to be referenced in the channel notification if not None (default=None)
+    data_class : bt.feed.DataBase
+        Custom backtrader database to be used as a parent class instead bt.feed. (default=None)
     {0}
     """
 
@@ -168,7 +171,7 @@ def backtest(
 
     # Initalize and verify data
     pd_data, data, data_format_dict = initalize_data(
-        data, strat_name, sentiments
+        data, strat_name, data_class, sentiments
     )
     cerebro.adddata(pd_data)
     cerebro.broker.setcash(init_cash)
