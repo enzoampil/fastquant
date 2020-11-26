@@ -10,6 +10,7 @@ from __future__ import (
 from pkg_resources import resource_filename
 import datetime
 import sys
+import logging
 
 # Import modules
 import backtrader as bt
@@ -30,6 +31,8 @@ from fastquant.config import (
     SELL_PROP,
     SHORT_MAX,
 )
+
+logging.getLogger().setLevel(logging.INFO)
 
 
 class BaseStrategy(bt.Strategy):
@@ -60,11 +63,12 @@ class BaseStrategy(bt.Strategy):
         ("add_cash_amount", None),
         ("add_cash_freq", "M"),
         ("live", True),
+        ("to_address", None)
     )
 
     def log(self, txt, dt=None):
         dt = dt or self.datas[0].datetime.date(0)
-        print("%s, %s" % (dt.isoformat(), txt))
+        logging.info("%s, %s" % (dt.isoformat(), txt))
 
     def update_order_history(self, order):
         self.order_history["dt"].append(self.datas[0].datetime.date(0))
@@ -90,11 +94,13 @@ class BaseStrategy(bt.Strategy):
         self.transaction_logging = self.params.transaction_logging
         self.commission = self.params.commission
         self.channel = self.params.channel
+        self.symbol = self.params.symbol
         self.stop_loss = self.params.stop_loss
         self.stop_trail = self.params.stop_trail
         self.allow_short = self.params.allow_short
         self.short_max = self.params.short_max
         self.live = self.params.live
+        self.to_address = self.params.to_address
         self.broker.set_coc(True)
         add_cash_freq = self.params.add_cash_freq
 
@@ -231,10 +237,9 @@ class BaseStrategy(bt.Strategy):
         self.order_history_df = pd.DataFrame(self.order_history)
         self.periodic_history_df = pd.DataFrame(self.periodic_history)
 
-        last_date = str(self.datas[0].datetime.date(0))
         if self.channel:
             trigger_bot(
-                self.symbol, self.action, last_date,
+                self.symbol, self.action, self.current_datetime_str,
             )
 
     def start(self):
@@ -242,7 +247,9 @@ class BaseStrategy(bt.Strategy):
         self.first_timepoint = True
 
     def next(self):
-        self._idx += 1
+        # Save current datetime string
+        self.current_datetime_str = bt.utils.date.num2date(self.data.datetime[0]).strftime("%Y-%m-%dT%H:%M:%S")
+
         if self.add_cash_amount:
             if self.first_timepoint:
                 # Initialize income date iterator, and set next
@@ -516,3 +523,9 @@ class BaseStrategy(bt.Strategy):
                     )
         else:
             self.action = "neutral"
+
+        if self.channel and self.data.is_live:
+            print("Triggering ...")
+            trigger_bot(
+                self.symbol, self.action, self.current_datetime_str, channel=self.channel, to_address=self.to_address
+            )

@@ -155,8 +155,8 @@ def backtest(
                 init_cash=[init_cash],
                 transaction_logging=[verbose],
                 commission=commission,
-                channel=None,
-                symbol=None,
+                channel=channel,
+                symbol=symbol,
                 allow_short=allow_short,
                 short_max=short_max,  
                 **params
@@ -176,8 +176,8 @@ def backtest(
             init_cash=[init_cash],
             transaction_logging=[verbose],
             commission=commission,
-            channel=None,
-            symbol=None,
+            channel=channel,
+            symbol=symbol,
             allow_short=allow_short,
             short_max=short_max,  
             **kwargs

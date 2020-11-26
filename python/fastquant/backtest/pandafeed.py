@@ -273,6 +273,7 @@ class PandasData(feed.DataBase):
                 # Set live to true the moment new data has been added to the queue
                 if not self.is_live:
                     self.is_live = True
+                    logging.info("Turning live mode on ...")
             except queue.Empty:
                 return None  # indicate timeout situation
 

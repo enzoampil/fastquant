@@ -9,6 +9,9 @@ import smtplib
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from fastquant.data.stocks.stocks import get_stock_data
+import logging
+
+logging.getLogger().setLevel(logging.INFO)
 
 
 def periodic_fetch(file_dir, symbol, today, next_period_dummy=False):
@@ -58,6 +61,8 @@ def email_notif(
     """
     my_address = os.getenv('EMAIL_ADDRESS')
     password = os.getenv('EMAIL_PASSWORD')
+    assert my_address, "Please set your email address as an environment variable: EMAIL_ADDRESS"
+    assert password, "Please set your email password as an environment variable: EMAIL_PASSWORD"
     # set up the SMTP server
     s = smtplib.SMTP(host=host, port=port)
     s.starttls()
@@ -81,6 +86,7 @@ def email_notif(
 
 
 def trigger_bot(symbol, action, date, channel=None, **kwargs):
+    logging.info("Triggering notification via channel: {}".format(channel))
     if channel == "slack":
         slack_notif(symbol, action, date=date)
     elif channel == "email":
