@@ -26,6 +26,7 @@ jobs:
           echo $SECRET > ~/.ssh/id_rsa
           ssh-keygen -p -N "" -m pem -f ~/.ssh/id_rsa
           chmod 400 ~/.ssh/id_rsa
+          chmod 700 ~/.ssh/
           sudo ssh-add ~/.ssh/id_rsa
           rm -rf ~/.ssh
           git clone git@github.com:fastquant-org/fastquant-docs.git docusaurus
