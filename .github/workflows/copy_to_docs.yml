@@ -22,9 +22,8 @@ jobs:
           git config --global user.name "Jose Endrinal"
           git config --global user.email "francis.endrinal@gmail.com"
           eval "$(ssh-agent -s)"
-          ls ~/.ssh
+          mkdir ~/.ssh
           echo $SECRET > ~/.ssh/id_rsa
-          ls ~/.ssh
           ssh-keygen -p -N "" -m pem -f ~/.ssh/id_rsa
           sudo ssh-add ~/.ssh/id_rsa
           rm -rf ~/.ssh
