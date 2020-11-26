@@ -46,7 +46,7 @@ def slack_notif(symbol, action, date=None):
     assert webhook_url, "Please set your slack webhook url as an environment variable: SLACK_URL"
     # Set date to the current date (UTC + 0) if no date argument is passed
     date = date or datetime.utcnow().strftime("%Y-%m-%d")
-    message = "Today is " + date + ": " + action + " " + symbol or ""
+    message = date + ": " + action + " " + symbol or ""
     slack_post(message, webhook_url)
 
 
@@ -71,7 +71,7 @@ def email_notif(
     msg = MIMEMultipart()  # create a message
 
     date = date or datetime.utcnow().strftime("%Y-%m-%d")
-    message = message or "Today is " + date + ": " + action + " " + symbol or ""
+    message = message or date + ": " + action + " " + symbol or ""
 
     # setup the parameters of the message
     msg["From"] = my_address
@@ -93,9 +93,9 @@ def trigger_bot(symbol, action, date, channel=None, **kwargs):
         email_notif(symbol, action, date=date, **kwargs)
     else:
         if action == "buy":
-            print(">>> Notif bot: Today is", date, ":", action, symbol or "", "<<<")
+            print(">>> Notif bot: ", date, ":", action, symbol or "", "<<<")
         elif action == "sell":
-            print(">>> Notif bot: Today is", date, ":", action, symbol or "", "<<<")
+            print(">>> Notif bot: ", date, ":", action, symbol or "", "<<<")
         else:  # hold
-            print(">>> Notif bot: Today is", date, ":", action, symbol or "", "<<<")
+            print(">>> Notif bot: ", date, ":", action, symbol or "", "<<<")
     return
