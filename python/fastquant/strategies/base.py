@@ -143,8 +143,9 @@ class BaseStrategy(bt.Strategy):
         self.order = None
         self.buyprice = None
         self.buycomm = None
-        # Number of ticks in the input data
-        self.len_data = len(list(self.datas[0]))
+        # Number of ticks in the original input data
+        # Note that len(self.data.p.dataname) can still go up later if data is added
+        self.len_data = len(self.data.p.dataname)
         # Sets the latest action as "buy", "sell", or "neutral"
         self.action = None
 
@@ -241,6 +242,7 @@ class BaseStrategy(bt.Strategy):
         self.first_timepoint = True
 
     def next(self):
+        self._idx += 1
         if self.add_cash_amount:
             if self.first_timepoint:
                 # Initialize income date iterator, and set next

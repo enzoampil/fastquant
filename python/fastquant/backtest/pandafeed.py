@@ -167,7 +167,7 @@ class PandasData(feed.DataBase):
         ('openinterest', -1),
         ('reconntimeout', 5.0),
         ('qcheck', 0.5),
-        ('cadence', 'sec'),
+        ('cadence', 'daily'),
         ('source', 'yahoo')
     )
 
@@ -181,6 +181,10 @@ class PandasData(feed.DataBase):
         self.cadence = self.p.cadence
         self.source = self.p.source
         self.qlive = queue.Queue()
+        # This indicates if the current iteration is already "live"
+        # Since by default, a historical dataframe is passed in,
+        # is_live is False until the the historical dataframe has been finished, and live data is now being pulled
+        self.is_live = False
         logging.info("===Datafeed level arguments===")
         logging.info("symbol : {}".format(self.symbol))
         logging.info("cadence : {}".format(self.cadence))
@@ -266,6 +270,9 @@ class PandasData(feed.DataBase):
                 update_df = self.qlive.get(timeout=self._qcheck)
                 self.p.dataname = pd.concat([self.p.dataname, update_df]).reset_index(drop=True)
                 logging.info(self.p.dataname.tail())
+                # Set live to true the moment new data has been added to the queue
+                if not self.is_live:
+                    self.is_live = True
             except queue.Empty:
                 return None  # indicate timeout situation
 
@@ -316,7 +323,7 @@ class PandasData(feed.DataBase):
     def streaming_data(self, tmout=None):
 
         q = queue.Queue()
-        kwargs = {'q': q, 'cadence': self.cadence, 'tmout': tmout}
+        kwargs = {'q': q, 'tmout': tmout}
         t = threading.Thread(target=self.add_data_periodic, kwargs=kwargs)
         t.daemon = True
         t.start()
@@ -342,8 +349,8 @@ class PandasData(feed.DataBase):
         q.put(current_df)
         logging.info("Queue updated on {}".format(current_datetimestr))
 
-    def add_data_periodic(self, cadence, **kwargs):
-        if cadence == "daily":
+    def add_data_periodic(self, **kwargs):
+        if self.cadence == "daily":
             # This should actually depend on the data source, since different markets have different closing times
             # Setting this to 9:00 for now, since should be okay for both UTC and EST markets
             schedule.every().day.at("9:00").do(self.add_data, **kwargs)
