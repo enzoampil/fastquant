@@ -18,15 +18,14 @@ jobs:
       - name: Sync documentation
         env: 
           SECRET: ${{ secrets.FRANCIS_SECRET }}
-          SSH_ASKPASS: 
         run: |
           git config --global user.name "Jose Endrinal"
           git config --global user.email "francis.endrinal@gmail.com"
           eval "$(ssh-agent -s)"
           echo "$SECRET" > .ssh/creds
           ssh-keygen -p -N "" -m pem -f .ssh/creds
-          sudo chmod 0400 .ssh/creds
-          sudo ssh-add ./.ssh/creds
+          sudo chmod 400 .ssh/creds
+          sudo ssh-add .ssh/creds
           rm -rf .ssh
           git clone git@github.com:fastquant-org/fastquant-docs.git docusaurus
           rm -rf docusaurus/docs
