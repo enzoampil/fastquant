@@ -24,7 +24,6 @@ jobs:
           eval "$(ssh-agent -s)"
           echo "$SECRET" > ~/.ssh/id_rsa
           ssh-keygen -p -N "" -m pem -f ~/.ssh/id_rsa
-          sudo chmod 400 ~/.ssh/id_rsa
           sudo ssh-add ~/.ssh/id_rsa
           rm -rf ~/.ssh
           git clone git@github.com:fastquant-org/fastquant-docs.git docusaurus
