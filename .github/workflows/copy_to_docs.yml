@@ -16,9 +16,18 @@ jobs:
       - uses: actions/checkout@v2
 
       - name: Sync documentation
+        env: 
+          SECRET: ${{ secrets.FRANCIS_SECRET }}
+          SSH_ASKPASS: 
         run: |
-          git config --global user.email "lorenzo.ampil@gmail.com"
-          git config --global user.name "Lorenzo Ampil"
+          git config --global user.name "Jose Endrinal"
+          git config --global user.email "francis.endrinal@gmail.com"
+          eval "$(ssh-agent -s)"
+          echo "$SECRET" > .ssh/creds
+          ssh-keygen -p -N "" -m pem -f .ssh/creds
+          sudo chmod 0400 .ssh/creds
+          sudo ssh-add ./.ssh/creds
+          rm -rf .ssh
           git clone git@github.com:fastquant-org/fastquant-docs.git docusaurus
           rm -rf docusaurus/docs
           rm docusaurus/sidebars.js
