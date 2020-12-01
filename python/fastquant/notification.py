@@ -41,17 +41,16 @@ def slack_post(message, webhook_url):
     )
 
 
-def slack_notif(symbol, action, date=None):
+def slack_notif(message, date=None):
     webhook_url = os.getenv('SLACK_URL')
     assert webhook_url, "Please set your slack webhook url as an environment variable: SLACK_URL"
     # Set date to the current date (UTC + 0) if no date argument is passed
     date = date or datetime.utcnow().strftime("%Y-%m-%d")
-    message = date + ": " + action + " " + symbol or ""
     slack_post(message, webhook_url)
 
 
 def email_notif(
-    symbol, action, to_address, date=None, subject=None, message=None, host="smtp.gmail.com", port=587
+    to_address, message, date=None, subject=None, host="smtp.gmail.com", port=587
 ):
     """
     Send email w/ credentials saved as environment variables for security
@@ -71,7 +70,6 @@ def email_notif(
     msg = MIMEMultipart()  # create a message
 
     date = date or datetime.utcnow().strftime("%Y-%m-%d")
-    message = message or date + ": " + action + " " + symbol or ""
 
     # setup the parameters of the message
     msg["From"] = my_address
@@ -85,17 +83,14 @@ def email_notif(
     s.send_message(msg)
 
 
-def trigger_bot(symbol, action, date, channel=None, **kwargs):
+def trigger_bot(symbol, action, date, indicators, message=None, channel=None, **kwargs):
     logging.info("Triggering notification via channel: {}".format(channel))
+    if not message:
+        message = date + ": " + action + " " + symbol + "\n Indicators: \n" + indicators
     if channel == "slack":
-        slack_notif(symbol, action, date=date)
+        slack_notif(message, date=date)
     elif channel == "email":
-        email_notif(symbol, action, date=date, **kwargs)
+        email_notif(message, date=date, **kwargs)
     else:
-        if action == "buy":
-            print(">>> Notif bot: ", date, ":", action, symbol or "", "<<<")
-        elif action == "sell":
-            print(">>> Notif bot: ", date, ":", action, symbol or "", "<<<")
-        else:  # hold
-            print(">>> Notif bot: ", date, ":", action, symbol or "", "<<<")
+        logging.info(">>> Notif bot: " + message + " <<<")
     return

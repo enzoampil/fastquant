@@ -239,7 +239,7 @@ class BaseStrategy(bt.Strategy):
 
         if self.channel:
             trigger_bot(
-                self.symbol, self.action, self.current_datetime_str,
+                self.symbol, self.action, self.current_datetime_str, self.indicators_str,
             )
 
     def start(self):
@@ -247,6 +247,14 @@ class BaseStrategy(bt.Strategy):
         self.first_timepoint = True
 
     def next(self):
+        indicators = self.getindicators()
+        indicators_dict = {
+            ind.plotlabel()
+            if hasattr(ind, "plotlabel")
+            else "indicator{}".format(i): ind.lines[0][0]
+            for i, ind in enumerate(indicators)
+        }
+        self.indicators_str = pd.Series(indicators_dict).to_string()
         # Save current datetime string
         self.current_datetime_str = bt.utils.date.num2date(self.data.datetime[0]).strftime("%Y-%m-%dT%H:%M:%S")
 
@@ -526,5 +534,5 @@ class BaseStrategy(bt.Strategy):
 
         if self.data.is_live:
             trigger_bot(
-                self.symbol, self.action, self.current_datetime_str, channel=self.channel, to_address=self.to_address
+                self.symbol, self.action, self.current_datetime_str, self.indicators_str, channel=self.channel, to_address=self.to_address
             )
