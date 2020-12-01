@@ -474,61 +474,62 @@ class BaseStrategy(bt.Strategy):
                             )
 
             elif stock_value > 0:
-                if self.live:
-                    if self.transaction_logging:
-                        self.log("SELL CREATE, %.2f" % self.dataclose[0])
-                    # Sell a 5% sell position (or whatever is afforded by the current stock holding)
-                    # "size" refers to the number of stocks to purchase
-                    if self.execution_type == "close":
-                        if SELL_PROP == 1:
-                            self.order = self.sell(
-                                size=self.position.size, exectype=bt.Order.Close
-                            )
-                        else:
-                            # Sell based on the closing price of the previous closing day
-                            self.order = self.sell(
-                                size=int(
-                                    (stock_value / (self.dataclose[0]))
-                                    * self.sell_prop
-                                ),
-                                exectype=bt.Order.Close,
-                            )
+                if self.execution_type == "close":
+                    if self.live:
+                        if self.transaction_logging:
+                            self.log("SELL CREATE, %.2f" % self.dataclose[0])
+                        # Sell a 5% sell position (or whatever is afforded by the current stock holding)
+                        # "size" refers to the number of stocks to purchase
+                        if self.execution_type == "close":
+                            if SELL_PROP == 1:
+                                self.order = self.sell(
+                                    size=self.position.size, exectype=bt.Order.Close
+                                )
+                            else:
+                                # Sell based on the closing price of the previous closing day
+                                self.order = self.sell(
+                                    size=int(
+                                        (stock_value / (self.dataclose[0]))
+                                        * self.sell_prop
+                                    ),
+                                    exectype=bt.Order.Close,
+                                )
+                    else:
+                        if self.transaction_logging:
+                            self.log("SELL CREATE, %.2f" % self.dataclose[1])
+                        # Sell a 5% sell position (or whatever is afforded by the current stock holding)
+                        # "size" refers to the number of stocks to purchase
+                        if self.execution_type == "close":
+                            if SELL_PROP == 1:
+                                self.order = self.sell(
+                                    size=self.position.size, exectype=bt.Order.Close
+                                )
+                            else:
+                                # Sell based on the closing price of the previous closing day
+                                self.order = self.sell(
+                                    size=int(
+                                        (stock_value / (self.dataclose[1]))
+                                        * self.sell_prop
+                                    ),
+                                    exectype=bt.Order.Close,
+                                )
                 else:
-                    if self.transaction_logging:
-                        self.log("SELL CREATE, %.2f" % self.dataclose[1])
-                    # Sell a 5% sell position (or whatever is afforded by the current stock holding)
-                    # "size" refers to the number of stocks to purchase
-                    if self.execution_type == "close":
-                        if SELL_PROP == 1:
-                            self.order = self.sell(
-                                size=self.position.size, exectype=bt.Order.Close
+                    if self.live:
+                        # Sell based on the opening price of the next closing day (only works "open" data exists in the dataset)
+                        self.order = self.sell(
+                            size=int(
+                                (self.init_cash / self.dataopen[0])
+                                * self.sell_prop
                             )
-                        else:
-                            # Sell based on the closing price of the previous closing day
-                            self.order = self.sell(
-                                size=int(
-                                    (stock_value / (self.dataclose[1]))
-                                    * self.sell_prop
-                                ),
-                                exectype=bt.Order.Close,
+                        )
+                    else:
+                        # Sell based on the opening price of the next closing day (only works "open" data exists in the dataset)
+                        self.order = self.sell(
+                            size=int(
+                                (self.init_cash / self.dataopen[1])
+                                * self.sell_prop
                             )
-            else:
-                if self.live:
-                    # Sell based on the opening price of the next closing day (only works "open" data exists in the dataset)
-                    self.order = self.sell(
-                        size=int(
-                            (self.init_cash / self.dataopen[0])
-                            * self.sell_prop
                         )
-                    )
-                else:
-                    # Sell based on the opening price of the next closing day (only works "open" data exists in the dataset)
-                    self.order = self.sell(
-                        size=int(
-                            (self.init_cash / self.dataopen[1])
-                            * self.sell_prop
-                        )
-                    )
         else:
             self.action = "neutral"
 
