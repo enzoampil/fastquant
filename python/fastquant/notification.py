@@ -50,7 +50,7 @@ def slack_notif(message, date=None):
 
 
 def email_notif(
-    to_address, message, date=None, subject=None, host="smtp.gmail.com", port=587
+    message, to_address=None, date=None, subject=None, host="smtp.gmail.com", port=587
 ):
     """
     Send email w/ credentials saved as environment variables for security
@@ -83,14 +83,14 @@ def email_notif(
     s.send_message(msg)
 
 
-def trigger_bot(symbol, action, date, indicators, message=None, channel=None, **kwargs):
+def trigger_bot(symbol, action, date, indicators, message=None, channel=None, to_address=None, **kwargs):
     logging.info("Triggering notification via channel: {}".format(channel))
     if not message:
         message = date + ": " + action + " " + symbol + "\n Indicators: \n" + indicators
     if channel == "slack":
         slack_notif(message, date=date)
     elif channel == "email":
-        email_notif(message, date=date, **kwargs)
+        email_notif(message, to_address=to_address, date=date, **kwargs)
     else:
         logging.info(">>> Notif bot: " + message + " <<<")
     return
