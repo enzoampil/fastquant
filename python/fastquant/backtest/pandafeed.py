@@ -18,8 +18,12 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-from __future__ import (absolute_import, division, print_function,
-                        unicode_literals)
+from __future__ import (
+    absolute_import,
+    division,
+    print_function,
+    unicode_literals,
+)
 
 from backtrader.utils.py3 import filter, string_types, integer_types
 
@@ -39,7 +43,7 @@ logging.getLogger().setLevel(logging.INFO)
 
 
 class PandasDirectData(feed.DataBase):
-    '''
+    """
     Uses a Pandas DataFrame as the feed source, iterating directly over the
     tuples returned by "itertuples".
 
@@ -53,20 +57,26 @@ class PandasDirectData(feed.DataBase):
       - A negative value in any of the parameters for the Data lines
         indicates it's not present in the DataFrame
         it is
-    '''
+    """
 
     params = (
-        ('datetime', 0),
-        ('open', 1),
-        ('high', 2),
-        ('low', 3),
-        ('close', 4),
-        ('volume', 5),
-        ('openinterest', 6),
+        ("datetime", 0),
+        ("open", 1),
+        ("high", 2),
+        ("low", 3),
+        ("close", 4),
+        ("volume", 5),
+        ("openinterest", 6),
     )
 
     datafields = [
-        'datetime', 'open', 'high', 'low', 'close', 'volume', 'openinterest'
+        "datetime",
+        "open",
+        "high",
+        "low",
+        "close",
+        "volume",
+        "openinterest",
     ]
 
     def start(self):
@@ -83,7 +93,7 @@ class PandasDirectData(feed.DataBase):
 
         # Set the standard datafields - except for datetime
         for datafield in self.getlinealiases():
-            if datafield == 'datetime':
+            if datafield == "datetime":
                 continue
 
             # get the column index
@@ -100,7 +110,7 @@ class PandasDirectData(feed.DataBase):
             line[0] = row[colidx]
 
         # datetime
-        colidx = getattr(self.params, 'datetime')
+        colidx = getattr(self.params, "datetime")
         tstamp = row[colidx]
 
         # convert to float via datetime and store it
@@ -108,7 +118,7 @@ class PandasDirectData(feed.DataBase):
         dtnum = date2num(dt)
 
         # get the line to be set
-        line = getattr(self.lines, 'datetime')
+        line = getattr(self.lines, "datetime")
         line[0] = dtnum
 
         # Done ... return
@@ -116,7 +126,7 @@ class PandasDirectData(feed.DataBase):
 
 
 class PandasData(feed.DataBase):
-    '''
+    """
     Uses a Pandas DataFrame as the feed source, using indices into column
     names (which can be "numeric")
 
@@ -142,37 +152,44 @@ class PandasData(feed.DataBase):
         - None: column not present
         - -1: autodetect
         - >= 0 or string: specific colum identifier
-    '''
+    """
 
     params = (
-        ('nocase', True),
-
+        ("nocase", True),
         # Possible values for datetime (must always be present)
         #  None : datetime is the "index" in the Pandas Dataframe
         #  -1 : autodetect position or case-wise equal name
         #  >= 0 : numeric index to the colum in the pandas dataframe
         #  string : column name (as index) in the pandas dataframe
-        ('datetime', None),
-
+        ("datetime", None),
         # Possible values below:
         #  None : column not present
         #  -1 : autodetect position or case-wise equal name
         #  >= 0 : numeric index to the colum in the pandas dataframe
         #  string : column name (as index) in the pandas dataframe
-        ('open', -1),
-        ('high', -1),
-        ('low', -1),
-        ('close', -1),
-        ('volume', -1),
-        ('openinterest', -1),
-        ('reconntimeout', 5.0),
-        ('qcheck', 0.5),
-        ('cadence', 'daily'),
-        ('source', '')  # falsey by default; so, having a source means we're in live mode
+        ("open", -1),
+        ("high", -1),
+        ("low", -1),
+        ("close", -1),
+        ("volume", -1),
+        ("openinterest", -1),
+        ("reconntimeout", 5.0),
+        ("qcheck", 0.5),
+        ("cadence", "daily"),
+        (
+            "source",
+            "",
+        ),  # falsey by default; so, having a source means we're in live mode
     )
 
     datafields = [
-        'datetime', 'open', 'high', 'low', 'close', 'volume', 'openinterest'
+        "datetime",
+        "open",
+        "high",
+        "low",
+        "close",
+        "volume",
+        "openinterest",
     ]
 
     def __init__(self):
@@ -270,7 +287,9 @@ class PandasData(feed.DataBase):
                 # Get new data from the queue when it's available; otherwise, keep listening till it is
                 try:
                     update_df = self.qlive.get(timeout=self._qcheck)
-                    self.p.dataname = pd.concat([self.p.dataname, update_df]).reset_index(drop=True)
+                    self.p.dataname = pd.concat(
+                        [self.p.dataname, update_df]
+                    ).reset_index(drop=True)
                     logging.info(self.p.dataname.tail())
                     # Set live to true the moment new data has been added to the queue
                     if not self.is_live:
@@ -286,7 +305,7 @@ class PandasData(feed.DataBase):
 
         # Set the standard datafields
         for datafield in self.getlinealiases():
-            if datafield == 'datetime':
+            if datafield == "datetime":
                 continue
 
             colindex = self._colmapping[datafield]
@@ -301,7 +320,7 @@ class PandasData(feed.DataBase):
             line[0] = self.p.dataname.iloc[self._idx, colindex]
 
         # datetime conversion
-        coldtime = self._colmapping['datetime']
+        coldtime = self._colmapping["datetime"]
 
         if coldtime is None:
             # standard index in the datetime
@@ -319,8 +338,8 @@ class PandasData(feed.DataBase):
         return True
 
     def islive(self):
-        '''Returns ``True`` to notify ``Cerebro`` that preloading and runonce
-        should be deactivated'''
+        """Returns ``True`` to notify ``Cerebro`` that preloading and runonce
+        should be deactivated"""
         return True
 
     def haslivedata(self):
@@ -329,7 +348,7 @@ class PandasData(feed.DataBase):
     def streaming_data(self, tmout=None):
 
         q = queue.Queue()
-        kwargs = {'q': q, 'tmout': tmout}
+        kwargs = {"q": q, "tmout": tmout}
         t = threading.Thread(target=self.add_data_periodic, kwargs=kwargs)
         t.daemon = True
         t.start()
@@ -340,18 +359,28 @@ class PandasData(feed.DataBase):
             time.sleep(tmout)
 
         # Previous day PHT is also safely previous day UTC, and EST (as of 9:00 PHT)
-        current_datetime = self.get_current_datetime(tz="PHT") - timedelta(days=1)
+        current_datetime = self.get_current_datetime(tz="PHT") - timedelta(
+            days=1
+        )
         current_datestr = current_datetime.strftime("%Y-%m-%d")
         current_datetimestr = current_datetime.strftime("%Y-%m-%dT%H:%M:%S")
-        logging.info("Pulling {} data from {} ...".format(self.symbol, self.source))
+        logging.info(
+            "Pulling {} data from {} ...".format(self.symbol, self.source)
+        )
         if self.source == "yahoo":
-            current_df = get_yahoo_data(self.symbol, current_datestr, current_datestr)
+            current_df = get_yahoo_data(
+                self.symbol, current_datestr, current_datestr
+            )
         # Else pull crypto data
         else:
-            current_df = get_crypto_data(self.symbol, current_datestr, current_datestr)
+            current_df = get_crypto_data(
+                self.symbol, current_datestr, current_datestr
+            )
         # Note that the datetime column should be the column, not an index
         # Also, the column has to be called "datetime" exactly
-        current_df = current_df.reset_index().rename(columns={"dt": "datetime"})
+        current_df = current_df.reset_index().rename(
+            columns={"dt": "datetime"}
+        )
         q.put(current_df)
         logging.info("Queue updated on {}".format(current_datetimestr))
 
@@ -386,10 +415,14 @@ class YahooPandasData(PandasData):
         current_datestr = current_datetime.strftime("%Y-%m-%d")
         current_datetimestr = current_datetime.strftime("%Y-%m-%dT%H:%M:%S")
         logging.info("Pulling data from yahoo ...")
-        current_df = get_yahoo_data(self.symbol, current_datestr, current_datestr)
+        current_df = get_yahoo_data(
+            self.symbol, current_datestr, current_datestr
+        )
         # Note that the datetime column should be the column, not an index
         # Also, the column has to be called "datetime" exactly
-        current_df = current_df.reset_index().rename(columns={"dt": "datetime"})
+        current_df = current_df.reset_index().rename(
+            columns={"dt": "datetime"}
+        )
         q.put(current_df)
         logging.info("Queue updated on {}".format(current_datetimestr))
 
@@ -402,9 +435,13 @@ class CCXTPandasData(PandasData):
         current_datestr = current_datetime.strftime("%Y-%m-%d")
         current_datetimestr = current_datetime.strftime("%Y-%m-%dT%H:%M:%S")
         logging.info("Pulling data from ccxt ...")
-        current_df = get_crypto_data(self.symbol, current_datestr, current_datestr)
+        current_df = get_crypto_data(
+            self.symbol, current_datestr, current_datestr
+        )
         # Note that the datetime column should be the column, not an index
         # Also, the column has to be called "datetime" exactly
-        current_df = current_df.reset_index().rename(columns={"dt": "datetime"})
+        current_df = current_df.reset_index().rename(
+            columns={"dt": "datetime"}
+        )
         q.put(current_df)
         logging.info("Queue updated on {}".format(current_datetimestr))
