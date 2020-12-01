@@ -524,7 +524,7 @@ class BaseStrategy(bt.Strategy):
         else:
             self.action = "neutral"
 
-        if self.channel and self.data.is_live:
+        if self.data.is_live:
             trigger_bot(
                 self.symbol, self.action, self.current_datetime_str, channel=self.channel, to_address=self.to_address
             )

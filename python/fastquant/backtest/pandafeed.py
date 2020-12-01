@@ -168,7 +168,7 @@ class PandasData(feed.DataBase):
         ('reconntimeout', 5.0),
         ('qcheck', 0.5),
         ('cadence', 'daily'),
-        ('source', 'yahoo')
+        ('source', '')  # falsey by default; so, having a source means we're in live mode
     )
 
     datafields = [
@@ -234,8 +234,9 @@ class PandasData(feed.DataBase):
         # reset the length with each start
         self._idx = -1
 
-        # Start the data streaming as its own thread
-        self.qlive = self.streaming_data(tmout=self.p.reconntimeout)
+        if self.source:
+            # Start the data streaming as its own thread if source is set (live mode)
+            self.qlive = self.streaming_data(tmout=self.p.reconntimeout)
 
         # Transform names (valid for .ix) into indices (good for .iloc)
         if self.p.nocase:
@@ -264,18 +265,22 @@ class PandasData(feed.DataBase):
     def _load(self):
         # Utilize live updates when historical data is finished
         if self._idx + 1 >= len(self.p.dataname):
-
-            # Get new data from the queue when it's available; otherwise, keep listening till it is
-            try:
-                update_df = self.qlive.get(timeout=self._qcheck)
-                self.p.dataname = pd.concat([self.p.dataname, update_df]).reset_index(drop=True)
-                logging.info(self.p.dataname.tail())
-                # Set live to true the moment new data has been added to the queue
-                if not self.is_live:
-                    self.is_live = True
-                    logging.info("Turning live mode on ...")
-            except queue.Empty:
-                return None  # indicate timeout situation
+            # Perform live data food if source has a value
+            if self.source:
+                # Get new data from the queue when it's available; otherwise, keep listening till it is
+                try:
+                    update_df = self.qlive.get(timeout=self._qcheck)
+                    self.p.dataname = pd.concat([self.p.dataname, update_df]).reset_index(drop=True)
+                    logging.info(self.p.dataname.tail())
+                    # Set live to true the moment new data has been added to the queue
+                    if not self.is_live:
+                        self.is_live = True
+                        logging.info("Turning live mode on ...")
+                except queue.Empty:
+                    return None  # indicate timeout situation
+            # Otherwise, break the backtest (only applied to historical data)
+            else:
+                return False
 
         self._idx += 1
 
