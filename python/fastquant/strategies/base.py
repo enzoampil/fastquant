@@ -381,13 +381,13 @@ class BaseStrategy(bt.Strategy):
                         )
 
         elif self.sell_signal():
-            if self.allow_short == True:
+            if self.allow_short:
 
                 # Sell short based on the closing price of the previous day
                 if self.execution_type == "close":
                     if self.live:
                         sell_prop_size = int(
-                            SELL_PROP * self.broker.getvalue() / self.dataclose[1]
+                            SELL_PROP * self.broker.getvalue() / self.dataclose[0]
                         )
                     else:
                         sell_prop_size = int(
@@ -440,7 +440,7 @@ class BaseStrategy(bt.Strategy):
                             int(
                                 self.broker.getvalue()
                                 * self.short_max
-                                / self.dataopen[1]
+                                / self.dataopen[0]
                             )
                             + self.position.size,
                             0,
