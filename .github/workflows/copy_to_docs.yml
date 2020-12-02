@@ -30,7 +30,7 @@ jobs:
       - name: Sync sidebars.js file
         uses: dmnemec/copy_file_to_another_repo_action@v1.0.4
         env: 
-          API_TOKEN_GITHUB: ${{ secrets.FRANCIS_SECRET }}
+          API_TOKEN_GITHUB: ${{ secrets.API_TOKEN_GITHUB }}
         with:
           source_file: 'docs/docusaurus/sidebars.js'
           destination_repo: 'fastquant-org/fastquant-docs'
