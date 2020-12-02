@@ -25,3 +25,5 @@ jobs:
           dst_repo_name: fastquant-docs
           dst_branch: dev
           clean: true
+          username: jgendrinal
+          email: francis.endrinal@gmail.com
