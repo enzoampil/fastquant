@@ -16,25 +16,15 @@ jobs:
       - uses: actions/checkout@v2
 
       - name: Sync docs folder
-        uses: dmnemec/copy_file_to_another_repo_action@v1.0.4
-        env: 
-          API_TOKEN_GITHUB: ${{ secrets.FRANCIS_SECRET }}
+        uses: andstor/copycat-action@v3
         with:
-          source_file: 'docs/docusaurus/docs/'
-          destination_repo: 'fastquant-org/fastquant-docs'
-          destination_folder: 'docs'
-          user_email: 'francis.endrinal@gmail.com'
-          user_name: 'jgendrinal'
-          destination_branch: 'main' 
-
-      - name: Sync sidebars.js file
-        uses: dmnemec/copy_file_to_another_repo_action@v1.0.4
-        env: 
-          API_TOKEN_GITHUB: ${{ secrets.API_TOKEN_GITHUB }}
-        with:
-          source_file: 'docs/docusaurus/sidebars.js'
-          destination_repo: 'fastquant-org/fastquant-docs'
-          destination_folder: '~'
-          user_email: 'francis.endrinal@gmail.com'
-          user_name: 'jgendrinal'
-          destination_branch: 'main' 
+          personal_token: ${{ secrets.FRANCIS_SECRET }}
+          src_path: docs/docusaurus/docs
+          dst_path: docs
+          dst_owner: fastquant-org
+          dst_repo_name: fastquant-docs
+          dst_branch: main
+          clean: true 
+          email: 'francis.endrinal@gmail.com'
+          username: 'jgendrinal'
+          commit_message: 'Update from enzoampil/fastquant'
