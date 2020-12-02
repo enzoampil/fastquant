@@ -59,11 +59,11 @@ def backtest(
     plot=True,
     verbose=1,
     sort_by="rnorm",
-    sentiments=None,
-    strats=None,  # Only used when strategy = "multi"
+    sentiments=[],
+    strats={},  # Only used when strategy = "multi"
     return_history=False,
-    channel=None,
-    symbol=None,
+    channel="",
+    symbol="",
     allow_short=False,
     short_max=1.5,
     figsize=(30, 15),
