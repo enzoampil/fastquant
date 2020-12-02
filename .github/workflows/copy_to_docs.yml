@@ -15,29 +15,26 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
-      - name: Sync documentation
+      - name: Sync docs folder
+        uses: dmnemec/copy_file_to_another_repo_action@v1.0.4
         env: 
-          SECRET: ${{ secrets.FRANCIS_SECRET }}
-          SSH_ASKPASS: echo "fastquant"
-          SSH_AUTH_SOCK: /tmp/ssh_agent.sock  
-        run: |
-          git config --global user.name "Jose Endrinal"
-          git config --global user.email "francis.endrinal@gmail.com"
-          mkdir -p ~/.ssh
-          ssh-keyscan github.com >> ~/.ssh/known_hosts
-          ssh-agent -a $SSH_AUTH_SOCK > /dev/null
-          echo $SECRET > ~/.ssh/id_rsa
-          ssh-keygen -p -N "fastquant" -m pem -f ~/.ssh/id_rsa
-          ssh-add - <<< cat ~/.ssh/id_rsa
-          rm -rf ~/.ssh
-          git clone git@github.com:fastquant-org/fastquant-docs.git docusaurus
-          rm -rf docusaurus/docs
-          rm docusaurus/sidebars.js
-          cp -avr docs/docusaurus/docs docusaurus
-          cp docs/docusaurus/sidebars.js docusaurus
-          cd docusaurus
-          git add .
-          git commit -m "Automatic publish from github.com/enzoampil/fastquant"
-          git push origin main
-          cd ..
-          rm -rf docusaurus
+          API_TOKEN_GITHUB: ${{ secrets.FRANCIS_SECRET }}
+        with:
+          source_file: 'docs/docusaurus/docs/'
+          destination_repo: 'fastquant-org/fastquant-docs'
+          destination_folder: 'docs'
+          user_email: 'francis.endrinal@gmail.com'
+          user_name: 'jgendrinal'
+          commit_message: 'Automatic docs publish from enzoampil/fastquant'
+
+      - name: Sync sidebars.js file
+        uses: dmnemec/copy_file_to_another_repo_action@v1.0.4
+        env: 
+          API_TOKEN_GITHUB: ${{ secrets.FRANCIS_SECRET }}
+        with:
+          source_file: 'docs/docusaurus/sidebars.js'
+          destination_repo: 'fastquant-org/fastquant-docs'
+          destination_folder: '~'
+          user_email: 'francis.endrinal@gmail.com'
+          user_name: 'jgendrinal'
+          commit_message: 'Automatic sidebars.js publish from enzoampil/fastquant'
