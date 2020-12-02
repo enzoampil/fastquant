@@ -18,7 +18,7 @@ jobs:
       - name: Sync docs folder
         uses: andstor/copycat-action@v3
         with:
-          personal_token: ${{ secrets.FRANCIS_SECRET }}
+          personal_token: ${{ secrets.francis_secret }}
           src_path: docs/docusaurus/docs
           dst_path: docs
           dst_owner: jgendrinal
