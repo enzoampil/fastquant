@@ -24,7 +24,4 @@ jobs:
           dst_owner: jgendrinal
           dst_repo_name: fastquant-docs
           dst_branch: dev
-          clean: true 
-          email: 'francis.endrinal@gmail.com'
-          username: 'jgendrinal'
-          commit_message: 'Update from enzoampil/fastquant'
+          clean: true
