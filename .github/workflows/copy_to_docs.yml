@@ -25,6 +25,7 @@ jobs:
           destination_folder: 'docs'
           user_email: 'francis.endrinal@gmail.com'
           user_name: 'jgendrinal'
+          destination_branch: 'main' 
 
       - name: Sync sidebars.js file
         uses: dmnemec/copy_file_to_another_repo_action@v1.0.4
@@ -36,3 +37,4 @@ jobs:
           destination_folder: '~'
           user_email: 'francis.endrinal@gmail.com'
           user_name: 'jgendrinal'
+          destination_branch: 'main' 
