@@ -10,20 +10,17 @@ on:
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
 jobs:
-  build:
+  copy:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-
-      - name: Sync docs folder
-        uses: andstor/copycat-action@v3
-        with:
-          personal_token: ${{ secrets.francis_secret }}
-          src_path: docs/docusaurus/docs
-          dst_path: docs
-          dst_owner: jgendrinal
-          dst_repo_name: fastquant-docs
-          dst_branch: dev
-          clean: true
-          username: jgendrinal
-          email: francis.endrinal@gmail.com
+    - name: Sync docs folder
+      uses: andstor/copycat-action@v3
+      with:
+        personal_token: ${{ secrets.FRANCIS_SECRET }}
+        src_path: /docs/docusaurus/docs/
+        dst_path: /docs/
+        dst_owner: fastquant-org
+        dst_repo_name: fastquant-docs
+        dst_branch: main
+        src_branch: master
+        clean: true
