@@ -47,6 +47,10 @@ def get_crypto_data(ticker, start_date, end_date, time_resolution="1d", exchange
         )
         ohlcv_df["dt"] = pd.to_datetime(ohlcv_df["dt"], unit="ms")
         ohlcv_df = ohlcv_df[ohlcv_df.dt <= end_date]
+        # Save input parameters into dataframe
+        ohlcv_df.start_date = start_date
+        ohlcv_df.end_date = end_date
+        ohlcv_df.symbol = ticker
         return ohlcv_df.set_index("dt")
     else:
         raise NotImplementedError(

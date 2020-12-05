@@ -71,4 +71,9 @@ def get_stock_data(
     if len(missing_columns) > 0:
         print("Missing columns filled w/ NaN:", missing_columns)
 
+    # Save input parameters into dataframe
+    df.start_date = start_date
+    df.end_date = end_date
+    df.symbol = symbol
+
     return df[df_columns]
