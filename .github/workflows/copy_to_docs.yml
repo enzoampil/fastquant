@@ -11,12 +11,15 @@ jobs:
   copy:
     runs-on: ubuntu-latest
     steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+      
     - name: Sync docs folder
-      uses: crykn/copy_folder_to_another_repo_action@v1.0.5
+      uses: dmnemec/copy_file_to_another_repo_action@v1.0.4
       env:
         API_TOKEN_GITHUB: ${{ secrets.ENZO_SECRET }}
       with:
-        source_folder: '/docs/docusaurus/docs'
+        source_file: 'docs/docusaurus/docs'
         destination_repo: 'fastquant-org/fastquant-docs'
         destination_folder: 'docs'
         user_email: 'lorenzo.ampil@gmail.com'
