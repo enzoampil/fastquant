@@ -1,12 +1,10 @@
-name: Sync to docs
-
+name: Copy
 on:
   # Triggers the workflow on push or pull request events but only for the master branch
   push:
     branches: [ master ]
   pull_request:
     branches: [ master ]
-
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
 jobs:
@@ -17,12 +15,12 @@ jobs:
       uses: andstor/copycat-action@v3
       with:
         personal_token: ${{ secrets.ENZO_SECRET }}
-        src_path: /docs/docusaurus/docs/
-        dst_path: /docs/
+        src_path: /docs/docusaurus/docs/.
+        dst_path: /docs/.
         dst_owner: fastquant-org
         dst_repo_name: fastquant-docs
         src_branch: master
         dst_branch: main
         clean: true
         username: enzoampil
-        email: lorenzojulioampil@gmail.com
+        email: lorenzo.ampil@gmail.com
