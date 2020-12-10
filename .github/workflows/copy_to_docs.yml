@@ -16,7 +16,7 @@ jobs:
       env:
         API_TOKEN_GITHUB: ${{ secrets.ENZO_SECRET }}
       with:
-        source_folder: 'docs/docusaurus/docs'
+        source_folder: '/docs/docusaurus/docs'
         destination_repo: 'fastquant-org/fastquant-docs'
         destination_folder: 'docs'
         user_email: 'lorenzo.ampil@gmail.com'
