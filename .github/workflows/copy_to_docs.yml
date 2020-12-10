@@ -1,4 +1,4 @@
-name: Copy
+name: Copy docusaurus assets
 on:
   # Triggers the workflow on push or pull request events but only for the master branch
   push:
@@ -12,15 +12,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: Sync docs folder
-      uses: andstor/copycat-action@v3
+      uses: crykn/copy_folder_to_another_repo_action@v1.0.5
+      env:
+        API_TOKEN_GITHUB: ${{ secrets.ENZO_SECRET }}
       with:
-        personal_token: ${{ secrets.ENZO_SECRET }}
-        src_path: /docs/docusaurus/docs/.
-        dst_path: /docs/.
-        dst_owner: fastquant-org
-        dst_repo_name: fastquant-docs
-        src_branch: master
-        dst_branch: main
-        clean: true
-        username: enzoampil
-        email: lorenzo.ampil@gmail.com
+        source_folder: 'docs/docusaurus/docs'
+        destination_repo: 'fastquant-org/fastquant-docs'
+        destination_folder: 'docs'
+        user_email: 'lorenzo.ampil@gmail.com'
+        user_name: 'enzoampil'
+        destination_branch: 'main'  
+        
