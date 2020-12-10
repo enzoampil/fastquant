@@ -2,7 +2,8 @@
 # -*- coding: utf-8 -*-
 import tweepy
 from nltk.sentiment.vader import SentimentIntensityAnalyzer
-from datetime import date
+from datetime import date, datetime
+import pandas as pd
 
 def tweepy_api(consumer_key, consumer_secret, access_token, access_secret):
     """
