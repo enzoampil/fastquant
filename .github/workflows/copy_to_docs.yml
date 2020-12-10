@@ -21,6 +21,8 @@ jobs:
         dst_path: /docs/
         dst_owner: fastquant-org
         dst_repo_name: fastquant-docs
-        dst_branch: main
         src_branch: master
+        dst_branch: main
         clean: true
+        username: enzoampil
+        email: lorenzojulioampil@gmail.com
