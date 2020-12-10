@@ -16,10 +16,10 @@ jobs:
     - name: Sync docs folder
       uses: andstor/copycat-action@v3
       with:
-        personal_token: ${{ secrets.FRANCIS_SECRET }}
+        personal_token: ${{ secrets.ENZO_SECRET }}
         src_path: /docs/docusaurus/docs/
         dst_path: /docs/
-        dst_owner: jgendrinal
+        dst_owner: fastquant-org
         dst_repo_name: fastquant-docs
         dst_branch: main
         src_branch: master
