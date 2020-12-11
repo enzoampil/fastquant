@@ -1,3 +1,8 @@
+---
+id: walk_forward_data_split
+title: walk_forward_data_split
+---
+
 # Example
 
 Example:
