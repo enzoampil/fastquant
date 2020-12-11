@@ -5,6 +5,8 @@ title: walk_forward_data_split
 
 # Example
 
+To import: `from fastquant.utils.data_split import walk_forward_split`
+
 Example:
 Initialize time series with size of 100
 
