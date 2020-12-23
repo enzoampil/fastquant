@@ -44,7 +44,8 @@ print(df.head())
 ```
 
 ## Get crypto data
-The data is pulled from Binance, and all the available tickers are found [here](https://coinmarketcap.com/exchanges/binance/).
+The data is pulled from Binance, and all the available tickers are found [
+](https://coinmarketcap.com/exchanges/binance/).
 
 ### Python
 
@@ -258,7 +259,7 @@ backtest("custom", df.dropna(),upper_limit=1.5, lower_limit=-1.5)
 See more examples [here](https://nbviewer.jupyter.org/github/enzoampil/fastquant/tree/master/examples/).
 
 ## fastquant API
-View full list of fastquan API [here]
+View full list of fastquan API [here](API.md)
 
 ## Be part of the growing fastquant community
 
