@@ -44,8 +44,7 @@ print(df.head())
 ```
 
 ## Get crypto data
-The data is pulled from Binance, and all the available tickers are found [
-](https://coinmarketcap.com/exchanges/binance/).
+The data is pulled from Binance, and all the available tickers are found [here](https://coinmarketcap.com/exchanges/binance/).
 
 ### Python
 
