@@ -257,6 +257,9 @@ backtest("custom", df.dropna(),upper_limit=1.5, lower_limit=-1.5)
 
 See more examples [here](https://nbviewer.jupyter.org/github/enzoampil/fastquant/tree/master/examples/).
 
+## fastquant API
+View full list of fastquan API [here]
+
 ## Be part of the growing fastquant community
 
 Want to discuss more about fastquant with other users, and our team of developers?
