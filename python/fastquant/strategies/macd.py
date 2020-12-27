@@ -33,8 +33,10 @@ class MACDStrategy(BaseStrategy):
         The period used for the slow exponential moving average line (should be larger than `fast_upper`)
     signal_period : int
         The period used for the signal line for MACD
-    allowance : float
-        Proportion of macd to be exceeded by the excess macd to consitute a buy or sell signal
+    sma_period : int
+        Period for the moving average (default: 30)
+    dir_period: int
+        Period for SMA direction calculation (default: 10)
     """
 
     params = (
