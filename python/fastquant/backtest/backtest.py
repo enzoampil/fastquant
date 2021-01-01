@@ -230,6 +230,7 @@ def backtest(
                 plot=plot,
                 verbose=0,
                 sort_by=sort_by,
+                plot_kwargs=plot_kwargs,
                 **optim_params,
             )
         else:
