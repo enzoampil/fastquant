@@ -69,6 +69,7 @@ def backtest(
     figsize=(30, 15),
     data_class=None,
     data_kwargs={},
+    plot_kwargs={},
     **kwargs,
 ):
     """Backtest financial data with a specified trading strategy
@@ -109,6 +110,8 @@ def backtest(
         Custom backtrader database to be used as a parent class instead bt.feed. (default=None)
     data_kwargs : dict
         Datafeed keyword arguments (empty dict by default)
+    plot_kwargs : dict
+        Argument for function cerebro.plot() (empty dict by default)
     {0}
     """
 
@@ -230,7 +233,7 @@ def backtest(
                 **optim_params,
             )
         else:
-            plot_results(cerebro, data_format_dict, figsize)
+            plot_results(cerebro, data_format_dict, figsize, **plot_kwargs)
 
     if return_history:
 
