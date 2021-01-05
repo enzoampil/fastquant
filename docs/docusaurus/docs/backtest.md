@@ -49,7 +49,7 @@ Backtest financial data with a specified trading strategy
     Whether to allow short selling, with max set as `short_max` times the portfolio value (default=False)
 
 **short_max** : float
-    The maximum short position allowable as a ratio relative to the portfolio value at that timepoint (default=1.5)
+    The maximum short position allowable as a ratio relative to the portfolio value at that timepoint(default=1.5)
 
 **figsize** : tuple
     The size of the figure to be displayed at the end of the backtest (default=(30, 15))
@@ -59,3 +59,7 @@ Backtest financial data with a specified trading strategy
 
 **data_kwargs** : dict
     Datafeed keyword arguments (empty dict by default)
+
+## Returns
+
+A plot containing the backtest results and a dictionary of the history and results of the backtest run. 
