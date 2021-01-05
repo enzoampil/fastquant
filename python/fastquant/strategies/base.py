@@ -45,8 +45,8 @@ class BaseStrategy(bt.Strategy):
         ("buy_prop", BUY_PROP),
         ("sell_prop", SELL_PROP),
         ("commission", COMMISSION_PER_TRANSACTION),
-        ("stop_loss", None),
-        ("stop_trail", None),
+        ("stop_loss", 0),  # Zero means no stop loss
+        ("stop_trail", 0),  # Zero means no stop loss
         (
             "execution_type",
             "close",
@@ -54,11 +54,11 @@ class BaseStrategy(bt.Strategy):
         ("periodic_logging", False),
         ("transaction_logging", True),
         ("strategy_logging", True),
-        ("channel", None),
-        ("symbol", None),
+        ("channel", ""),
+        ("symbol", ""),
         ("allow_short", False),
         ("short_max", SHORT_MAX),
-        ("add_cash_amount", None),
+        ("add_cash_amount", 0),
         ("add_cash_freq", "M"),
     )
 
@@ -380,7 +380,7 @@ class BaseStrategy(bt.Strategy):
                         )
 
         elif self.sell_signal():
-            if self.allow_short == True:
+            if self.allow_short:
 
                 # Sell short based on the closing price of the previous day
                 if self.execution_type == "close":
