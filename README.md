@@ -25,19 +25,6 @@ or
 python -m pip install fastquant
 ```
 
-### R
-
-R support is pending development and lagging in features, but you may install the R package by typing the following: 
-
-```
-# To install the stable version: 
-install.packages("fastquant")
-
-# To install the development version: 
-# install.packages("remotes")
-remotes::install_github("enzoampil/fastquant", subdir = "R")
-```
-
 ## Get stock data
 All symbols from [Yahoo Finance](https://finance.yahoo.com/) and Philippine Stock Exchange ([PSE](https://www.pesobility.com/stock)) are accessible via `get_stock_data`.
 
@@ -54,23 +41,6 @@ print(df.head())
 #   2019-01-03  309.0
 #   2019-01-06  323.0
 #   2019-01-07  321.0
-```
-
-### R
-
-```
-library(fastquant)
-
-get_stock_data("JFC", "2018-01-01", "2018-02-01")
-
-#> # A tibble: 22 x 7
-#>    symbol dt         name     currency close percent_change  volume
-#>    <chr>  <date>     <chr>    <chr>    <dbl>          <dbl>   <dbl>
-#>  1 JFC    2018-01-03 Jollibee PHP       255.             NA  745780
-#>  2 JFC    2018-01-04 Jollibee PHP       255              NA  617010
-#>  3 JFC    2018-01-05 Jollibee PHP       255              NA  946040
-#>  4 JFC    2018-01-08 Jollibee PHP       256              NA  840630
-#> ...
 ```
 
 ## Get crypto data
@@ -91,30 +61,8 @@ crypto.head()
 # 2018-12-04  3884.76  4085.00  3781.00  3951.64  48489.551613
 # 2018-12-05  3950.98  3970.00  3745.00  3769.84  44004.799448
 ```
-### R
-
-```
-get_crypto_data("BTCUSDT", "2019-01-01", "2019-03-01")
-
-#> # A tibble: 59 x 6
-#>    dt          open  high   low close volume
-#>    <date>     <dbl> <dbl> <dbl> <dbl>  <dbl>
-#>  1 2019-01-01 3701. 3810. 3642  3797. 23742.
-#>  2 2019-01-02 3796. 3882. 3750. 3859. 35156.
-#>  3 2019-01-03 3858. 3863. 3730  3767. 29407.
-#>  4 2019-01-04 3767. 3824. 3704. 3792. 29520.
-#>  5 2019-01-05 3790. 3841. 3751  3771. 30491.
-#> # … with 54 more rows
-```
-
-
-*Note: Python has Yahoo Finance and phisix support. R has phisix support and porting to symbols from the `quantmod` package. Symbols from Yahoo Finance will return closing prices in USD, while symbols from PSE will return closing prices in PHP.*
-
-*R does NOT have support for backtesting yet*
 
 ## Backtest trading strategies
-
-*Note: Support for backtesting in R is pending*
 
 ### Simple Moving Average Crossover (15 day MA vs 40 day MA)
 Daily Jollibee prices from 2018-01-01 to 2019-01-01

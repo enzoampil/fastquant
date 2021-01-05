@@ -40,6 +40,9 @@ strat_docs = "\nExisting strategies:\n\n" + "\n".join(
 
 
 def docstring_parameter(*sub):
+    """
+    Decorator to ensure all the strategy docstrings are included in the `backtest` docstring.
+    """
     def dec(obj):
         obj.__doc__ = obj.__doc__.format(*sub)
         return obj
@@ -56,12 +59,11 @@ def backtest(
     plot=True,
     verbose=1,
     sort_by="rnorm",
-    sentiments=None,
-    strats=None,  # Only used when strategy = "multi"
-    data_format=None,  # No longer needed but will leave for now to warn removal in a coming release
+    sentiments=[],
+    strats={},  # Only used when strategy = "multi"
     return_history=False,
-    channel=None,
-    symbol=None,
+    channel="",
+    symbol="",
     allow_short=False,
     short_max=1.5,
     figsize=(30, 15),
@@ -83,6 +85,8 @@ def backtest(
         initial cash (currency implied from `data`)
     plot : bool
         show plot backtrader (disabled if `strategy`=="multi")
+    verbose : int
+        Verbose can take values: [0, 1, 2, 3], with increasing levels of verbosity (default=1).
     sort_by : str
         sort result by given metric (default='rnorm')
     sentiments : pandas.DataFrame
@@ -92,23 +96,21 @@ def backtest(
     return_history : bool
         return history of transactions (i.e. buy and sell timestamps) (default=False)
     channel : str
-        Channel to be used for last day notification - e.g. "slack" (default=None)
-    verbose : int
-        Verbose can take values: [0, 1, 2, 3], with increasing levels of verbosity (default=1).
+        Channel to be used for notifications - e.g. "slack" (default=None)
     symbol : str
         Symbol to be referenced in the channel notification if not None (default=None)
+    allow_short : bool
+        Whether to allow short selling, with max set as `short_max` times the portfolio value (default=False)
+    short_max : float
+        The maximum short position allowable as a ratio relative to the portfolio value at that time point (default=1.5)
+    figsize : tuple
+        The size of the figure to be displayed at the end of the backtest (default=(30, 15))
     data_class : bt.feed.DataBase
         Custom backtrader database to be used as a parent class instead bt.feed. (default=None)
     data_kwargs : dict
-        Data keyword arguments (empty dict by default)
+        Datafeed keyword arguments (empty dict by default)
     {0}
     """
-
-    if data_format:
-        errmsg = "Warning: data_format argument is no longer needed since formatting is now purely automated based on column names!"
-        errmsg += "\nWe will be removing this argument in a coming release!"
-        warnings.warn(errmsg, DeprecationWarning)
-        print(errmsg)
 
     # Setting inital support for 1 cpu
     # Return the full strategy object to get all run information
@@ -136,8 +138,8 @@ def backtest(
                 STRATEGY_MAPPING[strat],
                 init_cash=[init_cash],
                 commission=commission,
-                channel=None,
-                symbol=None,
+                channel=channel,
+                symbol=symbol,
                 allow_short=allow_short,
                 short_max=short_max,
                 **params,
@@ -160,8 +162,8 @@ def backtest(
             strategy,
             init_cash=[init_cash],
             commission=commission,
-            channel=None,
-            symbol=None,
+            channel=channel,
+            symbol=symbol,
             allow_short=allow_short,
             short_max=short_max,
             **kwargs,
