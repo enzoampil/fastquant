@@ -205,7 +205,7 @@ def get_optim_metrics_and_params(sorted_metrics_df, sorted_params_df, verbose):
     return optim_params
 
 
-def plot_results(cerebro, data_format_dict, figsize=(30, 15)):
+def plot_results(cerebro, data_format_dict, figsize=(30, 15), **plot_kwargs):
 
     try:
         # This handles the Colab Plotting, Simple Check if we are in Colab
@@ -225,7 +225,7 @@ def plot_results(cerebro, data_format_dict, figsize=(30, 15)):
     plt.style.use("classic")  # ggplot is also fine
     plt.rcParams["figure.figsize"] = figsize
 
-    fig = cerebro.plot(volume=has_volume, iplot=iplot)
+    fig = cerebro.plot(volume=has_volume, iplot=iplot, **plot_kwargs)
 
     return fig[0][0]
 
