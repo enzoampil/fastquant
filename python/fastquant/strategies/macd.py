@@ -34,9 +34,9 @@ class MACDStrategy(BaseStrategy):
     signal_period : int
         The period used for the signal line for MACD
     sma_period : int
-        Simple moving average's period
+        Period for the moving average (default: 30)
     dir_period: int
-        SMA value dir_period ago
+        Period for SMA direction calculation (default: 10)
     """
 
     params = (
