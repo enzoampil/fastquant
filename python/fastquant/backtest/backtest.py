@@ -62,6 +62,7 @@ def backtest(
     sentiments=[],
     strats={},  # Only used when strategy = "multi"
     return_history=False,
+    return_plot=False,
     channel="",
     symbol="",
     allow_short=False,
@@ -69,6 +70,7 @@ def backtest(
     figsize=(30, 15),
     data_class=None,
     data_kwargs={},
+    fig=None,
     **kwargs,
 ):
     """Backtest financial data with a specified trading strategy
@@ -95,6 +97,8 @@ def backtest(
         dictionary of strategy parameters (applicable if `strategy`=='multi')
     return_history : bool
         return history of transactions (i.e. buy and sell timestamps) (default=False)
+    return_plot: bool
+        return the plot (if you want to save the plot) (default=True)
     channel : str
         Channel to be used for notifications - e.g. "slack" (default=None)
     symbol : str
@@ -111,8 +115,7 @@ def backtest(
         Datafeed keyword arguments (empty dict by default)
     {0}
     """
-
-    # Setting inital support for 1 cpu
+    # Setting initial support for 1 cpu
     # Return the full strategy object to get all run information
     cerebro = bt.Cerebro(stdstats=False, maxcpus=1, optreturn=False)
     cerebro.addobserver(bt.observers.Broker)
@@ -215,26 +218,30 @@ def backtest(
     )
 
     # Plot
+    
     if plot and strategy != "multi":
         # Plot only with the optimal parameters when multiple strategy runs are required
         if sorted_combined_df.shape[0] != 1:
             if verbose > 0:
                 print("=============================================")
                 print("Plotting backtest for optimal parameters ...")
-            backtest(
+            _, fig = backtest(
                 strategy,
                 data,
                 plot=plot,
                 verbose=0,
                 sort_by=sort_by,
+                return_plot=return_plot,
                 **optim_params,
             )
         else:
-            plot_results(cerebro, data_format_dict, figsize)
-
-    if return_history:
-
+            fig = plot_results(cerebro, data_format_dict, figsize)
+    if return_history and return_plot:
+        return sorted_combined_df, history_dict, fig
+    elif return_history:
         return sorted_combined_df, history_dict
+    elif return_plot:
+        return sorted_combined_df, fig
     else:
         return sorted_combined_df
 
