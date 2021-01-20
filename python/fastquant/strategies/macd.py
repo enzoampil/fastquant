@@ -33,8 +33,10 @@ class MACDStrategy(BaseStrategy):
         The period used for the slow exponential moving average line (should be larger than `fast_upper`)
     signal_period : int
         The period used for the signal line for MACD
-    allowance : float
-        Proportion of macd to be exceeded by the excess macd to consitute a buy or sell signal
+    sma_period : int
+        Simple moving average's period
+    dir_period: int
+        SMA value dir_period ago
     """
 
     params = (
@@ -78,6 +80,10 @@ class MACDStrategy(BaseStrategy):
         self.smadir = self.sma - self.sma(-self.dir_period)
 
     def buy_signal(self):
+        # Buy if the macd line cross the signal line to the upside 
+        # and a control Simple Moving Average  has had a net negative 
+        # direction in the last x periods 
+
         return self.crossover > 0 and self.smadir < 0.0
 
     def sell_signal(self):
