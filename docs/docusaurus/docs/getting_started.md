@@ -1,19 +1,7 @@
-# fastquant :nerd_face:
-[![Build Status](https://travis-ci.com/enzoampil/fastquant.svg?branch=master)](https://travis-ci.com/enzoampil/fastquant)
-[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/ambv/black)
-[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](https://raw.githubusercontent.com/enzoampil/fastquant/master/LICENSE)
-[![Downloads](https://pepy.tech/badge/fastquant)](https://pepy.tech/project/fastquant)
-## Bringing backtesting to the mainstream
-
-**fastquant** allows you to easily backtest investment strategies with as few as 3 lines of python code. Its goal is to promote data driven investments by making quantitative analysis in finance accessible to everyone.
-
-## Features
-1. Easily access historical stock data
-2. Backtest and optimize trading strategies with only 3 lines of code
-
-<sup>`*` - Both Yahoo Finance and Philippine stock data data are accessible straight from fastquant<sup>
-
-Check out our blog posts in the fastquant [website](https://enzoampil.github.io/fastquant-blog/) and this intro [article](https://towardsdatascience.com/backtest-your-trading-strategy-with-only-3-lines-of-python-3859b4a4ab44?source=friends_link&sk=ec647b6bb43fe322013248fd1d473015) on Medium!
+---
+id: getting_started
+title: Getting Started with fastquant
+---
 
 ## Installation
 
@@ -108,7 +96,7 @@ print(res[['fast_period', 'slow_period', 'final_value']].head())
 | Relative Strength Index (RSI) | rsi | `rsi_period`, `rsi_upper`,  `rsi_lower` |
 | Simple moving average crossover (SMAC) | smac | `fast_period`, `slow_period` |
 | Exponential moving average crossover (EMAC) | emac | `fast_period`, `slow_period` |
-| Moving Average Convergence Divergence (MACD) | macd | `fast_perod`, `slow_upper`, `signal_period`, `sma_period`, `dir_period` |
+| Moving Average Convergence Divergence (MACD) | macd | `fast_perod`, `slow_upper`, `signal_period`, `sma_period`, `sma_dir_period` |
 | Bollinger Bands | bbands | `period`, `devfactor` |
 | Buy and Hold | buynhold | `N/A` |
 | Sentiment Strategy | sentiment | `keyword` , `page_nums`, `senti` |
@@ -257,14 +245,11 @@ backtest("custom", df.dropna(),upper_limit=1.5, lower_limit=-1.5)
 
 See more examples [here](https://nbviewer.jupyter.org/github/enzoampil/fastquant/tree/master/examples/).
 
-## fastquant API
-View full list of fastquan API [here](API.md)
-
 ## Be part of the growing fastquant community
 
 Want to discuss more about fastquant with other users, and our team of developers?
 
-Join the fastquant Slack community, and our bi-weekly remote meetups through this [link](https://join.slack.com/t/fastquant/shared_invite/zt-kmbe1q7n-YFOZh_0XwsvRk0nPWcTCsA)!
+Join the fastquant Slack community, and our bi-weekly remote meetups through this [link](https://join.slack.com/t/fastquant/shared_invite/zt-gaaoahkz-X~5qw0psNOLg1iFYKcpRlQ)!
 
 You can also [subscribe](https://forms.gle/HAPYdMp2YMu4qXPd7) to our monthly newsletter to receive updates on our latest tutorials, blog posts, and product features!
 

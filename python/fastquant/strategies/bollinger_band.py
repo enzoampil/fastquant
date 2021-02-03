@@ -42,9 +42,10 @@ class BBandsStrategy(BaseStrategy):
         self.period = self.params.period
         self.devfactor = self.params.devfactor
 
-        print("===Strategy level arguments===")
-        print("period :", self.period)
-        print("devfactor :", self.devfactor)
+        if self.strategy_logging:
+            print("===Strategy level arguments===")
+            print("period :", self.period)
+            print("devfactor :", self.devfactor)
         bbands = bt.ind.BBands(period=self.period, devfactor=self.devfactor)
         self.mid = bbands.mid
         self.top = bbands.top

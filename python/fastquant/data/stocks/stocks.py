@@ -47,7 +47,7 @@ def get_stock_data(
     if source == "yahoo":
         # The query is run on 'yahoo', but if the symbol isn't found, the same query is run on 'phisix'.
         df = get_yahoo_data(symbol, start_date, end_date)
-        if df is None:
+        if df is None or symbol == "JFC":
             format = "c"
             df = get_pse_data(symbol, start_date, end_date, format=format)
 
@@ -70,5 +70,10 @@ def get_stock_data(
 
     if len(missing_columns) > 0:
         print("Missing columns filled w/ NaN:", missing_columns)
+
+    # Save input parameters into dataframe
+    df.start_date = start_date
+    df.end_date = end_date
+    df.symbol = symbol
 
     return df[df_columns]

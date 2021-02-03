@@ -107,9 +107,10 @@ class TernaryStrategy(BaseStrategy):
             self.buy_int,
         ]
 
-        print("===Strategy level arguments===")
-        print("Buy Int: ", self.buy_int)
-        print("Sell Int: ", self.sell_int)
+        if self.strategy_logging:
+            print("===Strategy level arguments===")
+            print("Buy Int: ", self.buy_int)
+            print("Sell Int: ", self.sell_int)
 
     # Buy when the custom indicator is equal to buy_int (+1), and sell when custom indicator is equal to sell_int (-1)
     def buy_signal(self):

@@ -39,11 +39,13 @@ class RSIStrategy(BaseStrategy):
         self.rsi_period = self.params.rsi_period
         self.rsi_upper = self.params.rsi_upper
         self.rsi_lower = self.params.rsi_lower
-        print("===Strategy level arguments===")
-        print("rsi_period :", self.rsi_period)
-        print("rsi_upper :", self.rsi_upper)
-        print("rsi_lower :", self.rsi_lower)
-        self.rsi = bt.indicators.RelativeStrengthIndex(period=self.rsi_period)
+
+        if self.strategy_logging:
+            print("===Strategy level arguments===")
+            print("rsi_period :", self.rsi_period)
+            print("rsi_upper :", self.rsi_upper)
+            print("rsi_lower :", self.rsi_lower)
+        self.rsi = bt.indicators.RelativeStrengthIndex(period=self.rsi_period, upperband=self.rsi_upper, lowerband=self.rsi_lower)
 
     def buy_signal(self):
         return self.rsi[0] < self.rsi_lower

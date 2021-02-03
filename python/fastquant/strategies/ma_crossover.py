@@ -40,9 +40,10 @@ class SMACStrategy(BaseStrategy):
         self.fast_period = self.params.fast_period
         self.slow_period = self.params.slow_period
 
-        print("===Strategy level arguments===")
-        print("fast_period :", self.fast_period)
-        print("slow_period :", self.slow_period)
+        if self.strategy_logging:
+            print("===Strategy level arguments===")
+            print("fast_period :", self.fast_period)
+            print("slow_period :", self.slow_period)
         sma_fast = bt.ind.SMA(period=self.fast_period)  # fast moving average
         sma_slow = bt.ind.SMA(period=self.slow_period)  # slow moving average
         self.crossover = bt.ind.CrossOver(
@@ -81,9 +82,10 @@ class EMACStrategy(BaseStrategy):
         self.fast_period = self.params.fast_period
         self.slow_period = self.params.slow_period
 
-        print("===Strategy level arguments===")
-        print("fast_period :", self.fast_period)
-        print("slow_period :", self.slow_period)
+        if self.strategy_logging:
+            print("===Strategy level arguments===")
+            print("fast_period :", self.fast_period)
+            print("slow_period :", self.slow_period)
         ema_fast = bt.ind.EMA(period=self.fast_period)  # fast moving average
         ema_slow = bt.ind.EMA(period=self.slow_period)  # slow moving average
         self.crossover = bt.ind.CrossOver(
