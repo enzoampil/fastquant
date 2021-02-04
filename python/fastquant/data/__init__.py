@@ -9,6 +9,7 @@ from fastquant.data.stocks.pse import (
     get_stock_table,
     # Combines get_phisix_data and get_pse_data_cache
     get_pse_data,
+    get_pse_data_multiple,
     # Gets data from PHISIX
     get_phisix_data,
     # Gets data from PSE Data Cache

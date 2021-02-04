@@ -15,6 +15,7 @@ from pathlib import Path
 import pandas as pd
 from pandas.io.json import json_normalize
 import numpy as np
+from joblib import Parallel, delayed
 import lxml.html as LH
 from tqdm import tqdm
 
@@ -322,6 +323,37 @@ def get_pse_data(
         pse_data_df.to_csv(fp, index=False)
         print("Saved: ", fp)
     return pse_data_df.set_index("dt")
+
+
+def get_pse_data_multiple(symbols, n_jobs=None, verbose=1, **kwargs):
+    """Return a dictionary of pricing data for the given PHISIX stock symbols.
+
+    This is a utility function for `get_pse_data` to be able to query multiple stock data with parallelization using joblib. The return format is a dictionary whose key-value pairsare the stock symbols and their respective pricing dataframes.
+
+    Parameters
+    ----------
+    symbols : list of str
+        List of symbols of the stock in the PSE. You can refer to this link: https://www.pesobility.com/stock.
+    n_jobs : int
+        The maximum number of concurrently running jobs. Refer to joblib.Parallel docs for more information: https://joblib.readthedocs.io/en/latest/generated/joblib.Parallel.html.
+    verbose : int
+        The verbosity level: if non zero, progress messages are printed. Above 50, the output is sent to stdout. The frequency of the messages increases with the verbosity level. If it more than 10, all iterations are reported.
+
+    Returns
+    -------
+    data : dict
+        Dictionary of symbols and their pricing dataframe
+
+    Examples
+    --------
+    # TODO: write sample usage
+    """
+    lst = Parallel(n_jobs=n_jobs, verbose=verbose)(
+        delayed(get_pse_data)(symbol, **kwargs) for symbol in symbols
+    )
+    data = dict(zip(symbols, lst))
+
+    return data
 
 
 def datestring_to_datetime(date, sep="-"):
