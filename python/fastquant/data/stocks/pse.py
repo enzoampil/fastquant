@@ -348,6 +348,11 @@ def get_pse_data_multiple(symbols, n_jobs=None, verbose=1, **kwargs):
     --------
     # TODO: write sample usage
     """
+    try:
+        symbols = list(symbols)
+    except TypeError:
+        raise TypeError("symbols should be a list or list-like.")
+
     lst = Parallel(n_jobs=n_jobs, verbose=verbose)(
         delayed(get_pse_data)(symbol, **kwargs) for symbol in symbols
     )
