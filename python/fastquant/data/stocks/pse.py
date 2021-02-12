@@ -102,13 +102,13 @@ def get_pse_all_stocks():
     Returns dataframe containing all PSE listed stock symbols
     """
 
-    ''' Note ID is taken from inkdrop.app '''
-    res = requests.get('http://phisix-api.appspot.com/stocks.json')
+    """ Note ID is taken from inkdrop.app """
+    res = requests.get("http://phisix-api.appspot.com/stocks.json")
     if not res:
         return pd.DataFrame()
 
-    df = json_normalize(res.json(),'stock')['symbol'].sort_values()
-    df.columns = [ 'symbol' ]
+    df = json_normalize(res.json(), "stock")["symbol"].sort_values()
+    df.columns = ["symbol"]
     return df
 
 
@@ -321,6 +321,9 @@ def get_pse_data(
     if save:
         pse_data_df.to_csv(fp, index=False)
         print("Saved: ", fp)
+    # add dividend column for dividends sake XD
+
+    pse_data_df["dividend"] = 0
     return pse_data_df.set_index("dt")
 
 
@@ -332,8 +335,7 @@ def datestring_to_datetime(date, sep="-"):
 
 
 def pse_data_to_csv(symbol, start_date, end_date, pse_dir=DATA_PATH):
-    """
-    """
+    """"""
     pse = get_pse_data(symbol, start_date, end_date)
     fp = Path(
         pse_dir,
