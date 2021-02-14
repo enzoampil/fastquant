@@ -108,7 +108,7 @@ print(res[['fast_period', 'slow_period', 'final_value']].head())
 | Relative Strength Index (RSI) | rsi | `rsi_period`, `rsi_upper`,  `rsi_lower` |
 | Simple moving average crossover (SMAC) | smac | `fast_period`, `slow_period` |
 | Exponential moving average crossover (EMAC) | emac | `fast_period`, `slow_period` |
-| Moving Average Convergence Divergence (MACD) | macd | `fast_perod`, `slow_upper`, `signal_period`, `sma_period`, `sma_dir_period` |
+| Moving Average Convergence Divergence (MACD) | macd | `fast_perod`, `slow_upper`, `signal_period`, `sma_period`, `dir_period` |
 | Bollinger Bands | bbands | `period`, `devfactor` |
 | Buy and Hold | buynhold | `N/A` |
 | Sentiment Strategy | sentiment | `keyword` , `page_nums`, `senti` |
@@ -256,6 +256,9 @@ backtest("custom", df.dropna(),upper_limit=1.5, lower_limit=-1.5)
 ![](./docs/assets/bitcoin_prophet_backtest.png)
 
 See more examples [here](https://nbviewer.jupyter.org/github/enzoampil/fastquant/tree/master/examples/).
+
+## fastquant API
+View full list of fastquan API [here](API.md)
 
 ## Be part of the growing fastquant community
 
