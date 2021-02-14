@@ -261,7 +261,7 @@ See more examples [here](https://nbviewer.jupyter.org/github/enzoampil/fastquant
 
 Want to discuss more about fastquant with other users, and our team of developers?
 
-Join the fastquant Slack community, and our bi-weekly remote meetups through this [link](https://join.slack.com/t/fastquant/shared_invite/zt-gaaoahkz-X~5qw0psNOLg1iFYKcpRlQ)!
+Join the fastquant Slack community, and our bi-weekly remote meetups through this [link](https://join.slack.com/t/fastquant/shared_invite/zt-mhsm2481-sWVLAO3_Taa1djiakiNQMg)!
 
 You can also [subscribe](https://forms.gle/HAPYdMp2YMu4qXPd7) to our monthly newsletter to receive updates on our latest tutorials, blog posts, and product features!
 
