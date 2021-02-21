@@ -102,7 +102,7 @@ print(res[['fast_period', 'slow_period', 'final_value']].head())
 
 ## Want to do this without coding at all?
 
-If you want to make this kind of analysis even more simple without having to code at all (or want to avoid the pain of doing all of the setup required), you can subscribe for early access to Hawksight - this new [no-code tool](https://hawksight.co/) I’m building to democratize data driven investments.
+If you want to make this kind of analysis even more simple without having to code at all (or want to avoid the pain of doing all of the setup required), you can subscribe for early access to [Hawksight](https://hawksight.co/) - this new no-code tool I’m building to democratize data driven investments.
 
 Hoping to make these kinds of powerful analyses accessible to more people!
 
