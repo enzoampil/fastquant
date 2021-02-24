@@ -141,7 +141,7 @@ class BaseStrategy(bt.Strategy):
 
         self.dataclose = self.datas[0].close
         self.dataopen = self.datas[0].open
-        # self.datadiv = self.datas[0].dividend
+        self.datadiv = self.datas[0].dividend
         self.order = None
         self.buyprice = None
         self.buycomm = None
@@ -241,8 +241,7 @@ class BaseStrategy(bt.Strategy):
     def next(self):
 
         # add dividend to cash
-        self.broker.add_cash(self.datas[0].dividend)
-
+        self.broker.add_cash(self.datadiv)
         if self.add_cash_amount:
             if self.first_timepoint:
                 # Initialize income date iterator, and set next

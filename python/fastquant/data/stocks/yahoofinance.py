@@ -43,6 +43,8 @@ def get_yahoo_data(symbol, start_date, end_date, dividends=True):
 
         if div_df.shape[0] > 0:
             df = df.join(div_df, how="left", on="Date")
+        else:
+            df["dividend"] = 0
     else:
         df["Dividends"] = 0
 
