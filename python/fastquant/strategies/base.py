@@ -60,6 +60,7 @@ class BaseStrategy(bt.Strategy):
         ("short_max", SHORT_MAX),
         ("add_cash_amount", 0),
         ("add_cash_freq", "M"),
+        ("invest_div", True),
     )
 
     def log(self, txt, dt=None):
@@ -95,6 +96,7 @@ class BaseStrategy(bt.Strategy):
         self.stop_trail = self.params.stop_trail
         self.allow_short = self.params.allow_short
         self.short_max = self.params.short_max
+        self.invest_div = self.params.invest_div
         self.broker.set_coc(True)
         add_cash_freq = self.params.add_cash_freq
 
@@ -241,7 +243,9 @@ class BaseStrategy(bt.Strategy):
     def next(self):
 
         # add dividend to cash
-        self.broker.add_cash(self.datadiv)
+        if self.invest_div:
+            self.broker.add_cash(self.datadiv)
+
         if self.add_cash_amount:
             if self.first_timepoint:
                 # Initialize income date iterator, and set next
