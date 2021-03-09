@@ -6,12 +6,12 @@ import backtrader as bt
 from fastquant.backtest.backtest_indicators import get_indicators_as_dict
 from fastquant.config import GLOBAL_PARAMS
 
+
 """
 Post backtest functionalities
 - Retrieval of hisotry of orders, indicators and perodic logs
 - Analysis of each strategy
 - Plotting
- 
 """
 
 
@@ -45,7 +45,10 @@ def analyze_strategies(
 
         for i, strat in enumerate(stratrun):
             # Get indicator history
-            st_dtime = [bt.utils.date.num2date(num) for num in strat.lines.datetime.plot()]
+            st_dtime = [
+                bt.utils.date.num2date(num)
+                for num in strat.lines.datetime.plot()
+            ]
             indicators_dict = get_indicators_as_dict(strat)
             indicators_df = pd.DataFrame(indicators_dict)
             indicators_df.insert(0, "dt", st_dtime)
@@ -228,6 +231,7 @@ def plot_results(cerebro, data_format_dict, figsize=(30, 15), **plot_kwargs):
     fig = cerebro.plot(volume=has_volume, iplot=iplot, **plot_kwargs)
 
     return fig[0][0]
+
 
 def print_dict(d, title="", format="inline"):
     if format is None:
