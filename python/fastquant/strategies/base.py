@@ -42,22 +42,36 @@ class BaseStrategy(bt.Strategy):
 
     Attributes
     ----------
-    init_cash
-    buy_proportion
-    sell_proportion
-    commission
-    stop_loss_percent
-    stop_trail_percent
-    take_profit_percent
-    execution_type
-    allow_short_selling
-    max_short_ratio
-    add_cash_amount
-    add_cash_frequency
-    channel
-    symbol
+    init_cash : float
+        inital cash
+    buy_prop : float
+        buy proportion, percentage of available units to buy, setting to 1.0 buys all afforded units
+    sell_prop : float
+        sell proportion, percentage of owned units to sell
+    commission: float
+        Percentage of comission
+    stop_loss : float
+        stop loss percent
+    stop_trail : float
+        stop trail percent
+    execution_type : str {`market`,`close`} (default=`market`)
+        If set to `market`, excecutes the action (buy or sell) at current bar (or day),
+        If set to `close`, executees the action on the next available bar
+    allow_short : bool (default=False)
+        allow short selling
+    short_max : float
+        The max incremental short allowed is the short that would lead to a cumulative short position
+        equal to the maximum short position (initial cash times the maximum short ratio, which is 1.5 by default)
+    add_cash_amount : int (default=0)
+        Added cash amount for periodic cash-ins. (can be used in cost averaging)
+    add_cash_frequency : str {`W` or `M`} (default=`W`)
+        Frequency of when to add cash (weekly or monthly)
+    channel: str (default=`""`)
+        Notification channel
+    symbol: str
+        Symbol of the asset traded
 
-    Modified/Removed:
+    Renamed in code:
         init_cash   :initial_cash
         buy_prop    :buy_proportion
         sell_prop   :sell_proportion
@@ -67,17 +81,8 @@ class BaseStrategy(bt.Strategy):
         strategy_logging
         allow_short : allow_short_selling
         short_max   : max_short_ratio
-        add_cash_freq : add_cash_frequency
-
-
-
-    """
-
-    """"
-    init
-    buy_signal
-    sell_signal
-    update_logging
+        add_cash_freq :
+            add_cash_frequency
 
     """
 
@@ -86,8 +91,6 @@ class BaseStrategy(bt.Strategy):
     # with the properties of a `named tuple`
     params = (
         ("init_cash", INIT_CASH),
-        ("custom", 10),
-        ("custom2", 20),
         ("buy_prop", BUY_PROP),
         ("sell_prop", SELL_PROP),
         ("commission", COMMISSION_PER_TRANSACTION),
