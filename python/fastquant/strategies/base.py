@@ -111,9 +111,6 @@ class BaseStrategy(bt.Strategy):
 
     def __init__(self):
 
-        # print("sadsads", self.params.custom)
-        print(type(self.params.custom2))
-
         self.initial_cash = self.params.init_cash
         self.buy_proportion = self.params.buy_prop
         self.sell_proportion = self.params.sell_prop
