@@ -9,9 +9,12 @@ from fastquant import (
 
 PHISIX_SYMBOL = "JFC"
 CRYPTO_SYMBOL = "BTC/USDT"
+MSFT_SYMBOL = "MSFT"
 YAHOO_SYMBOL = "GOOGL"
 DATE_START = "2018-01-01"
 DATE_END = "2019-01-01"
+MSFT_SYMBOL_START = "2020-10-01"
+MSFT_SYMBOL_STOP = "2020-12-31"
 
 
 def test_get_pse_data():
@@ -21,6 +24,13 @@ def test_get_pse_data():
 
 def test_get_yahoo_data():
     stock_df = get_yahoo_data(YAHOO_SYMBOL, DATE_START, DATE_END)
+    assert isinstance(stock_df, pd.DataFrame)
+
+
+def test_get_yahoo_data_dividend():
+    stock_df = get_yahoo_data(
+        MSFT_SYMBOL, MSFT_SYMBOL_START, MSFT_SYMBOL_STOP, dividends=True
+    )
     assert isinstance(stock_df, pd.DataFrame)
 
 

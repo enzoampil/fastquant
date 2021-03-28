@@ -16,7 +16,12 @@ from fastquant.data.stocks.yahoofinance import get_yahoo_data
 
 
 def get_stock_data(
-    symbol, start_date, end_date, source="yahoo", format="ohlcv"
+    symbol,
+    start_date,
+    end_date,
+    source="yahoo",
+    format="ohlcv",
+    dividends=True,
 ):
     """Returns pricing data for a specified stock and source.
 
@@ -46,7 +51,7 @@ def get_stock_data(
 
     if source == "yahoo":
         # The query is run on 'yahoo', but if the symbol isn't found, the same query is run on 'phisix'.
-        df = get_yahoo_data(symbol, start_date, end_date)
+        df = get_yahoo_data(symbol, start_date, end_date, dividends)
         if df is None or symbol == "JFC":
             format = "c"
             df = get_pse_data(symbol, start_date, end_date, format=format)
@@ -56,7 +61,7 @@ def get_stock_data(
         format = "c"
         df = get_pse_data(symbol, start_date, end_date, format=format)
         if df is None:
-            df = get_yahoo_data(symbol, start_date, end_date)
+            df = get_yahoo_data(symbol, start_date, end_date, dividends)
 
     else:
         raise Exception("Source must be either 'phisix' or 'yahoo'")
