@@ -193,7 +193,7 @@ class BaseStrategy(bt.Strategy):
             self.logging.order_executed(order, action=self.action.upper())
 
             # Update order history whenever an order is completed
-            self.logging.update_order_history(order)
+            self.logging.update_order_history(order, self.execution_type)
 
         elif order.status in [order.Canceled, order.Margin, order.Rejected]:
             self.logging.order_aborted(order)

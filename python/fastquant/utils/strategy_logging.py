@@ -56,13 +56,19 @@ class StrategyLogger:
 
     def strategy_argments(self):
         strategy = self.strategy
-        self.log("===Global level arguments===")
-        self.log("init_cash : {}".format(strategy.initial_cash))
-        self.log("buy_prop : {}".format(strategy.buy_proportion))
-        self.log("sell_prop : {}".format(strategy.sell_proportion))
-        self.log("commission : {}".format(strategy.commission))
-        self.log("stop_loss_percent : {}".format(strategy.stop_loss_percent))
-        self.log("stop_trail_percent : {}".format(strategy.stop_trail_percent))
+
+        if self.transaction_logging or self.periodic_logging:
+            self.log("===Global level arguments===")
+            self.log("init_cash : {}".format(strategy.initial_cash))
+            self.log("buy_prop : {}".format(strategy.buy_proportion))
+            self.log("sell_prop : {}".format(strategy.sell_proportion))
+            self.log("commission : {}".format(strategy.commission))
+            self.log(
+                "stop_loss_percent : {}".format(strategy.stop_loss_percent)
+            )
+            self.log(
+                "stop_trail_percent : {}".format(strategy.stop_trail_percent)
+            )
 
     def order_created(self, order_type_str, text):
 
@@ -149,10 +155,15 @@ class StrategyLogger:
             self.log("Sell Size: {}".format(size))
             self.log("Sell Price: {}".format(price))
 
-    def update_order_history(self, order):
-        self.order_history["dt"].append(
-            self.strategy.datas[0].datetime.date(0)
-        )
+    def update_order_history(self, order, order_execution_type="close"):
+        if order_execution_type == "close":
+            self.order_history["dt"].append(
+                self.strategy.datas[0].datetime.date(0)
+            )
+        else:  # for market order, use previous day (same day as the signal was generated)
+            self.order_history["dt"].append(
+                self.strategy.datas[0].datetime.datetime(-1)
+            )
         self.order_history["type"].append("buy" if order.isbuy() else "sell")
         self.order_history["price"].append(order.executed.price)
         self.order_history["size"].append(order.executed.size)
