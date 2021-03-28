@@ -102,7 +102,11 @@ def test_grid_backtest():
     """
     sample = pd.read_csv(SAMPLE_CSV, parse_dates=["dt"])
     cerebro = backtest(
-        "smac", sample, fast_period=[20, 25], slow_period=[40, 50], plot=False
+        "smac",
+        sample,
+        fast_period=range(15, 30, 3),
+        slow_period=range(40, 55, 3),
+        plot=False,
     )
     assert (
         cerebro is not None
