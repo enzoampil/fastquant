@@ -6,7 +6,15 @@ from pandas.api.types import is_numeric_dtype
 from fastquant.config import DEFAULT_PANDAS
 
 
-def initalize_data(data, strategy_name, symbol=None, data_class=None, sentiments=None, data_kwargs={}):
+def initalize_data(
+    data,
+    strategy_name,
+    symbol=None,
+    data_class=None,
+    sentiments=None,
+    data_kwargs={},
+    verbose=None,
+):
 
     # Treat `data` as a path if it's a string; otherwise, it's treated as a pandas dataframe
     if isinstance(data, str):
@@ -14,6 +22,11 @@ def initalize_data(data, strategy_name, symbol=None, data_class=None, sentiments
             print("Reading path as pandas dataframe ...")
         # Rename dt to datetime
         data = pd.read_csv(data, header=0, parse_dates=["dt"])
+
+    # Add dividend column in case it doesn't exist
+    # This is utilized if `invest_div` is set to True in `backtest` `kwargs` (True by default)
+    if "dividend" not in data.columns:
+        data["dividend"] = 0
 
     if strategy_name == "sentiment":
         data = include_sentiment_score(data, sentiments)
@@ -52,6 +65,7 @@ def initalize_data(data, strategy_name, symbol=None, data_class=None, sentiments
 
     # Use custom data class if input
     if data_class:
+
         class CustomData(data_class):
             """
             Data feed that includes all the columns in the input dataframe
@@ -63,7 +77,9 @@ def initalize_data(data, strategy_name, symbol=None, data_class=None, sentiments
             # automatically handle parameter with -1
             # add the parameter to the parameters inherited from the base class
             params = params_tuple + (("symbol", symbol),)
+
     else:
+
         class CustomData(bt.feeds.PandasData):
             """
             Data feed that includes all the columns in the input dataframe
@@ -77,7 +93,10 @@ def initalize_data(data, strategy_name, symbol=None, data_class=None, sentiments
             params = params_tuple + (("symbol", symbol),)
 
     data_format_dict = tuple_to_dict(params_tuple)
-    pd_data = CustomData(dataname=data, symbol=symbol, **data_format_dict, **data_kwargs)
+
+    pd_data = CustomData(
+        dataname=data, symbol=symbol, **data_format_dict, **data_kwargs
+    )
 
     return pd_data, data, data_format_dict
 
@@ -92,6 +111,7 @@ def include_sentiment_score(data, sentiments):
         senti_series, left_index=True, right_index=True, how="left"
     )
     data = data.reset_index()
+
     return data
 
 

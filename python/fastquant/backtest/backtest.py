@@ -43,6 +43,7 @@ def docstring_parameter(*sub):
     """
     Decorator to ensure all the strategy docstrings are included in the `backtest` docstring.
     """
+
     def dec(obj):
         obj.__doc__ = obj.__doc__.format(*sub)
         return obj
@@ -221,14 +222,14 @@ def backtest(
     )
 
     # Plot
-    
+
     if plot and strategy != "multi":
         # Plot only with the optimal parameters when multiple strategy runs are required
         if sorted_combined_df.shape[0] != 1:
             if verbose > 0:
                 print("=============================================")
                 print("Plotting backtest for optimal parameters ...")
-            _, fig = backtest(
+            fig = backtest(
                 strategy,
                 data,
                 plot=plot,
@@ -236,28 +237,34 @@ def backtest(
                 sort_by=sort_by,
                 return_plot=return_plot,
                 plot_kwargs=plot_kwargs,
+                return_history=return_history,
                 **optim_params,
             )
         else:
-            fig = plot_results(cerebro, data_format_dict, figsize, **plot_kwargs)
+            fig = plot_results(
+                cerebro, data_format_dict, figsize, **plot_kwargs
+            )
 
+    # we just need to make the output of this conditions into tuple so that
+    # if the user is using grid-search, they'll have a tuple and can access the result
+    # via indexes e.g result[0], result[1]
     if return_history and return_plot:
-        return sorted_combined_df, history_dict, fig
+        return (sorted_combined_df, history_dict, fig)
     elif return_history:
-        return sorted_combined_df, history_dict
+        return (sorted_combined_df, history_dict)
     elif return_plot:
-        return sorted_combined_df, fig
+        return (sorted_combined_df, fig)
     else:
         return sorted_combined_df
 
 
 def get_logging_params(verbose):
     """
-        Adjusts the logging verbosity based on the `verbose` parameter
-        0 - No logging
-        1 - Strategy Level logs
-        2 - Transaction Level logs
-        3 - Periodic Logs
+    Adjusts the logging verbosity based on the `verbose` parameter
+    0 - No logging
+    1 - Strategy Level logs
+    2 - Transaction Level logs
+    3 - Periodic Logs
     """
     verbosity_args = dict(
         strategy_logging=False,
