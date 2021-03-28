@@ -23,6 +23,11 @@ def initalize_data(
         # Rename dt to datetime
         data = pd.read_csv(data, header=0, parse_dates=["dt"])
 
+    # Add dividend column in case it doesn't exist
+    # This is utilized if `invest_div` is set to True in `backtest` `kwargs` (True by default)
+    if "dividend" not in data.columns:
+        data["dividend"] = 0
+
     if strategy_name == "sentiment":
         data = include_sentiment_score(data, sentiments)
 
@@ -106,9 +111,6 @@ def include_sentiment_score(data, sentiments):
         senti_series, left_index=True, right_index=True, how="left"
     )
     data = data.reset_index()
-    # dividend handler in sentiment strat
-    if "dividend" not in data.columns:
-        data["dividend"] = 0
 
     return data
 
