@@ -75,6 +75,12 @@ backtest('smac', df, fast_period=15, slow_period=40)
 ```
 ![](./docs/assets/smac_sample.png)
 
+## Want to do this without coding at all?
+
+If you want to make this kind of analysis even more simple without having to code at all (or want to avoid the pain of doing all of the setup required), you can signup for free and try out [Hawksight](https://hawksight.co/) - this new no-code tool I’m building to democratize data driven investments.
+
+Hoping to make these kinds of powerful analyses accessible to more people!
+
 ## Optimize trading strategies with automated grid search
 
 fastquant allows you to automatically measure the performance of your trading strategy on multiple combinations of parameters. All you need to do is to input the values as iterators (like as a `list` or `range`).
@@ -99,13 +105,6 @@ print(res[['fast_period', 'slow_period', 'final_value']].head())
 #4	15	        46	         97452.92
 
 ```
-
-## Want to do this without coding at all?
-
-If you want to make this kind of analysis even more simple without having to code at all (or want to avoid the pain of doing all of the setup required), you can subscribe for early access to [Hawksight](https://hawksight.co/) - this new no-code tool I’m building to democratize data driven investments.
-
-Hoping to make these kinds of powerful analyses accessible to more people!
-
 
 ## Library of trading strategies
 
