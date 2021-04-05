@@ -25,3 +25,6 @@ from fastquant.data.web.businesstimes import get_bt_news_sentiment
 # Twitter
 from fastquant.data.web.twitter import tweepy_api
 from fastquant.data.web.twitter import get_twitter_sentiment
+
+# Forex
+from fastquant.data.forex.forex import get_forex_data

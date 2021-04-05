@@ -135,3 +135,13 @@ fastquant_0.0.0.9000.tar.gz
 
 # VSCode Workspace files
 *.code-workspace
+
+# PyCharm Workspace files
+*.idea/
+
+# tmp pickle test files
+*.pickle
+
+# tmp forex data
+/python/fastquant/data/*.txt
+/python/fastquant/data/*.zip
