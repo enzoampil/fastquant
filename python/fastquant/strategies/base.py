@@ -64,7 +64,7 @@ class BaseStrategy(bt.Strategy):
         equal to the maximum short position (initial cash times the maximum short ratio, which is 1.5 by default)
     add_cash_amount : int (default=0)
         Added cash amount for periodic cash-ins. (can be used in cost averaging)
-    add_cash_frequency : str {`W` or `M`} (default=`W`)
+    add_cash_frequency : str {`W`, `M`, or custom cron notion} (default=`W`)
         Frequency of when to add cash (weekly or monthly)
     channel: str (default=`""`)
         Notification channel
