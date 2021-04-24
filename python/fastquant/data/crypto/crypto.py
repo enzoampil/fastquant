@@ -22,7 +22,9 @@ def unix_time_millis(date):
     return int(dt.timestamp() * 1000)
 
 
-def get_crypto_data(ticker, start_date, end_date, time_resolution="1d", exchange="binance"):
+def get_crypto_data(
+    ticker, start_date, end_date, time_resolution="1d", exchange="binance"
+):
     """
     Get crypto data in OHLCV format
 
@@ -53,9 +55,11 @@ def get_crypto_data(ticker, start_date, end_date, time_resolution="1d", exchange
         # Variable to store our dataframe as we fill it out
         ohlcv_df = None
 
-        while (previous_request_end_date_epoch < end_date_epoch):
+        while previous_request_end_date_epoch < end_date_epoch:
             # Pull the data from the exchange
-            ohlcv_lol = ex.fetch_ohlcv(ticker, time_resolution, since=request_start_date_epoch)
+            ohlcv_lol = ex.fetch_ohlcv(
+                ticker, time_resolution, since=request_start_date_epoch
+            )
             # Convert it to a dataframe
             current_request_df = pd.DataFrame(
                 ohlcv_lol, columns=["dt", "open", "high", "low", "close", "volume"]
@@ -67,7 +71,7 @@ def get_crypto_data(ticker, start_date, end_date, time_resolution="1d", exchange
             else:
                 # Append the results to what we have so far
                 ohlcv_df = ohlcv_df.append(current_request_df)
-            
+
             # Get the last entry timestamp after we've retrieved (or attempted to) additional records
             current_request_end_date_epoch = int(ohlcv_df.tail(1).dt.values[0])
 
@@ -86,7 +90,7 @@ def get_crypto_data(ticker, start_date, end_date, time_resolution="1d", exchange
                 request_start_date_epoch = current_request_end_date_epoch + 1
                 # This request's end date should now be set as current for the next loop
                 previous_request_end_date_epoch = current_request_end_date_epoch
-        
+
         # Convert the unix timestampe to datetime
         ohlcv_df["dt"] = pd.to_datetime(ohlcv_df["dt"], unit="ms")
         # Trim off any records which were returned beyond the end
@@ -98,8 +102,6 @@ def get_crypto_data(ticker, start_date, end_date, time_resolution="1d", exchange
         return ohlcv_df.set_index("dt")
     else:
         raise NotImplementedError(
-            "The exchange "
-            + exchange
-            + " is not yet supported. Available exchanges: "
+            "The exchange " + exchange + " is not yet supported. Available exchanges: "
             ", ".join(CRYPTO_EXCHANGES)
         )
