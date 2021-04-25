@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 import pandas as pd
 import ccxt
 
@@ -64,6 +64,12 @@ def get_crypto_data(
             current_request_df = pd.DataFrame(
                 ohlcv_lol, columns=["dt", "open", "high", "low", "close", "volume"]
             )
+
+            if current_request_df.size == 0:
+                # If we got no results (which happens sometimes, like on binance for ETH/BTC when requesting 2018-02-08)
+                # then step forward to the next day
+                request_start_date_epoch += int(timedelta(days=1).total_seconds()) * 1000
+                continue
 
             if ohlcv_df is None:
                 # We don't have a dataframe yet, so start with this
