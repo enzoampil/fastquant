@@ -69,11 +69,13 @@ def get_crypto_data(
                 # We don't have a dataframe yet, so start with this
                 ohlcv_df = current_request_df
             else:
+                # Trim any overlap with the new results
+                ohlcv_df = ohlcv_df[ohlcv_df.dt < current_request_df.dt.min()]
                 # Append the results to what we have so far
                 ohlcv_df = ohlcv_df.append(current_request_df)
 
             # Get the last entry timestamp after we've retrieved (or attempted to) additional records
-            current_request_end_date_epoch = int(ohlcv_df.tail(1).dt.values[0])
+            current_request_end_date_epoch = int(ohlcv_df.dt.max())
 
             if current_request_end_date_epoch <= previous_request_end_date_epoch:
                 # We haven't gained any additional records, so there's no point in further requests
