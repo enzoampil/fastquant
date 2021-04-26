@@ -69,6 +69,7 @@ def get_crypto_data(
                 # If we got no results (which happens sometimes, like on binance for ETH/BTC when requesting 2018-02-08)
                 # then step forward to the next day
                 request_start_date_epoch += int(timedelta(days=1).total_seconds()) * 1000
+                previous_request_end_date_epoch = request_start_date_epoch - 1
                 continue
 
             if ohlcv_df is None:
