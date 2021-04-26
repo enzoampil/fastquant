@@ -111,7 +111,7 @@ def get_crypto_data(
             ohlcv_df.start_date = start_date
             ohlcv_df.end_date = end_date
             ohlcv_df.symbol = ticker
-            ohlcv_df.set_index("dt")
+            olhcv_df = ohlcv_df.set_index("dt")
             
         return ohlcv_df
     else:
