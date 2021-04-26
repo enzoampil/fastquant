@@ -102,15 +102,18 @@ def get_crypto_data(
                 # This request's end date should now be set as current for the next loop
                 previous_request_end_date_epoch = current_request_end_date_epoch
 
-        # Convert the unix timestampe to datetime
-        ohlcv_df["dt"] = pd.to_datetime(ohlcv_df["dt"], unit="ms")
-        # Trim off any records which were returned beyond the end
-        ohlcv_df = ohlcv_df[ohlcv_df.dt <= end_date]
-        # Save input parameters into dataframe
-        ohlcv_df.start_date = start_date
-        ohlcv_df.end_date = end_date
-        ohlcv_df.symbol = ticker
-        return ohlcv_df.set_index("dt")
+        if ohlcv_df is not None:
+            # Convert the unix timestampe to datetime
+            ohlcv_df["dt"] = pd.to_datetime(ohlcv_df["dt"], unit="ms")
+            # Trim off any records which were returned beyond the end
+            ohlcv_df = ohlcv_df[ohlcv_df.dt <= end_date]
+            # Save input parameters into dataframe
+            ohlcv_df.start_date = start_date
+            ohlcv_df.end_date = end_date
+            ohlcv_df.symbol = ticker
+            ohlcv_df.set_index("dt")
+            
+        return ohlcv_df
     else:
         raise NotImplementedError(
             "The exchange " + exchange + " is not yet supported. Available exchanges: "
