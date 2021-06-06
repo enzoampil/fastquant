@@ -7,7 +7,7 @@
 
 **fastquant** allows you to easily backtest investment strategies with as few as 3 lines of python code. Its goal is to promote data driven investments by making quantitative analysis in finance accessible to everyone.
 
-To do this type analysis without coding, you can also try out [Hawksight](https://hawksight.co/), which was just recently launched! :smile:
+To do this type of analysis without coding, you can also try out [Hawksight](https://hawksight.co/), which was just recently launched! :smile:
 
 ## Features
 1. Easily access historical stock data
