@@ -47,6 +47,7 @@ class BaseStrategy(bt.Strategy):
         ("commission", COMMISSION_PER_TRANSACTION),
         ("stop_loss", 0),  # Zero means no stop loss
         ("stop_trail", 0),  # Zero means no stop loss
+        ("take_profit", 0),
         (
             "execution_type",
             "close",
@@ -60,7 +61,6 @@ class BaseStrategy(bt.Strategy):
         ("short_max", SHORT_MAX),
         ("add_cash_amount", 0),
         ("add_cash_freq", "M"),
-        ("invest_div", True),
     )
 
     def log(self, txt, dt=None):
@@ -94,9 +94,9 @@ class BaseStrategy(bt.Strategy):
         self.channel = self.params.channel
         self.stop_loss = self.params.stop_loss
         self.stop_trail = self.params.stop_trail
+        self.take_profit = self.params.take_profit
         self.allow_short = self.params.allow_short
         self.short_max = self.params.short_max
-        self.invest_div = self.params.invest_div
         self.broker.set_coc(True)
         add_cash_freq = self.params.add_cash_freq
 
@@ -124,6 +124,8 @@ class BaseStrategy(bt.Strategy):
             self.log("commission : {}".format(self.commission))
             self.log("stop_loss : {}".format(self.stop_loss))
             self.log("stop_trail : {}".format(self.stop_trail))
+            self.log("take_profit : {}".format(self.take_profit))
+
         self.order_history = {
             "dt": [],
             "type": [],
@@ -143,7 +145,7 @@ class BaseStrategy(bt.Strategy):
 
         self.dataclose = self.datas[0].close
         self.dataopen = self.datas[0].open
-        self.datadiv = self.datas[0].dividend
+
         self.order = None
         self.buyprice = None
         self.buycomm = None
@@ -151,11 +153,15 @@ class BaseStrategy(bt.Strategy):
         self.len_data = len(list(self.datas[0]))
         # Sets the latest action as "buy", "sell", or "neutral"
         self.action = None
+        self.price_bought = 0
 
     def buy_signal(self):
         return True
 
     def sell_signal(self):
+        return True
+    
+    def take_profit_signal(self):
         return True
 
     def notify_order(self, order):
@@ -204,8 +210,7 @@ class BaseStrategy(bt.Strategy):
             return
         if self.transaction_logging:
             self.log(
-                "OPERATION PROFIT, GROSS: %.2f, NET: %.2f"
-                % (trade.pnl, trade.pnlcomm)
+                "OPERATION PROFIT, GROSS: %.2f, NET: %.2f" % (trade.pnl, trade.pnlcomm)
             )
 
     def notify_cashvalue(self, cash, value):
@@ -219,9 +224,7 @@ class BaseStrategy(bt.Strategy):
         # Saving to self so it's accessible later during optimization
         self.final_value = self.broker.getvalue()
         # Note that PnL is the final portfolio value minus the initial cash balance minus the total cash added
-        self.pnl = round(
-            self.final_value - self.init_cash - self.total_cash_added, 2
-        )
+        self.pnl = round(self.final_value - self.init_cash - self.total_cash_added, 2)
         if self.strategy_logging:
             self.log("Final Portfolio Value: {}".format(self.final_value))
             self.log("Final PnL: {}".format(self.pnl))
@@ -231,9 +234,7 @@ class BaseStrategy(bt.Strategy):
         last_date = str(self.datas[0].datetime.date(0))
         if self.channel:
             trigger_bot(
-                self.symbol,
-                self.action,
-                last_date,
+                self.symbol, self.action, last_date,
             )
 
     def start(self):
@@ -241,11 +242,6 @@ class BaseStrategy(bt.Strategy):
         self.first_timepoint = True
 
     def next(self):
-
-        # add dividend to cash
-        if self.invest_div:
-            self.broker.add_cash(self.datadiv)
-
         if self.add_cash_amount:
             if self.first_timepoint:
                 # Initialize income date iterator, and set next
@@ -254,11 +250,7 @@ class BaseStrategy(bt.Strategy):
                 self.next_cash_datetime = self.cron.get_next(datetime.datetime)
 
                 if self.transaction_logging:
-                    self.log(
-                        "Start date: {}".format(
-                            start_date.strftime("%Y-%m-%d")
-                        )
-                    )
+                    self.log("Start date: {}".format(start_date.strftime("%Y-%m-%d")))
                     self.log(
                         "Next cash date: {}".format(
                             self.next_cash_datetime.strftime("%Y-%m-%d")
@@ -277,9 +269,7 @@ class BaseStrategy(bt.Strategy):
 
                 if self.transaction_logging:
                     self.log("Cash added: {}".format(self.add_cash_amount))
-                    self.log(
-                        "Total cash added: {}".format(self.total_cash_added)
-                    )
+                    self.log("Total cash added: {}".format(self.total_cash_added))
                     self.log(
                         "Next cash date: {}".format(
                             self.next_cash_datetime.strftime("%Y-%m-%d")
@@ -314,10 +304,11 @@ class BaseStrategy(bt.Strategy):
                 # Margin is required for buy commission
                 # Add allowance to commission per transaction (avoid margin)
                 afforded_size = int(
-                    self.cash
-                    / (self.dataclose[0] * (1 + self.commission + 0.001))
+                    self.cash / (self.dataclose[0] * (1 + self.commission + 0.001))
                 )
                 buy_prop_size = int(afforded_size * self.buy_prop)
+                self.price_bought = self.data.close[0]
+
                 # Buy based on the closing price of the previous closing day
                 if self.execution_type == "close":
                     final_size = min(buy_prop_size, afforded_size)
@@ -329,18 +320,14 @@ class BaseStrategy(bt.Strategy):
                         self.log("Final size: {}".format(final_size))
                     # Explicitly setting exectype=bt.Order.Close will make the next day's closing the reference price
                     self.order = self.buy(size=final_size)
-
+                    
                     # Implement stop loss at the purchase level (only this specific trade is closed)
                     if self.stop_loss:
-                        stop_price = self.data.close[0] * (
-                            1.0 - self.stop_loss
-                        )
+                        stop_price = self.data.close[0] * (1.0 - self.stop_loss)
                         if self.transaction_logging:
                             self.log("Stop price: {}".format(stop_price))
                         self.sell(
-                            exectype=bt.Order.Stop,
-                            price=stop_price,
-                            size=final_size,
+                            exectype=bt.Order.StopLimit, price=stop_price, size=final_size,
                         )
 
                     if self.stop_trail:
@@ -356,8 +343,7 @@ class BaseStrategy(bt.Strategy):
                 else:
                     # Margin is required for buy commission
                     afforded_size = int(
-                        self.cash
-                        / (self.dataopen[1] * (1 + self.commission + 0.001))
+                        self.cash / (self.dataopen[1] * (1 + self.commission + 0.001))
                     )
                     final_size = min(buy_prop_size, afforded_size)
                     if self.transaction_logging:
@@ -368,15 +354,11 @@ class BaseStrategy(bt.Strategy):
 
                     # Implement stop loss at the purchase level (only this specific trade is closed)
                     if self.stop_loss:
-                        stop_price = self.data.close[0] * (
-                            1.0 - self.stop_loss
-                        )
+                        stop_price = self.data.close[0] * (1.0 - self.stop_loss)
                         if self.transaction_logging:
                             self.log("Stop price: {}".format(stop_price))
                         self.sell(
-                            exectype=bt.Order.Stop,
-                            price=stop_price,
-                            size=final_size,
+                            exectype=bt.Order.Stop, price=stop_price, size=final_size,
                         )
 
                     if self.stop_trail:
@@ -400,11 +382,7 @@ class BaseStrategy(bt.Strategy):
                     # The max incremental short allowed is the short that would lead to a cumulative short position
                     # equal to the maximum short position (initial cash times the maximum short ratio, which is 1.5 by default)
                     max_position_size = max(
-                        int(
-                            self.broker.getvalue()
-                            * self.short_max
-                            / self.dataclose[1]
-                        )
+                        int(self.broker.getvalue() * self.short_max / self.dataclose[1])
                         + self.position.size,
                         0,
                     )
@@ -424,11 +402,7 @@ class BaseStrategy(bt.Strategy):
                     # The max incremental short allowed is the short that would lead to a cumulative short position
                     # equal to the maximum short position (initial cash times the maximum short ratio, which is 1.5 by default)
                     max_position_size = max(
-                        int(
-                            self.broker.getvalue()
-                            * self.short_max
-                            / self.dataopen[1]
-                        )
+                        int(self.broker.getvalue() * self.short_max / self.dataopen[1])
                         + self.position.size,
                         0,
                     )
@@ -454,18 +428,24 @@ class BaseStrategy(bt.Strategy):
                         # Sell based on the closing price of the previous closing day
                         self.order = self.sell(
                             size=int(
-                                (stock_value / (self.dataclose[1]))
-                                * self.sell_prop
+                                (stock_value / (self.dataclose[1])) * self.sell_prop
                             ),
                             exectype=bt.Order.Close,
                         )
                 else:
                     # Sell based on the opening price of the next closing day (only works "open" data exists in the dataset)
                     self.order = self.sell(
-                        size=int(
-                            (self.init_cash / self.dataopen[1])
-                            * self.sell_prop
-                        )
+                        size=int((self.init_cash / self.dataopen[1]) * self.sell_prop)
+                    )
+                    
+        elif self.take_profit_signal():
+            # Take profit 
+            tp_price = self.price_bought * (1 + self.take_profit)
+
+            if self.take_profit:
+                if self.data.close[0] >= tp_price:
+                    self.sell(
+                        exectype=bt.Order.Close, price=tp_price, size=self.position.size,
                     )
 
         else:
