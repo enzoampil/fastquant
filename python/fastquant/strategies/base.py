@@ -147,7 +147,11 @@ class BaseStrategy(bt.Strategy):
 
         self.dataclose = self.datas[0].close
         self.dataopen = self.datas[0].open
-#         self.datadiv = self.datas[0].dividend
+        
+        self.datadiv = None
+        if hasattr(self.datas[0],'dividend'):
+            self.datadiv = self.datas[0].dividend 
+            
         self.order = None
         self.buyprice = None
         self.buycomm = None
@@ -157,15 +161,24 @@ class BaseStrategy(bt.Strategy):
         self.action = None
         self.price_bought = 0
 
+        # List of Orders
+        self.order_list = []
+
+        # Track stoploss order
+        self.stoploss_order = None
 
     def buy_signal(self):
         return True
 
     def sell_signal(self):
         return True
-    
+
     def take_profit_signal(self):
         return True
+
+    def stop_loss_signal(self):
+        return True
+
 
     def notify_order(self, order):
         if order.status in [order.Submitted, order.Accepted]:
@@ -205,6 +218,7 @@ class BaseStrategy(bt.Strategy):
                 self.log("Margin: {}".format(order.status == order.Margin))
                 self.log("Rejected: {}".format(order.status == order.Rejected))
 
+        print(order,"\n")
         # Write down: no pending order
         self.order = None
 
@@ -252,9 +266,9 @@ class BaseStrategy(bt.Strategy):
     def next(self):
 
         # add dividend to cash
-#         if self.invest_div:
-#             self.broker.add_cash(self.datadiv)
-
+        if self.invest_div and self.datadiv != None:
+            self.broker.add_cash(self.datadiv)
+            
         if self.add_cash_amount:
             if self.first_timepoint:
                 # Initialize income date iterator, and set next
@@ -330,77 +344,27 @@ class BaseStrategy(bt.Strategy):
                 
                 # Used for take profit method
                 self.price_bought = self.data.close[0] 
-                
+
                 # Buy based on the closing price of the previous closing day
                 if self.execution_type == "close":
                     final_size = min(buy_prop_size, afforded_size)
-                    if self.transaction_logging:
-                        self.log("Cash: {}".format(self.cash))
-                        self.log("Price: {}".format(self.dataclose[0]))
-                        self.log("Buy prop size: {}".format(buy_prop_size))
-                        self.log("Afforded size: {}".format(afforded_size))
-                        self.log("Final size: {}".format(final_size))
+
                     # Explicitly setting exectype=bt.Order.Close will make the next day's closing the reference price
                     self.order = self.buy(size=final_size)
 
-                    # Implement stop loss at the purchase level (only this specific trade is closed)
                     if self.stop_loss:
                         stop_price = self.data.close[0] * (
                             1.0 - self.stop_loss
                         )
+
                         if self.transaction_logging:
                             self.log("Stop price: {}".format(stop_price))
-                        self.sell(
-                            exectype=bt.Order.Stop,
-                            price=stop_price,
-                            size=final_size,
-                        )
 
-                    if self.stop_trail:
-                        if self.transaction_logging:
-                            self.log("Stop trail: {}".format(self.stop_trail))
-                        self.sell(
-                            exectype=bt.Order.StopTrail,
-                            trailpercent=self.stop_trail,
-                            size=final_size,
-                        )
+                        self.stoploss_order = self.sell(exectype=bt.Order.Stop, price=stop_price, size=final_size)
 
-                # Buy based on the opening price of the next closing day (only works "open" data exists in the dataset)
-                else:
-                    # Margin is required for buy commission
-                    afforded_size = int(
-                        self.cash
-                        / (self.dataopen[1] * (1 + self.commission + 0.001))
-                    )
-                    final_size = min(buy_prop_size, afforded_size)
-                    if self.transaction_logging:
-                        self.log("Buy prop size: {}".format(buy_prop_size))
-                        self.log("Afforded size: {}".format(afforded_size))
-                        self.log("Final size: {}".format(final_size))
-                    self.order = self.buy(size=final_size)
-
-                    # Implement stop loss at the purchase level (only this specific trade is closed)
-                    if self.stop_loss:
-                        stop_price = self.data.close[0] * (
-                            1.0 - self.stop_loss
-                        )
-                        if self.transaction_logging:
-                            self.log("Stop price: {}".format(stop_price))
-                        self.sell(
-                            exectype=bt.Order.Stop,
-                            price=stop_price,
-                            size=final_size,
-                        )
-
-                    if self.stop_trail:
-                        if self.transaction_logging:
-                            self.log("Stop trail: {}".format(self.stop_trail))
-                        self.sell(
-                            exectype=bt.Order.StopTrail,
-                            trailpercent=self.stop_trail,
-                            size=final_size,
-                        )
-
+        # Track order
+        #After each sell if cancel open order
+        #Assuming we want to cancel stop loss order if there is subsequent sell
         elif self.sell_signal():
             if self.allow_short:
 
@@ -427,7 +391,7 @@ class BaseStrategy(bt.Strategy):
                         self.order = self.sell(
                             size=min(sell_prop_size, max_position_size)
                         )
-
+                
                 # Buy based on the opening price of the next closing day (only works "open" data exists in the dataset)
                 else:
 
@@ -452,8 +416,8 @@ class BaseStrategy(bt.Strategy):
                             size=min(sell_prop_size, max_position_size)
                         )
 
-            elif stock_value > 0:
-
+            elif stock_value > 0:                    
+                    
                 if self.transaction_logging:
                     self.log("SELL CREATE, %.2f" % self.dataclose[1])
                 # Sell a 5% sell position (or whatever is afforded by the current stock holding)
@@ -480,16 +444,19 @@ class BaseStrategy(bt.Strategy):
                             * self.sell_prop
                         )
                     )
-                    
+            # Explicitly cancel stoploss order
+            if self.stoploss_order:
+                self.cancel(self.stoploss_order)
+
         elif self.take_profit_signal():
             # Take profit 
-            tp_price = self.price_bought * (1 + self.take_profit)
+            price_limit = self.price_bought * (1 + self.take_profit)
 
             if self.take_profit:
-                if self.data.close[0] >= tp_price:
+                if self.data.close[0] >= price_limit:
                     self.sell(
-                        exectype=bt.Order.Close, price=tp_price, size=self.position.size,
+                        exectype=bt.Order.Close, price=price_limit, size=self.position.size,
                     )
-
+        
         else:
             self.action = "neutral"
