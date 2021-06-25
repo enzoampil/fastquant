@@ -217,9 +217,6 @@ class BaseStrategy(bt.Strategy):
                 self.log("Rejected: {}".format(order.status == order.Rejected))
 
         # Write down: no pending order
-        print(self.order, "\n")
-        print(self.stoploss_trail_order, "\n")
-
         self.order = None
 
     def notify_trade(self, trade):
