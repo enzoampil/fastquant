@@ -415,7 +415,7 @@ class BaseStrategy(bt.Strategy):
                     if self.stop_trail:
                         if self.transaction_logging:
                             self.log("Stop trail: {}".format(self.stop_trail))
-                        self.sell(
+                        self.stoploss_trail_order = self.sell(
                             exectype=bt.Order.StopTrail,
                             trailpercent=self.stop_trail,
                             size=final_size,
