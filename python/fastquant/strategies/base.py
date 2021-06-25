@@ -326,8 +326,10 @@ class BaseStrategy(bt.Strategy):
 
         # Only buy if there is enough cash for at least one stock
         if self.buy_signal():
-            if self.cash >= self.dataclose[0]:
-
+            # Alternative for fractional condition based in min amount of significant value: 
+            #(self.fractional and self.cash >= self.dataclose[0] / 10000)
+            if (self.fractional and self.cash >= 10) or (not self.fractional and self.cash >= self.dataclose[0]):
+                
                 if self.transaction_logging:
                     self.log("BUY CREATE, %.2f" % self.dataclose[0])
                 # Take a 10% long position every time it's a buy signal (or whatever is afforded by the current cash position)
