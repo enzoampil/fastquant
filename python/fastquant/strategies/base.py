@@ -44,6 +44,7 @@ class BaseStrategy(bt.Strategy):
         ("init_cash", INIT_CASH),
         ("buy_prop", BUY_PROP),
         ("sell_prop", SELL_PROP),
+        ("fractional", False), 
         ("commission", COMMISSION_PER_TRANSACTION),
         ("stop_loss", 0),  # Zero means no stop loss
         ("stop_trail", 0),  # Zero means no stop loss
@@ -91,6 +92,7 @@ class BaseStrategy(bt.Strategy):
         self.periodic_logging = self.params.periodic_logging
         self.transaction_logging = self.params.transaction_logging
         self.strategy_logging = self.params.strategy_logging
+        self.fractional = self.params.fractional
         self.commission = self.params.commission
         self.channel = self.params.channel
         self.stop_loss = self.params.stop_loss
@@ -333,11 +335,8 @@ class BaseStrategy(bt.Strategy):
                 # Afforded size is based on closing price for the current trading day
                 # Margin is required for buy commission
                 # Add allowance to commission per transaction (avoid margin)
-                afforded_size = int(
-                    self.cash
-                    / (self.dataclose[0] * (1 + self.commission + 0.001))
-                )
-                buy_prop_size = int(afforded_size * self.buy_prop)
+                afforded_size = self.cash / (self.dataclose[0] * (1 + self.commission))
+                buy_prop_size = afforded_size * self.buy_prop
 
                 # Used for take profit method
                 self.price_bought = self.data.close[0]
@@ -345,6 +344,8 @@ class BaseStrategy(bt.Strategy):
                 # Buy based on the closing price of the previous closing day
                 if self.execution_type == "close":
                     final_size = min(buy_prop_size, afforded_size)
+                    if not self.fractional:
+                        final_size = int(final_size)
                     if self.transaction_logging:
                         self.log("Cash: {}".format(self.cash))
                         self.log("Price: {}".format(self.dataclose[0]))

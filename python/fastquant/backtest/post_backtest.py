@@ -1,3 +1,4 @@
+from fastquant.strategies.buy_and_hold import BuyAndHoldStrategy
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
@@ -6,16 +7,17 @@ import backtrader as bt
 from fastquant.backtest.backtest_indicators import get_indicators_as_dict
 from fastquant.config import GLOBAL_PARAMS
 
-
 """
 Post backtest functionalities
 - Retrieval of hisotry of orders, indicators and perodic logs
 - Analysis of each strategy
 - Plotting
+ 
 """
 
 
 def analyze_strategies(
+    init_cash,
     stratruns,
     data,
     strat_names,
@@ -45,10 +47,7 @@ def analyze_strategies(
 
         for i, strat in enumerate(stratrun):
             # Get indicator history
-            st_dtime = [
-                bt.utils.date.num2date(num)
-                for num in strat.lines.datetime.plot()
-            ]
+            st_dtime = [bt.utils.date.num2date(num) for num in strat.lines.datetime.plot()]
             indicators_dict = get_indicators_as_dict(strat)
             indicators_df = pd.DataFrame(indicators_dict)
             indicators_df.insert(0, "dt", st_dtime)
@@ -120,6 +119,8 @@ def analyze_strategies(
         sharpe = strat.analyzers.mysharpe.get_analysis()
         drawdown = strat.analyzers.drawdown.get_analysis()
         timedraw = strat.analyzers.timedraw.get_analysis()
+        tradeanalyzer = strat.analyzers.tradeanalyzer.get_analysis()
+
         # Combine dicts for returns and sharpe
         m = {
             **returns,
@@ -129,6 +130,24 @@ def analyze_strategies(
             "pnl": strat.pnl,
             "final_value": strat.final_value,
         }
+
+        if strategy!= BuyAndHoldStrategy:
+            m2 = {
+            "total": tradeanalyzer['total']['total'],
+            "win_rate": tradeanalyzer['won']['total'] / tradeanalyzer['total']['total'],
+            "won": tradeanalyzer['won']['total'],
+            "lost": tradeanalyzer['lost']['total'],
+            "won_avg": tradeanalyzer['won']['pnl']['average'],
+            "won_avg_prcnt": tradeanalyzer['won']['pnl']['average'] / init_cash * 100,
+            "lost_avg": tradeanalyzer['lost']['pnl']['average'],
+            "lost_avg_prcnt": tradeanalyzer['lost']['pnl']['average'] / init_cash * 100,
+            "won_max": tradeanalyzer['won']['pnl']['max'],
+            "won_max_prcnt": tradeanalyzer['won']['pnl']['max'] / init_cash * 100,
+            "lost_max": tradeanalyzer['lost']['pnl']['max'],
+            "lost_max_prcnt":  tradeanalyzer['lost']['pnl']['max'] / init_cash * 100
+        }
+            m = {**m, **m2}
+        
 
         params.append(strats_params)
         metrics.append(m)
@@ -231,7 +250,6 @@ def plot_results(cerebro, data_format_dict, figsize=(30, 15), **plot_kwargs):
     fig = cerebro.plot(volume=has_volume, iplot=iplot, **plot_kwargs)
 
     return fig[0][0]
-
 
 def print_dict(d, title="", format="inline"):
     if format is None:
