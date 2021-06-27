@@ -337,7 +337,7 @@ class BaseStrategy(bt.Strategy):
                 # Afforded size is based on closing price for the current trading day
                 # Margin is required for buy commission
                 # Add allowance to commission per transaction (avoid margin)
-                afforded_size = self.cash / (self.dataclose[0] * (1 + self.commission))
+                afforded_size = self.cash / (self.dataclose[0] * (1 + self.commission + 0.001))
                 buy_prop_size = afforded_size * self.buy_prop
 
                 # Used for take profit method
