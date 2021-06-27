@@ -512,8 +512,10 @@ class BaseStrategy(bt.Strategy):
         elif self.take_profit_signal():
             # Take profit 
             price_limit = self.price_bought * (1 + self.take_profit)
-
-            if self.take_profit:
+            
+            # Take profit is only triggered when there is a net long position (positive position size)
+            # TODO: Make take profit (and stop loss) supported for both net long and short positions
+            if self.take_profit and self.position.size > 0:
                 if self.data.close[0] >= price_limit:
                     self.sell(
                         exectype=bt.Order.Close, price=price_limit, size=self.position.size,
