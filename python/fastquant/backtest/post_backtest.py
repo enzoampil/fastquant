@@ -47,7 +47,10 @@ def analyze_strategies(
 
         for i, strat in enumerate(stratrun):
             # Get indicator history
-            st_dtime = [bt.utils.date.num2date(num) for num in strat.lines.datetime.plot()]
+            st_dtime = [
+                bt.utils.date.num2date(num)
+                for num in strat.lines.datetime.plot()
+            ]
             indicators_dict = get_indicators_as_dict(strat)
             indicators_df = pd.DataFrame(indicators_dict)
             indicators_df.insert(0, "dt", st_dtime)
@@ -131,23 +134,65 @@ def analyze_strategies(
             "final_value": strat.final_value,
         }
 
-        if strategy!= BuyAndHoldStrategy:
-            m2 = {
-            "total": tradeanalyzer['total']['total'],
-            "win_rate": tradeanalyzer['won']['total'] / tradeanalyzer['total']['total'],
-            "won": tradeanalyzer['won']['total'],
-            "lost": tradeanalyzer['lost']['total'],
-            "won_avg": tradeanalyzer['won']['pnl']['average'],
-            "won_avg_prcnt": tradeanalyzer['won']['pnl']['average'] / init_cash * 100,
-            "lost_avg": tradeanalyzer['lost']['pnl']['average'],
-            "lost_avg_prcnt": tradeanalyzer['lost']['pnl']['average'] / init_cash * 100,
-            "won_max": tradeanalyzer['won']['pnl']['max'],
-            "won_max_prcnt": tradeanalyzer['won']['pnl']['max'] / init_cash * 100,
-            "lost_max": tradeanalyzer['lost']['pnl']['max'],
-            "lost_max_prcnt":  tradeanalyzer['lost']['pnl']['max'] / init_cash * 100
+        if "total" in tradeanalyzer.keys():
+            total = tradeanalyzer["total"]["total"]
+        else:
+            total = np.nan
+
+        if "won" in tradeanalyzer.keys():
+            win_rate = (
+                tradeanalyzer["won"]["total"] / tradeanalyzer["total"]["total"]
+            )
+            won = tradeanalyzer["won"]["total"]
+            won_avg = tradeanalyzer["won"]["pnl"]["average"]
+            won_avg_prcnt = (
+                tradeanalyzer["won"]["pnl"]["average"] / init_cash * 100
+            )
+            won_max = tradeanalyzer["won"]["pnl"]["max"]
+            won_max_prcnt = (
+                tradeanalyzer["won"]["pnl"]["max"] / init_cash * 100
+            )
+        else:
+            win_rate = np.nan
+            won = np.nan
+            won_avg = np.nan
+            won_avg_prcnt = np.nan
+            won_max = np.nan
+            won_max_prcnt = np.nan
+
+        if "lost" in tradeanalyzer.keys():
+            lost = tradeanalyzer["lost"]["total"]
+            lost_avg = tradeanalyzer["lost"]["pnl"]["average"]
+            lost_avg_prcnt = (
+                tradeanalyzer["lost"]["pnl"]["average"] / init_cash * 100
+            )
+            lost_max = tradeanalyzer["lost"]["pnl"]["max"]
+            lost_max_prcnt = (
+                tradeanalyzer["lost"]["pnl"]["max"] / init_cash * 100
+            )
+        else:
+            lost = np.nan
+            lost_avg = np.nan
+            lost_avg_prcnt = np.nan
+            lost_max = np.nan
+            lost_max_prcnt = np.nan
+
+        m2 = {
+            "total": total,
+            "win_rate": win_rate,
+            "won": won,
+            "lost": lost,
+            "won_avg": won_avg,
+            "won_avg_prcnt": won_avg_prcnt,
+            "lost_avg": lost_avg,
+            "lost_avg_prcnt": lost_avg_prcnt,
+            "won_max": won_max,
+            "won_max_prcnt": won_max_prcnt,
+            "lost_max": lost_max,
+            "lost_max_prcnt": lost_max_prcnt,
         }
-            m = {**m, **m2}
-        
+
+        m = {**m, **m2}
 
         params.append(strats_params)
         metrics.append(m)
@@ -250,6 +295,7 @@ def plot_results(cerebro, data_format_dict, figsize=(30, 15), **plot_kwargs):
     fig = cerebro.plot(volume=has_volume, iplot=iplot, **plot_kwargs)
 
     return fig[0][0]
+
 
 def print_dict(d, title="", format="inline"):
     if format is None:
