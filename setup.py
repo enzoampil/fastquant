@@ -7,7 +7,7 @@ with open("python/requirements.txt", "r") as fh:
 
 setuptools.setup(
     name="fastquant",
-    version="0.1.3.24",
+    version="0.1.5.0",
     author="Lorenzo Ampil",
     author_email="lorenzo.ampil@gmail.com",
     description="Bringing data driven investments to the mainstream",
@@ -16,7 +16,7 @@ setuptools.setup(
     url="https://github.com/enzoampil/fastquant",
     packages=setuptools.find_packages(where="./python", exclude=["docs", "tests"]),
     package_dir={"": "python"},
-    package_data={"fastquant": ["python/data/*"]},
+    package_data={"fastquant": ["data/*"]},
     include_package_data=True,
     scripts=["python/scripts/get_disclosures", "python/scripts/update_cache"],
     classifiers=[

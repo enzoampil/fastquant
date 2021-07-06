@@ -7,6 +7,8 @@
 
 **fastquant** allows you to easily backtest investment strategies with as few as 3 lines of python code. Its goal is to promote data driven investments by making quantitative analysis in finance accessible to everyone.
 
+To do this type of analysis without coding, you can also try out [Hawksight](https://hawksight.co/), which was just recently launched! :smile:
+
 ## Features
 1. Easily access historical stock data
 2. Backtest and optimize trading strategies with only 3 lines of code
@@ -75,6 +77,12 @@ backtest('smac', df, fast_period=15, slow_period=40)
 ```
 ![](./docs/assets/smac_sample.png)
 
+## Want to do this without coding at all?
+
+If you want to make this kind of analysis even more simple without having to code at all (or want to avoid the pain of doing all of the setup required), you can signup for free and try out [Hawksight](https://hawksight.co/) - this new no-code tool I’m building to democratize data driven investments.
+
+Hoping to make these kinds of powerful analyses accessible to more people!
+
 ## Optimize trading strategies with automated grid search
 
 fastquant allows you to automatically measure the performance of your trading strategy on multiple combinations of parameters. All you need to do is to input the values as iterators (like as a `list` or `range`).
@@ -99,13 +107,6 @@ print(res[['fast_period', 'slow_period', 'final_value']].head())
 #4	15	        46	         97452.92
 
 ```
-
-## Want to do this without coding at all?
-
-If you want to make this kind of analysis even more simple without having to code at all (or want to avoid the pain of doing all of the setup required), you can subscribe for early access to [Hawksight](https://hawksight.co/) - this new no-code tool I’m building to democratize data driven investments.
-
-Hoping to make these kinds of powerful analyses accessible to more people!
-
 
 ## Library of trading strategies
 
@@ -270,7 +271,7 @@ View full list of fastquan API [here](API.md)
 
 Want to discuss more about fastquant with other users, and our team of developers?
 
-Join the fastquant Slack community, and our bi-weekly remote meetups through this [link](https://join.slack.com/t/fastquant/shared_invite/zt-mhsm2481-sWVLAO3_Taa1djiakiNQMg)!
+Join the fastquant Slack community through this [link](https://join.slack.com/t/fastquant/shared_invite/zt-sfoxaqq9-LU0Bha7jDvOVVAzu~B3PDA)!
 
 You can also [subscribe](https://forms.gle/HAPYdMp2YMu4qXPd7) to our monthly newsletter to receive updates on our latest tutorials, blog posts, and product features!
 
