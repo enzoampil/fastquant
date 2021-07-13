@@ -17,7 +17,7 @@ CRYPTO_EXCHANGES = [
 
 def unix_time_millis(date):
     # epoch = datetime.utcfromtimestamp(0)
-    dt = datetime.strptime(date, "%Y-%m-%d")
+    dt = datetime.strptime(date, "%Y-%m-%d %H:%M:%S")
     # return int((dt - epoch).total_seconds() * 1000)
     return int(dt.timestamp() * 1000)
 
@@ -70,7 +70,8 @@ def get_crypto_data(
                 # then step forward to the next day
                 request_start_date_epoch += int(timedelta(days=1).total_seconds()) * 1000
                 # Make sure we're at the start of that day
-                request_start_date_epoch = unix_time_millis(pd.to_datetime(request_start_date_epoch, unit="ms").strftime('%Y-%m-%d'))
+                request_start_date_epoch = unix_time_millis(pd.to_datetime(request_start_date_epoch, unit="ms").strftime('%Y-%m-%d %H:%M:%S'))
+
                 previous_request_end_date_epoch = request_start_date_epoch - 1
                 continue
 
