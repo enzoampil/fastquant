@@ -70,7 +70,7 @@ class BaseStrategy(bt.Strategy):
         print("%s, %s" % (dt.isoformat(), txt))
 
     def update_order_history(self, order):
-        self.order_history["dt"].append(self.datas[0].datetime.date(0))
+        self.order_history["dt"].append(self.datas[0].datetime.datetime(0))
         self.order_history["type"].append("buy" if order.isbuy() else "sell")
         self.order_history["price"].append(order.executed.price)
         self.order_history["size"].append(order.executed.size)
@@ -79,7 +79,7 @@ class BaseStrategy(bt.Strategy):
         self.order_history["pnl"].append(order.executed.pnl)
 
     def update_periodic_history(self):
-        self.periodic_history["dt"].append(self.datas[0].datetime.date(0))
+        self.periodic_history["dt"].append(self.datas[0].datetime.datetime(0))
         self.periodic_history["portfolio_value"].append(self.broker.getvalue())
         self.periodic_history["cash"].append(self.broker.getcash())
 
