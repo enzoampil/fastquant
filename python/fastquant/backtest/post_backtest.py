@@ -262,6 +262,7 @@ def sort_metrics_params_and_strats(
 
 def get_optim_metrics_and_params(sorted_metrics_df, sorted_params_df, verbose):
     # Save optimal parameters as dictionary
+    print(sorted_params_df)
     optim_params = sorted_params_df.iloc[0].to_dict()
     optim_metrics = sorted_metrics_df.iloc[0].to_dict()
 
