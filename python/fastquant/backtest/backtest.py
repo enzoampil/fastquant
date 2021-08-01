@@ -19,6 +19,7 @@ from collections.abc import Iterable
 import time
 from pandas.api.types import is_numeric_dtype
 
+from backtrader import CommInfoBase
 
 # Import backtest variables
 from fastquant.config import (
@@ -33,7 +34,6 @@ from fastquant.strategies.mappings import STRATEGY_MAPPING
 from fastquant.backtest.data_prep import initalize_data
 from fastquant.backtest.post_backtest import analyze_strategies, plot_results
 
-
 strat_docs = "\nExisting strategies:\n\n" + "\n".join(
     [key + "\n" + value.__doc__ for key, value in STRATEGY_MAPPING.items()]
 )
@@ -43,7 +43,6 @@ def docstring_parameter(*sub):
     """
     Decorator to ensure all the strategy docstrings are included in the `backtest` docstring.
     """
-
     def dec(obj):
         obj.__doc__ = obj.__doc__.format(*sub)
         return obj
@@ -58,6 +57,8 @@ def backtest(
     commission=COMMISSION_PER_TRANSACTION,
     init_cash=INIT_CASH,
     plot=True,
+    fractional=False,
+    rr_ratio=None,
     verbose=1,
     sort_by="rnorm",
     sentiments=[],
@@ -69,6 +70,7 @@ def backtest(
     allow_short=False,
     short_max=1.5,
     figsize=(30, 15),
+    multi_line_indicators=None,
     data_class=None,
     data_kwargs={},
     plot_kwargs={},
@@ -115,7 +117,7 @@ def backtest(
         Custom backtrader database to be used as a parent class instead bt.feed. (default=None)
     data_kwargs : dict
         Datafeed keyword arguments (empty dict by default)
-    plot_kwargs : dict
+    F : dict
         Argument for function cerebro.plot() (empty dict by default)
     {0}
     """
@@ -148,6 +150,8 @@ def backtest(
                 channel=channel,
                 symbol=symbol,
                 allow_short=allow_short,
+                fractional=fractional,
+                # rr_ratio=rr_ratio,
                 short_max=short_max,
                 **params,
             )
@@ -171,6 +175,8 @@ def backtest(
             commission=commission,
             channel=channel,
             symbol=symbol,
+            fractional=fractional,
+            # rr_ratio=rr_ratio,
             allow_short=allow_short,
             short_max=short_max,
             **kwargs,
@@ -182,6 +188,7 @@ def backtest(
     cerebro.addanalyzer(btanalyzers.SharpeRatio, _name="mysharpe")
     cerebro.addanalyzer(btanalyzers.DrawDown, _name="drawdown")
     cerebro.addanalyzer(btanalyzers.TimeDrawDown, _name="timedraw")
+    cerebro.addanalyzer(btanalyzers.TradeAnalyzer, _name="tradeanalyzer") #trade analyzer
 
     cerebro.broker.setcommission(commission=commission)
 
@@ -210,6 +217,7 @@ def backtest(
 
     # Get History, Optimal Parameters and Strategy Metrics
     sorted_combined_df, optim_params, history_dict = analyze_strategies(
+        init_cash,
         stratruns,
         data,
         strat_names,
@@ -218,18 +226,19 @@ def backtest(
         sort_by,
         return_history,
         verbose,
+        multi_line_indicators,
         **kwargs,
     )
 
     # Plot
-
+    
     if plot and strategy != "multi":
         # Plot only with the optimal parameters when multiple strategy runs are required
         if sorted_combined_df.shape[0] != 1:
             if verbose > 0:
                 print("=============================================")
                 print("Plotting backtest for optimal parameters ...")
-            fig = backtest(
+            _, fig = backtest(
                 strategy,
                 data,
                 plot=plot,
@@ -237,34 +246,28 @@ def backtest(
                 sort_by=sort_by,
                 return_plot=return_plot,
                 plot_kwargs=plot_kwargs,
-                return_history=return_history,
                 **optim_params,
             )
         else:
-            fig = plot_results(
-                cerebro, data_format_dict, figsize, **plot_kwargs
-            )
+            fig = plot_results(cerebro, data_format_dict, figsize, **plot_kwargs)
 
-    # we just need to make the output of this conditions into tuple so that
-    # if the user is using grid-search, they'll have a tuple and can access the result
-    # via indexes e.g result[0], result[1]
     if return_history and return_plot:
-        return (sorted_combined_df, history_dict, fig)
+        return sorted_combined_df, history_dict, fig
     elif return_history:
-        return (sorted_combined_df, history_dict)
+        return sorted_combined_df, history_dict
     elif return_plot:
-        return (sorted_combined_df, fig)
+        return sorted_combined_df, fig
     else:
         return sorted_combined_df
 
 
 def get_logging_params(verbose):
     """
-    Adjusts the logging verbosity based on the `verbose` parameter
-    0 - No logging
-    1 - Strategy Level logs
-    2 - Transaction Level logs
-    3 - Periodic Logs
+        Adjusts the logging verbosity based on the `verbose` parameter
+        0 - No logging
+        1 - Strategy Level logs
+        2 - Transaction Level logs
+        3 - Periodic Logs
     """
     verbosity_args = dict(
         strategy_logging=False,

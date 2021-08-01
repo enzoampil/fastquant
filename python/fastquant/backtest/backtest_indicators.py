@@ -11,10 +11,13 @@ from backtrader.indicators import (
 )
 import re
 
+
 # Some indicators contain multiple "lines" instead of just one
 # From source code `lines` attribute of the indacator
 # https://github.com/mementum/backtrader/tree/master/backtrader/indicators
-multi_line_indicators = [
+MULTI_LINE_INDICATORS = [
+    # (INDICATOR_MAPPING['zzfib'], ("s1", "s2", "r1", "r2")),
+    # (INDICATOR_MAPPING['sr'], ("s1", "s2", "r1", "r2")),
     (AverageDirectionalMovementIndexRating, ("adx", "adxr",)),
     (ADXR, ("adx", "adxr",)),
     (BollingerBands, ("mid", "top", "bot",)),
@@ -39,13 +42,19 @@ multi_line_indicators = [
 indicator_regex = re.compile("[a-zA-Z0-9.]+")
 
 
-def get_indicators_as_dict(strat_run):
+def get_indicators_as_dict(strat_run, multi_line_indicators):
     """
     Returns the indicators used for the strategy run
     """
+
+    if multi_line_indicators != None:
+        multi_line_ind = multi_line_indicators
+    else:
+        multi_line_ind = MULTI_LINE_INDICATORS
+    
     indicators = strat_run.getindicators()
     indicators_dict = dict()
-    for i, ind in enumerate(indicators):
+    for i, ind in enumerate(indicators): 
         indicator_name = (
             ind.plotlabel()
             if hasattr(ind, "plotlabel")
@@ -53,7 +62,7 @@ def get_indicators_as_dict(strat_run):
         )
 
         # Check if indicator contains multiple lines
-        line_names = get_line_names(ind)
+        line_names = get_line_names(ind, multi_line_ind)
         if len(line_names) > 1:
             for lx, line_name in enumerate(line_names):
                 key = rename_indicator(indicator_name, line_name)
@@ -66,9 +75,9 @@ def get_indicators_as_dict(strat_run):
     return indicators_dict
 
 
-def get_line_names(indicator):
+def get_line_names(indicator, multi_line_ind):
 
-    for indicator_class, line_names in multi_line_indicators:
+    for indicator_class, line_names in multi_line_ind:
         # Check the type/class # isinstance doesnt work on subclasses correctly
         if type(indicator) == indicator_class:
             return line_names
