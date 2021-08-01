@@ -48,8 +48,7 @@ class BaseStrategy(bt.Strategy):
         ("init_cash", INIT_CASH),
         ("buy_prop", BUY_PROP),
         ("sell_prop", SELL_PROP),
-        ("fractional", False),
-        # ("rr_ratio", None),   
+        ("fractional", False),  
         ("commission", COMMISSION_PER_TRANSACTION),
         ("stop_loss", 0),  # Zero means no stop loss
         ("stop_trail", 0),  # Zero means no stop loss
@@ -84,16 +83,6 @@ class BaseStrategy(bt.Strategy):
         self.order_history["commission"].append(order.executed.comm)
         self.order_history["pnl"].append(order.executed.pnl)
         
-        # Adding Risk Reward Ratio in orders Dataframe
-        # if self.rr_ratio !=None:
-        #     if order.isbuy():
-        #         rr_sl_price = order.executed.price - (self.rr_atr_ind*2)
-        #         rr_tp_price = order.executed.price + ((self.rr_atr_ind*2) * self.rr_ratio)
-        #     else:
-        #         rr_sl_price = order.executed.price + (self.rr_atr_ind*2)
-        #         rr_tp_price = order.executed.price - ((self.rr_atr_ind*2) * self.rr_ratio)
-        #     self.order_history["rr_take_profit"].append(rr_tp_price)
-        #     self.order_history["rr_stop_loss"].append(rr_sl_price)
 
     def update_periodic_history(self):
         self.periodic_history["dt"].append(self.datas[0].datetime.date(0))
@@ -110,7 +99,6 @@ class BaseStrategy(bt.Strategy):
         self.transaction_logging = self.params.transaction_logging
         self.strategy_logging = self.params.strategy_logging
         self.fractional = self.params.fractional
-        # self.rr_ratio = self.params.rr_ratio
         self.commission = self.params.commission
         self.channel = self.params.channel
         self.stop_loss = self.params.stop_loss
@@ -121,10 +109,6 @@ class BaseStrategy(bt.Strategy):
         self.invest_div = self.params.invest_div
         self.broker.set_coc(True)
         add_cash_freq = self.params.add_cash_freq
-
-        # if self.rr_ratio !=None:
-        #     self.rr_atr_ind = bt.indicators.AverageTrueRange() #ATR for recommended riskreward ratio/sl&tp
-        #     self.rr_atr_ind.plotinfo.plot = False
         
         # Longer term, we plan to add `freq` like notation, similar to pandas datetime
         # https://pandas.pydata.org/pandas-docs/stable/user_guide/timeseries.html
@@ -161,9 +145,6 @@ class BaseStrategy(bt.Strategy):
             "commission": [],
             "pnl": [],
         }
-        # if self.rr_ratio !=None:
-        #     self.order_history["rr_stop_loss"] = []
-        #     self.order_history["rr_take_profit"] = []
 
         self.periodic_history = {
             "dt": [],

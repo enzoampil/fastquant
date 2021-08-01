@@ -16,8 +16,6 @@ import re
 # From source code `lines` attribute of the indacator
 # https://github.com/mementum/backtrader/tree/master/backtrader/indicators
 MULTI_LINE_INDICATORS = [
-    # (INDICATOR_MAPPING['zzfib'], ("s1", "s2", "r1", "r2")),
-    # (INDICATOR_MAPPING['sr'], ("s1", "s2", "r1", "r2")),
     (AverageDirectionalMovementIndexRating, ("adx", "adxr",)),
     (ADXR, ("adx", "adxr",)),
     (BollingerBands, ("mid", "top", "bot",)),
