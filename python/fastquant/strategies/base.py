@@ -48,7 +48,9 @@ class BaseStrategy(bt.Strategy):
         ("init_cash", INIT_CASH),
         ("buy_prop", BUY_PROP),
         ("sell_prop", SELL_PROP),
-        ("fractional", False),  
+        ("fractional", False),
+        ("rr_ratio", None),
+        ("sr_fib", None),  
         ("commission", COMMISSION_PER_TRANSACTION),
         ("stop_loss", 0),  # Zero means no stop loss
         ("stop_trail", 0),  # Zero means no stop loss
