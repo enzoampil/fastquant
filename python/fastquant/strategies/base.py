@@ -70,12 +70,11 @@ class BaseStrategy(bt.Strategy):
     )
 
     def log(self, txt, dt=None):
-        dt = dt or self.datas[0].datetime.date(0)
+        dt = dt or self.datas[0].datetime.datetime(0)
         print("%s, %s" % (dt.isoformat(), txt))
 
     def update_order_history(self, order):
-
-        self.order_history["dt"].append(self.datas[0].datetime.date(0))
+        self.order_history["dt"].append(self.datas[0].datetime.datetime(0))
         self.order_history["type"].append("buy" if order.isbuy() else "sell")
         self.order_history["price"].append(order.executed.price)
         self.order_history["size"].append(order.executed.size)
@@ -85,7 +84,7 @@ class BaseStrategy(bt.Strategy):
         
 
     def update_periodic_history(self):
-        self.periodic_history["dt"].append(self.datas[0].datetime.date(0))
+        self.periodic_history["dt"].append(self.datas[0].datetime.datetime(0))
         self.periodic_history["portfolio_value"].append(self.broker.getvalue())
         self.periodic_history["cash"].append(self.broker.getcash())
 
@@ -357,7 +356,7 @@ class BaseStrategy(bt.Strategy):
                     final_size = min(buy_prop_size, afforded_size)
                     if not self.fractional:
                         final_size = int(final_size)
-            
+
                     if self.transaction_logging:
                         self.log("Cash: {}".format(self.cash))
                         self.log("Price: {}".format(self.dataclose[0]))
