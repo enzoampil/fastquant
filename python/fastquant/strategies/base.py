@@ -22,10 +22,6 @@ import time
 from fastquant.notification import trigger_bot
 import croniter
 
-# For importing local indicators
-# import sys
-# sys.path.append(r"C:\Users\ACALA\Documents\GitHub\HawkSight\quant-experiments")
-# from indicators import *
 
 from fastquant.config import (
     INIT_CASH,
