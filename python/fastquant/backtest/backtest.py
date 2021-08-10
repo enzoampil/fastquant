@@ -69,6 +69,7 @@ def backtest(
     allow_short=False,
     short_max=1.5,
     figsize=(30, 15),
+    multi_line_indicators=None,
     data_class=None,
     data_kwargs={},
     plot_kwargs={},
@@ -115,7 +116,7 @@ def backtest(
         Custom backtrader database to be used as a parent class instead bt.feed. (default=None)
     data_kwargs : dict
         Datafeed keyword arguments (empty dict by default)
-    plot_kwargs : dict
+    F : dict
         Argument for function cerebro.plot() (empty dict by default)
     {0}
     """
@@ -222,6 +223,7 @@ def backtest(
         sort_by,
         return_history,
         verbose,
+        multi_line_indicators,
         **kwargs,
     )
 

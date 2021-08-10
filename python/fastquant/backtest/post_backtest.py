@@ -15,7 +15,6 @@ Post backtest functionalities
  
 """
 
-
 def analyze_strategies(
     init_cash,
     stratruns,
@@ -26,6 +25,7 @@ def analyze_strategies(
     sort_by,
     return_history,
     verbose,
+    multi_line_indicators=None,
     **kwargs
 ):
     params = []
@@ -51,7 +51,7 @@ def analyze_strategies(
                 bt.utils.date.num2date(num)
                 for num in strat.lines.datetime.plot()
             ]
-            indicators_dict = get_indicators_as_dict(strat)
+            indicators_dict = get_indicators_as_dict(strat, multi_line_indicators)
             indicators_df = pd.DataFrame(indicators_dict)
             indicators_df.insert(0, "dt", st_dtime)
 

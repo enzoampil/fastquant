@@ -22,6 +22,7 @@ import time
 from fastquant.notification import trigger_bot
 import croniter
 
+
 from fastquant.config import (
     INIT_CASH,
     COMMISSION_PER_TRANSACTION,
@@ -30,7 +31,6 @@ from fastquant.config import (
     SELL_PROP,
     SHORT_MAX,
 )
-
 
 class BaseStrategy(bt.Strategy):
     """
@@ -44,7 +44,7 @@ class BaseStrategy(bt.Strategy):
         ("init_cash", INIT_CASH),
         ("buy_prop", BUY_PROP),
         ("sell_prop", SELL_PROP),
-        ("fractional", False), 
+        ("fractional", False),
         ("commission", COMMISSION_PER_TRANSACTION),
         ("stop_loss", 0),  # Zero means no stop loss
         ("stop_trail", 0),  # Zero means no stop loss
@@ -77,6 +77,7 @@ class BaseStrategy(bt.Strategy):
         self.order_history["value"].append(order.executed.value)
         self.order_history["commission"].append(order.executed.comm)
         self.order_history["pnl"].append(order.executed.pnl)
+        
 
     def update_periodic_history(self):
         self.periodic_history["dt"].append(self.datas[0].datetime.datetime(0))
@@ -103,7 +104,7 @@ class BaseStrategy(bt.Strategy):
         self.invest_div = self.params.invest_div
         self.broker.set_coc(True)
         add_cash_freq = self.params.add_cash_freq
-
+        
         # Longer term, we plan to add `freq` like notation, similar to pandas datetime
         # https://pandas.pydata.org/pandas-docs/stable/user_guide/timeseries.html
         # M means add cash at the first day of each month
@@ -139,6 +140,7 @@ class BaseStrategy(bt.Strategy):
             "commission": [],
             "pnl": [],
         }
+
         self.periodic_history = {
             "dt": [],
             "portfolio_value": [],
@@ -348,6 +350,7 @@ class BaseStrategy(bt.Strategy):
                     final_size = min(buy_prop_size, afforded_size)
                     if not self.fractional:
                         final_size = int(final_size)
+
                     if self.transaction_logging:
                         self.log("Cash: {}".format(self.cash))
                         self.log("Price: {}".format(self.dataclose[0]))
