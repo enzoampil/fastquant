@@ -43,6 +43,7 @@ def docstring_parameter(*sub):
     """
     Decorator to ensure all the strategy docstrings are included in the `backtest` docstring.
     """
+
     def dec(obj):
         obj.__doc__ = obj.__doc__.format(*sub)
         return obj
@@ -58,6 +59,7 @@ def backtest(
     init_cash=INIT_CASH,
     plot=True,
     fractional=False,
+    slippage=0.001,
     verbose=1,
     sort_by="rnorm",
     sentiments=[],
@@ -150,6 +152,7 @@ def backtest(
                 symbol=symbol,
                 allow_short=allow_short,
                 fractional=fractional,
+                slippage=slippage,
                 short_max=short_max,
                 **params,
             )
@@ -174,6 +177,7 @@ def backtest(
             channel=channel,
             symbol=symbol,
             fractional=fractional,
+            slippage=slippage,
             allow_short=allow_short,
             short_max=short_max,
             **kwargs,
@@ -185,7 +189,9 @@ def backtest(
     cerebro.addanalyzer(btanalyzers.SharpeRatio, _name="mysharpe")
     cerebro.addanalyzer(btanalyzers.DrawDown, _name="drawdown")
     cerebro.addanalyzer(btanalyzers.TimeDrawDown, _name="timedraw")
-    cerebro.addanalyzer(btanalyzers.TradeAnalyzer, _name="tradeanalyzer") #trade analyzer
+    cerebro.addanalyzer(
+        btanalyzers.TradeAnalyzer, _name="tradeanalyzer"
+    )  # trade analyzer
 
     cerebro.broker.setcommission(commission=commission)
 
@@ -228,7 +234,7 @@ def backtest(
     )
 
     # Plot
-    
+
     if plot and strategy != "multi":
         # Plot only with the optimal parameters when multiple strategy runs are required
         if sorted_combined_df.shape[0] != 1:
@@ -246,7 +252,9 @@ def backtest(
                 **optim_params,
             )
         else:
-            fig = plot_results(cerebro, data_format_dict, figsize, **plot_kwargs)
+            fig = plot_results(
+                cerebro, data_format_dict, figsize, **plot_kwargs
+            )
 
     if return_history and return_plot:
         return sorted_combined_df, history_dict, fig
@@ -260,11 +268,11 @@ def backtest(
 
 def get_logging_params(verbose):
     """
-        Adjusts the logging verbosity based on the `verbose` parameter
-        0 - No logging
-        1 - Strategy Level logs
-        2 - Transaction Level logs
-        3 - Periodic Logs
+    Adjusts the logging verbosity based on the `verbose` parameter
+    0 - No logging
+    1 - Strategy Level logs
+    2 - Transaction Level logs
+    3 - Periodic Logs
     """
     verbosity_args = dict(
         strategy_logging=False,
