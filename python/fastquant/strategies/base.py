@@ -22,10 +22,6 @@ import time
 from fastquant.notification import trigger_bot
 import croniter
 
-# For importing local indicators
-# import sys
-# sys.path.append(r"C:\Users\ACALA\Documents\GitHub\HawkSight\quant-experiments")
-# from indicators import *
 
 from fastquant.config import (
     INIT_CASH,
@@ -254,8 +250,6 @@ class BaseStrategy(bt.Strategy):
             self.log("Final Portfolio Value: {}".format(self.final_value))
             self.log("Final PnL: {}".format(self.pnl))
         self.order_history_df = pd.DataFrame(self.order_history)
-        # self.order_history_df['take_profi']=''
-        # self.order_history_df['stop_loss']=''
         self.periodic_history_df = pd.DataFrame(self.periodic_history)
 
         last_date = str(self.datas[0].datetime.date(0))
