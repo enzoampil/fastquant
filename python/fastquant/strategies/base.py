@@ -22,6 +22,10 @@ import time
 from fastquant.notification import trigger_bot
 import croniter
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> upstream/master
 from fastquant.config import (
     INIT_CASH,
     COMMISSION_PER_TRANSACTION,
@@ -67,12 +71,11 @@ class BaseStrategy(bt.Strategy):
     )
 
     def log(self, txt, dt=None):
-        dt = dt or self.datas[0].datetime.date(0)
+        dt = dt or self.datas[0].datetime.datetime(0)
         print("%s, %s" % (dt.isoformat(), txt))
 
     def update_order_history(self, order):
-
-        self.order_history["dt"].append(self.datas[0].datetime.date(0))
+        self.order_history["dt"].append(self.datas[0].datetime.datetime(0))
         self.order_history["type"].append("buy" if order.isbuy() else "sell")
         self.order_history["price"].append(order.executed.price)
         self.order_history["size"].append(order.executed.size)
@@ -81,7 +84,7 @@ class BaseStrategy(bt.Strategy):
         self.order_history["pnl"].append(order.executed.pnl)
 
     def update_periodic_history(self):
-        self.periodic_history["dt"].append(self.datas[0].datetime.date(0))
+        self.periodic_history["dt"].append(self.datas[0].datetime.datetime(0))
         self.periodic_history["portfolio_value"].append(self.broker.getvalue())
         self.periodic_history["cash"].append(self.broker.getcash())
 
@@ -252,8 +255,6 @@ class BaseStrategy(bt.Strategy):
             self.log("Final Portfolio Value: {}".format(self.final_value))
             self.log("Final PnL: {}".format(self.pnl))
         self.order_history_df = pd.DataFrame(self.order_history)
-        # self.order_history_df['take_profi']=''
-        # self.order_history_df['stop_loss']=''
         self.periodic_history_df = pd.DataFrame(self.periodic_history)
 
         last_date = str(self.datas[0].datetime.date(0))
