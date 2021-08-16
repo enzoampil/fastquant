@@ -60,6 +60,7 @@ def backtest(
     plot=True,
     fractional=False,
     slippage=0.001,
+    single_position=None,
     verbose=1,
     sort_by="rnorm",
     sentiments=[],
@@ -153,6 +154,7 @@ def backtest(
                 allow_short=allow_short,
                 fractional=fractional,
                 slippage=slippage,
+                single_position=single_position,
                 short_max=short_max,
                 **params,
             )
@@ -178,6 +180,7 @@ def backtest(
             symbol=symbol,
             fractional=fractional,
             slippage=slippage,
+            single_position=single_position,
             allow_short=allow_short,
             short_max=short_max,
             **kwargs,

@@ -22,10 +22,7 @@ import time
 from fastquant.notification import trigger_bot
 import croniter
 
-<<<<<<< HEAD
-=======
 
->>>>>>> upstream/master
 from fastquant.config import (
     INIT_CASH,
     COMMISSION_PER_TRANSACTION,
@@ -50,6 +47,7 @@ class BaseStrategy(bt.Strategy):
         ("sell_prop", SELL_PROP),
         ("fractional", False),
         ("slippage", 0.001),
+        ("single_position", None),
         ("commission", COMMISSION_PER_TRANSACTION),
         ("stop_loss", 0),  # Zero means no stop loss
         ("stop_trail", 0),  # Zero means no stop loss
@@ -99,6 +97,7 @@ class BaseStrategy(bt.Strategy):
         self.strategy_logging = self.params.strategy_logging
         self.fractional = self.params.fractional
         self.slippage = self.params.slippage
+        self.single_position = self.params.single_position
         self.commission = self.params.commission
         self.channel = self.params.channel
         self.stop_loss = self.params.stop_loss
@@ -109,6 +108,13 @@ class BaseStrategy(bt.Strategy):
         self.invest_div = self.params.invest_div
         self.broker.set_coc(True)
         add_cash_freq = self.params.add_cash_freq
+
+        # Sets wether to include the current position as a condition buying or selling
+        # It will only buy or sell as a single pair in each trade if this is not None
+        if self.single_position is not None:
+            self.strategy_position = 0
+        else:
+            self.strategy_position = None
 
         # Longer term, we plan to add `freq` like notation, similar to pandas datetime
         # https://pandas.pydata.org/pandas-docs/stable/user_guide/timeseries.html
@@ -332,8 +338,12 @@ class BaseStrategy(bt.Strategy):
         stock_value = self.value - self.cash
 
         # Only buy if there is enough cash for at least one stock
-        if self.buy_signal():
-            # Alternative for fractional condition based in min amount of significant value:
+        if self.buy_signal() and (
+            self.strategy_position == 0 or self.strategy_position is None
+        ):
+            self.strategy_position = 1 if self.strategy_position == 0 else None
+
+            # Alternative for fractional condition based o  n min amount of significant value:
             # (self.fractional and self.cash >= self.dataclose[0] / 10000)
             if (self.fractional and self.cash >= 10) or (
                 not self.fractional and self.cash >= self.dataclose[0]
@@ -347,7 +357,8 @@ class BaseStrategy(bt.Strategy):
                 # Margin is required for buy commission
                 # Add allowance to commission per transaction (avoid margin)
                 afforded_size = self.cash / (
-                    self.dataclose[0] * (1 + self.commission + self.slippage)
+                    (self.dataclose[0] * (1 + self.slippage))
+                    * (1 + self.commission)
                 )
                 buy_prop_size = afforded_size * self.buy_prop
 
@@ -403,10 +414,7 @@ class BaseStrategy(bt.Strategy):
                     # Margin is required for buy commission
                     afforded_size = int(
                         self.cash
-                        / (
-                            self.dataopen[1]
-                            * (1 + self.commission + self.slippage)
-                        )
+                        / (self.dataopen[1] * (1 + self.commission + 0.001))
                     )
                     final_size = min(buy_prop_size, afforded_size)
                     if self.transaction_logging:
@@ -437,7 +445,11 @@ class BaseStrategy(bt.Strategy):
                             size=final_size,
                         )
 
-        elif self.sell_signal():
+        elif self.sell_signal() and (
+            self.strategy_position == 1 or self.strategy_position is None
+        ):
+            self.strategy_position = 0 if self.strategy_position == 1 else None
+
             if self.allow_short:
 
                 # Sell short based on the closing price of the previous day
