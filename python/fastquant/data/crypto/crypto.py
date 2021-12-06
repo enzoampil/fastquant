@@ -14,10 +14,17 @@ CRYPTO_EXCHANGES = [
 # to add more just add more method names to the above
 # list of supported exchanges according to the classes mentioned here: https://github.com/ccxt/ccxt/tree/master/python/ccxt
 
+DATETIME_FORMAT = {
+    "daily": "%Y-%m-%d",
+    "intraday": "%Y-%m-%d %H:%M:%S"
+}
 
 def unix_time_millis(date):
     # epoch = datetime.utcfromtimestamp(0)
-    dt = datetime.strptime(date, "%Y-%m-%d")
+
+    # value will only have : if the date passed is intraday
+    dt_format = DATETIME_FORMAT['intraday'] if ":" in date else DATETIME_FORMAT['daily']
+    dt = datetime.strptime(date, dt_format)
     # return int((dt - epoch).total_seconds() * 1000)
     return int(dt.timestamp() * 1000)
 
@@ -39,6 +46,7 @@ def get_crypto_data(
     exchange : str
        market exchanges: 'binance' (default), 'coinbasepro', 'bithumb', 'kraken', 'kucoin', 'bitstamp'
     """
+    dt_format = DATETIME_FORMAT['intraday'] if "m" in time_resolution or "h" in time_resolution else DATETIME_FORMAT['daily']
     start_date_epoch = unix_time_millis(start_date)
     end_date_epoch = unix_time_millis(end_date)
 
@@ -70,7 +78,7 @@ def get_crypto_data(
                 # then step forward to the next day
                 request_start_date_epoch += int(timedelta(days=1).total_seconds()) * 1000
                 # Make sure we're at the start of that day
-                request_start_date_epoch = unix_time_millis(pd.to_datetime(request_start_date_epoch, unit="ms").strftime('%Y-%m-%d'))
+                request_start_date_epoch = unix_time_millis(pd.to_datetime(request_start_date_epoch, unit="ms").strftime(dt_format))
                 previous_request_end_date_epoch = request_start_date_epoch - 1
                 continue
 
