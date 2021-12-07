@@ -72,9 +72,7 @@ class Network:
         self.interpolation_method = interpolation_method
         self.n_companies = n_companies
         self.update_cache = update_cache
-        self.data_cache = get_pse_data_cache(
-            update=self.update_cache, verbose=False
-        )
+        self.data_cache = get_pse_data_cache(update=self.update_cache, verbose=False)
         self.data = self.data_cache.xs(indicator, level=1, axis=1)
         self.filtered_data = self.filter_data()
         self.company_table = self.load_company_table()
@@ -93,26 +91,20 @@ class Network:
         return table
 
     def get_sector_of_symbol(self, symbol):
-        """get sector or subsector where symbol belongs
-        """
+        """get sector or subsector where symbol belongs"""
         info = self.company_table.copy()
-        sector = info.loc[
-            info["Stock Symbol"].isin([symbol]), "Sector"
-        ].values[0]
+        sector = info.loc[info["Stock Symbol"].isin([symbol]), "Sector"].values[0]
         return sector
 
     def get_symbols_of_a_sector(self, sector, subsector=False, verbose=False):
-        """get symbols of members in the sector
-        """
+        """get symbols of members in the sector"""
         info = self.company_table.copy()
         column = "Subsector" if subsector else "Sector"
         sectors_dict = info[["Stock Symbol", column]].groupby(column).groups
 
         sector_indices = sectors_dict[sector]
         sector_symbols = info.loc[sector_indices, "Stock Symbol"]
-        data_availability_indices = self.filtered_data.columns.isin(
-            sector_symbols
-        )
+        data_availability_indices = self.filtered_data.columns.isin(sector_symbols)
         symbols_with_data = self.filtered_data.columns[
             data_availability_indices
         ].tolist()
@@ -121,9 +113,7 @@ class Network:
         ].tolist()
         if verbose:
             print(
-                "Symbols without data in {}:\n{}".format(
-                    sector, symbols_without_data
-                )
+                "Symbols without data in {}:\n{}".format(sector, symbols_without_data)
             )
         return symbols_with_data
 
@@ -150,8 +140,7 @@ class Network:
             return df / df_rolling
 
     def remove_outliers(self, df=None, sigma=None):
-        """remove data sigma away from the mean of pct_change
-        """
+        """remove data sigma away from the mean of pct_change"""
         sigma = self.sigma if sigma is None else sigma
 
         if df is None:
@@ -363,11 +352,7 @@ class Network:
         if positive:
             # positively correlated
             if symbol2 is None:
-                symbol2 = (
-                    rank.index[-2]
-                    if rank.index[-1] == symbol
-                    else rank.index[-1]
-                )
+                symbol2 = rank.index[-2] if rank.index[-1] == symbol else rank.index[-1]
 
         else:
             # negatively correlated

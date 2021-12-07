@@ -19,9 +19,7 @@ RSI_PERIOD = 14
 COMMISSION_PER_TRANSACTION = 0.006
 RSI_UPPER = 70
 RSI_LOWER = 30
-DATA_FILE = resource_filename(
-    __name__, "../data/JFC_2010-01-01_2019-01-01_OHLCV.csv"
-)
+DATA_FILE = resource_filename(__name__, "../data/JFC_2010-01-01_2019-01-01_OHLCV.csv")
 
 
 class RSIStrategy(bt.Strategy):
@@ -76,10 +74,7 @@ class RSIStrategy(bt.Strategy):
         if not trade.isclosed:
             return
 
-        self.log(
-            "OPERATION PROFIT, GROSS %.2f, NET %.2f"
-            % (trade.pnl, trade.pnlcomm)
-        )
+        self.log("OPERATION PROFIT, GROSS %.2f, NET %.2f" % (trade.pnl, trade.pnlcomm))
 
     def notify_cashvalue(self, cash, value):
         # Update cash and value every period
@@ -114,9 +109,7 @@ class RSIStrategy(bt.Strategy):
                 self.log("SELL CREATE, %.2f" % self.dataclose[0])
                 # Sell a 5% sell position (or whatever is afforded by the current stock holding)
                 # "size" refers to the number of stocks to purchase
-                self.order = self.sell(
-                    size=int((INIT_CASH / self.dataclose[0]) * 0.1)
-                )
+                self.order = self.sell(size=int((INIT_CASH / self.dataclose[0]) * 0.1))
 
 
 if __name__ == "__main__":

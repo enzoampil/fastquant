@@ -23,10 +23,8 @@ class CustomIndicator(bt.Indicator):
 
     lines = ("custom",)
 
-    params = (
-        ("custom_column", "custom"),
-    )
-        
+    params = (("custom_column", "custom"),)
+
     plotinfo = dict(
         plotymargin=0.15,
         plothlines=[0],

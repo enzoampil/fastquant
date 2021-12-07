@@ -16,14 +16,66 @@ import re
 # From source code `lines` attribute of the indacator
 # https://github.com/mementum/backtrader/tree/master/backtrader/indicators
 MULTI_LINE_INDICATORS = [
-    (AverageDirectionalMovementIndexRating, ("adx", "adxr",)),
-    (ADXR, ("adx", "adxr",)),
-    (BollingerBands, ("mid", "top", "bot",)),
-    (BBands, ("mid", "top", "bot",)),
-    (Envelope, ("top", "bot",)),
-    (MACD, ("macd", "signal",)),
-    (MACDHistogram, ("macd", "signal", "histo",)),
-    (MACDHisto, ("macd", "signal", "histo",)),
+    (
+        AverageDirectionalMovementIndexRating,
+        (
+            "adx",
+            "adxr",
+        ),
+    ),
+    (
+        ADXR,
+        (
+            "adx",
+            "adxr",
+        ),
+    ),
+    (
+        BollingerBands,
+        (
+            "mid",
+            "top",
+            "bot",
+        ),
+    ),
+    (
+        BBands,
+        (
+            "mid",
+            "top",
+            "bot",
+        ),
+    ),
+    (
+        Envelope,
+        (
+            "top",
+            "bot",
+        ),
+    ),
+    (
+        MACD,
+        (
+            "macd",
+            "signal",
+        ),
+    ),
+    (
+        MACDHistogram,
+        (
+            "macd",
+            "signal",
+            "histo",
+        ),
+    ),
+    (
+        MACDHisto,
+        (
+            "macd",
+            "signal",
+            "histo",
+        ),
+    ),
     (
         Ichimoku,
         (
@@ -49,14 +101,12 @@ def get_indicators_as_dict(strat_run, multi_line_indicators):
         multi_line_ind = multi_line_indicators
     else:
         multi_line_ind = MULTI_LINE_INDICATORS
-    
+
     indicators = strat_run.getindicators()
     indicators_dict = dict()
-    for i, ind in enumerate(indicators): 
+    for i, ind in enumerate(indicators):
         indicator_name = (
-            ind.plotlabel()
-            if hasattr(ind, "plotlabel")
-            else "indicator{}".format(i)
+            ind.plotlabel() if hasattr(ind, "plotlabel") else "indicator{}".format(i)
         )
 
         # Check if indicator contains multiple lines
@@ -86,8 +136,5 @@ def rename_indicator(name, line_name=None):
     # Changes the name to <indicator>_<line>_<param1>_<param2>
     tokens = indicator_regex.findall(name)
     if line_name:
-        tokens = [tokens[0], line_name] + (
-            tokens[1:] if len(tokens) > 1 else []
-        )
+        tokens = [tokens[0], line_name] + (tokens[1:] if len(tokens) > 1 else [])
     return "_".join(tokens)
-

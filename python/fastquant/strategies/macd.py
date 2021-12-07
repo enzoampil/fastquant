@@ -80,9 +80,9 @@ class MACDStrategy(BaseStrategy):
         self.smadir = self.sma - self.sma(-self.dir_period)
 
     def buy_signal(self):
-        # Buy if the macd line cross the signal line to the upside 
-        # and a control Simple Moving Average  has had a net negative 
-        # direction in the last x periods 
+        # Buy if the macd line cross the signal line to the upside
+        # and a control Simple Moving Average  has had a net negative
+        # direction in the last x periods
 
         return self.crossover > 0 and self.smadir < 0.0
 

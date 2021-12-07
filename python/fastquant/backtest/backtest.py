@@ -43,6 +43,7 @@ def docstring_parameter(*sub):
     """
     Decorator to ensure all the strategy docstrings are included in the `backtest` docstring.
     """
+
     def dec(obj):
         obj.__doc__ = obj.__doc__.format(*sub)
         return obj
@@ -159,9 +160,7 @@ def backtest(
         # Allow instance of BaseStrategy or from the predefined mapping
         if not isinstance(strategy, str) and issubclass(strategy, bt.Strategy):
             strat_name = (
-                strategy.__name__
-                if hasattr(strategy, "__name__")
-                else str(strategy)
+                strategy.__name__ if hasattr(strategy, "__name__") else str(strategy)
             )
         else:
             strat_name = strategy
@@ -185,7 +184,9 @@ def backtest(
     cerebro.addanalyzer(btanalyzers.SharpeRatio, _name="mysharpe")
     cerebro.addanalyzer(btanalyzers.DrawDown, _name="drawdown")
     cerebro.addanalyzer(btanalyzers.TimeDrawDown, _name="timedraw")
-    cerebro.addanalyzer(btanalyzers.TradeAnalyzer, _name="tradeanalyzer") #trade analyzer
+    cerebro.addanalyzer(
+        btanalyzers.TradeAnalyzer, _name="tradeanalyzer"
+    )  # trade analyzer
 
     cerebro.broker.setcommission(commission=commission)
 
@@ -228,7 +229,7 @@ def backtest(
     )
 
     # Plot
-    
+
     if plot and strategy != "multi":
         # Plot only with the optimal parameters when multiple strategy runs are required
         if sorted_combined_df.shape[0] != 1:
@@ -260,11 +261,11 @@ def backtest(
 
 def get_logging_params(verbose):
     """
-        Adjusts the logging verbosity based on the `verbose` parameter
-        0 - No logging
-        1 - Strategy Level logs
-        2 - Transaction Level logs
-        3 - Periodic Logs
+    Adjusts the logging verbosity based on the `verbose` parameter
+    0 - No logging
+    1 - Strategy Level logs
+    2 - Transaction Level logs
+    3 - Periodic Logs
     """
     verbosity_args = dict(
         strategy_logging=False,

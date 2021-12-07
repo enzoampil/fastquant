@@ -15,6 +15,7 @@ Post backtest functionalities
  
 """
 
+
 def analyze_strategies(
     init_cash,
     stratruns,
@@ -48,8 +49,7 @@ def analyze_strategies(
         for i, strat in enumerate(stratrun):
             # Get indicator history
             st_dtime = [
-                bt.utils.date.num2date(num)
-                for num in strat.lines.datetime.plot()
+                bt.utils.date.num2date(num) for num in strat.lines.datetime.plot()
             ]
             indicators_dict = get_indicators_as_dict(strat, multi_line_indicators)
             indicators_df = pd.DataFrame(indicators_dict)
@@ -103,9 +103,7 @@ def analyze_strategies(
                 order_history_dfs.append(order_history_df)
 
                 periodic_history_df = strat.periodic_history_df
-                periodic_history_df["dt"] = pd.to_datetime(
-                    periodic_history_df.dt
-                )
+                periodic_history_df["dt"] = pd.to_datetime(periodic_history_df.dt)
                 periodic_history_df.insert(0, "strat_name", history_key)
                 periodic_history_df.insert(0, "strat_id", strat_idx)
                 periodic_history_df[
@@ -140,18 +138,12 @@ def analyze_strategies(
             total = np.nan
 
         if "won" in tradeanalyzer.keys():
-            win_rate = (
-                tradeanalyzer["won"]["total"] / tradeanalyzer["total"]["total"]
-            )
+            win_rate = tradeanalyzer["won"]["total"] / tradeanalyzer["total"]["total"]
             won = tradeanalyzer["won"]["total"]
             won_avg = tradeanalyzer["won"]["pnl"]["average"]
-            won_avg_prcnt = (
-                tradeanalyzer["won"]["pnl"]["average"] / init_cash * 100
-            )
+            won_avg_prcnt = tradeanalyzer["won"]["pnl"]["average"] / init_cash * 100
             won_max = tradeanalyzer["won"]["pnl"]["max"]
-            won_max_prcnt = (
-                tradeanalyzer["won"]["pnl"]["max"] / init_cash * 100
-            )
+            won_max_prcnt = tradeanalyzer["won"]["pnl"]["max"] / init_cash * 100
         else:
             win_rate = np.nan
             won = np.nan
@@ -163,13 +155,9 @@ def analyze_strategies(
         if "lost" in tradeanalyzer.keys():
             lost = tradeanalyzer["lost"]["total"]
             lost_avg = tradeanalyzer["lost"]["pnl"]["average"]
-            lost_avg_prcnt = (
-                tradeanalyzer["lost"]["pnl"]["average"] / init_cash * 100
-            )
+            lost_avg_prcnt = tradeanalyzer["lost"]["pnl"]["average"] / init_cash * 100
             lost_max = tradeanalyzer["lost"]["pnl"]["max"]
-            lost_max_prcnt = (
-                tradeanalyzer["lost"]["pnl"]["max"] / init_cash * 100
-            )
+            lost_max_prcnt = tradeanalyzer["lost"]["pnl"]["max"] / init_cash * 100
         else:
             lost = np.nan
             lost_avg = np.nan
@@ -230,9 +218,7 @@ def analyze_strategies(
     return sorted_combined_df, optim_params, history_dict
 
 
-def sort_metrics_params_and_strats(
-    metrics_df, params_df, strat_ids, sort_by, verbose
-):
+def sort_metrics_params_and_strats(metrics_df, params_df, strat_ids, sort_by, verbose):
 
     # Get indices based on `sort_by` metric
     optim_idxs = np.argsort(metrics_df[sort_by].values)[::-1]
@@ -248,11 +234,7 @@ def sort_metrics_params_and_strats(
     )
     # drop extra columns #248
     if (
-        len(
-            set(["channel" "symbol"]).intersection(
-                sorted_combined_df.columns.values
-            )
-        )
+        len(set(["channel" "symbol"]).intersection(sorted_combined_df.columns.values))
         == 2
     ):
         sorted_combined_df.drop(["channel", "symbol"], axis=1, inplace=True)
