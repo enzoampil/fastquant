@@ -87,15 +87,14 @@ Ready to contribute? Here's how to set up `fastquant` for local development.
     ```
     Now you can make your changes locally.
 
-5. When you're done making changes, check that your changes pass `flake8` and the tests, including testing other Python versions with `tox`. In addition, ensure that your code is formatted using `black`
+5. When you're done making changes, check that your changes pass `flake8` and the tests. In addition, ensure that your code is formatted using `black`
     ```shell
     $ flake8 .
     $ black .
     $ pytest python/tests/test_fastquant.py
-    $ tox .
     ```
 
-    To get `flake8`, `black`, `pytest`, and `tox`, just pip install them into your virtualenv. If you wish,
+    To get `flake8`, `black`, and `pytest`, just pip install them into your virtualenv. If you wish,
     you can add pre-commit hooks for both `flake8` and `black` to make all formatting easier. See [this blog post](https://ljvmiranda921.github.io/notebook/2018/06/21/precommits-using-black-and-flake8/) for details.
 
 6. Commit your changes and push your branch to GitHub

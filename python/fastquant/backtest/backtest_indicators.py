@@ -16,14 +16,66 @@ import re
 # From source code `lines` attribute of the indacator
 # https://github.com/mementum/backtrader/tree/master/backtrader/indicators
 MULTI_LINE_INDICATORS = [
-    (AverageDirectionalMovementIndexRating, ("adx", "adxr",)),
-    (ADXR, ("adx", "adxr",)),
-    (BollingerBands, ("mid", "top", "bot",)),
-    (BBands, ("mid", "top", "bot",)),
-    (Envelope, ("top", "bot",)),
-    (MACD, ("macd", "signal",)),
-    (MACDHistogram, ("macd", "signal", "histo",)),
-    (MACDHisto, ("macd", "signal", "histo",)),
+    (
+        AverageDirectionalMovementIndexRating,
+        (
+            "adx",
+            "adxr",
+        ),
+    ),
+    (
+        ADXR,
+        (
+            "adx",
+            "adxr",
+        ),
+    ),
+    (
+        BollingerBands,
+        (
+            "mid",
+            "top",
+            "bot",
+        ),
+    ),
+    (
+        BBands,
+        (
+            "mid",
+            "top",
+            "bot",
+        ),
+    ),
+    (
+        Envelope,
+        (
+            "top",
+            "bot",
+        ),
+    ),
+    (
+        MACD,
+        (
+            "macd",
+            "signal",
+        ),
+    ),
+    (
+        MACDHistogram,
+        (
+            "macd",
+            "signal",
+            "histo",
+        ),
+    ),
+    (
+        MACDHisto,
+        (
+            "macd",
+            "signal",
+            "histo",
+        ),
+    ),
     (
         Ichimoku,
         (
@@ -45,14 +97,14 @@ def get_indicators_as_dict(strat_run, multi_line_indicators):
     Returns the indicators used for the strategy run
     """
 
-    if multi_line_indicators != None:
+    if multi_line_indicators is not None:
         multi_line_ind = multi_line_indicators
     else:
         multi_line_ind = MULTI_LINE_INDICATORS
-    
+
     indicators = strat_run.getindicators()
     indicators_dict = dict()
-    for i, ind in enumerate(indicators): 
+    for i, ind in enumerate(indicators):
         indicator_name = (
             ind.plotlabel()
             if hasattr(ind, "plotlabel")
@@ -90,4 +142,3 @@ def rename_indicator(name, line_name=None):
             tokens[1:] if len(tokens) > 1 else []
         )
     return "_".join(tokens)
-

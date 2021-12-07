@@ -12,8 +12,9 @@ Post backtest functionalities
 - Retrieval of hisotry of orders, indicators and perodic logs
 - Analysis of each strategy
 - Plotting
- 
+
 """
+
 
 def analyze_strategies(
     init_cash,
@@ -51,7 +52,9 @@ def analyze_strategies(
                 bt.utils.date.num2date(num)
                 for num in strat.lines.datetime.plot()
             ]
-            indicators_dict = get_indicators_as_dict(strat, multi_line_indicators)
+            indicators_dict = get_indicators_as_dict(
+                strat, multi_line_indicators
+            )
             indicators_df = pd.DataFrame(indicators_dict)
             indicators_df.insert(0, "dt", st_dtime)
 
