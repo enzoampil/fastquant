@@ -46,7 +46,9 @@ class RSIStrategy(BaseStrategy):
             print("rsi_upper :", self.rsi_upper)
             print("rsi_lower :", self.rsi_lower)
         self.rsi = bt.indicators.RelativeStrengthIndex(
-            period=self.rsi_period, upperband=self.rsi_upper, lowerband=self.rsi_lower
+            period=self.rsi_period,
+            upperband=self.rsi_upper,
+            lowerband=self.rsi_lower,
         )
 
     def buy_signal(self):

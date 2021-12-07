@@ -21,7 +21,11 @@ def unix_time_millis(date):
     # epoch = datetime.utcfromtimestamp(0)
 
     # value will only have : if the date passed is intraday
-    dt_format = DATETIME_FORMAT["intraday"] if ":" in date else DATETIME_FORMAT["daily"]
+    dt_format = (
+        DATETIME_FORMAT["intraday"]
+        if ":" in date
+        else DATETIME_FORMAT["daily"]
+    )
     dt = datetime.strptime(date, dt_format)
     # return int((dt - epoch).total_seconds() * 1000)
     return int(dt.timestamp() * 1000)
@@ -72,7 +76,8 @@ def get_crypto_data(
             )
             # Convert it to a dataframe
             current_request_df = pd.DataFrame(
-                ohlcv_lol, columns=["dt", "open", "high", "low", "close", "volume"]
+                ohlcv_lol,
+                columns=["dt", "open", "high", "low", "close", "volume"],
             )
 
             if current_request_df.size == 0:
@@ -83,9 +88,9 @@ def get_crypto_data(
                 )
                 # Make sure we're at the start of that day
                 request_start_date_epoch = unix_time_millis(
-                    pd.to_datetime(request_start_date_epoch, unit="ms").strftime(
-                        dt_format
-                    )
+                    pd.to_datetime(
+                        request_start_date_epoch, unit="ms"
+                    ).strftime(dt_format)
                 )
                 previous_request_end_date_epoch = request_start_date_epoch - 1
                 continue
@@ -102,7 +107,10 @@ def get_crypto_data(
             # Get the last entry timestamp after we've retrieved (or attempted to) additional records
             current_request_end_date_epoch = int(ohlcv_df.dt.max())
 
-            if current_request_end_date_epoch <= previous_request_end_date_epoch:
+            if (
+                current_request_end_date_epoch
+                <= previous_request_end_date_epoch
+            ):
                 # We haven't gained any additional records, so there's no point in further requests
                 # Let's mark this for the data end date, mostly so both end_date and end_date_epoch will be
                 # in sync in case someone in future uses them in code futher down and to ensure the loop bails
@@ -116,7 +124,9 @@ def get_crypto_data(
                 # The next request should start a millisecond after this one ended
                 request_start_date_epoch = current_request_end_date_epoch + 1
                 # This request's end date should now be set as current for the next loop
-                previous_request_end_date_epoch = current_request_end_date_epoch
+                previous_request_end_date_epoch = (
+                    current_request_end_date_epoch
+                )
 
         if ohlcv_df is not None:
             # Convert the unix timestampe to datetime
@@ -132,6 +142,8 @@ def get_crypto_data(
         return ohlcv_df
     else:
         raise NotImplementedError(
-            "The exchange " + exchange + " is not yet supported. Available exchanges: "
+            "The exchange "
+            + exchange
+            + " is not yet supported. Available exchanges: "
             ", ".join(CRYPTO_EXCHANGES)
         )

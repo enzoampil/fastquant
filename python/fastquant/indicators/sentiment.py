@@ -24,7 +24,9 @@ class Sentiment(bt.Indicator):
 
     lines = ("sentiment",)
 
-    plotinfo = dict(plotymargin=0.15, plothlines=[0], plotyticks=[1.0, 0, -1.0])
+    plotinfo = dict(
+        plotymargin=0.15, plothlines=[0], plotyticks=[1.0, 0, -1.0]
+    )
 
     plotlines = dict(
         sentiment=dict(

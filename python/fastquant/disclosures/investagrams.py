@@ -86,7 +86,9 @@ class DisclosuresInvestagrams:
             params=params,
         )
         if hasattr(response, "text"):
-            assert len(response.text) > 10, "Empty response from investagrams.com"
+            assert (
+                len(response.text) > 10
+            ), "Empty response from investagrams.com"
         return response.json()
 
     def disclosures_json_to_df(self):
@@ -107,7 +109,9 @@ class DisclosuresInvestagrams:
                     for ex in filtered_examples
                 ]
             )
-            main_df = pd.DataFrame(filtered_examples)[["id", "time", "color", "label"]]
+            main_df = pd.DataFrame(filtered_examples)[
+                ["id", "time", "color", "label"]
+            ]
             combined = pd.concat([main_df, additional_feats_df], axis=1)
             combined["time"] = pd.to_datetime(combined.time, unit="s")
             if "Total Revenue" in combined.columns.values:
@@ -131,7 +135,9 @@ class DisclosuresInvestagrams:
                     .apply(lambda x: x.split()[0])
                     .astype(float)
                 )
-                combined["Net Income YoY Growth (%)"] = combined["Net Income"].apply(
+                combined["Net Income YoY Growth (%)"] = combined[
+                    "Net Income"
+                ].apply(
                     lambda x: str(x)
                     .replace("(", "")
                     .replace(")", "")

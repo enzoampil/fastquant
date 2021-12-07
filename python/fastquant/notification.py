@@ -75,7 +75,9 @@ def email_notif(
     msg = MIMEMultipart()  # create a message
 
     date = date or datetime.utcnow().strftime("%Y-%m-%d")
-    message = message or "Today is " + date + ": " + action + " " + symbol or ""
+    message = (
+        message or "Today is " + date + ": " + action + " " + symbol or ""
+    )
 
     # setup the parameters of the message
     msg["From"] = my_address
@@ -96,9 +98,30 @@ def trigger_bot(symbol, action, date, channel=None, **kwargs):
         email_notif(symbol, action, date=date, **kwargs)
     else:
         if action == "buy":
-            print(">>> Notif bot: Today is", date, ":", action, symbol or "", "<<<")
+            print(
+                ">>> Notif bot: Today is",
+                date,
+                ":",
+                action,
+                symbol or "",
+                "<<<",
+            )
         elif action == "sell":
-            print(">>> Notif bot: Today is", date, ":", action, symbol or "", "<<<")
+            print(
+                ">>> Notif bot: Today is",
+                date,
+                ":",
+                action,
+                symbol or "",
+                "<<<",
+            )
         else:  # hold
-            print(">>> Notif bot: Today is", date, ":", action, symbol or "", "<<<")
+            print(
+                ">>> Notif bot: Today is",
+                date,
+                ":",
+                action,
+                symbol or "",
+                "<<<",
+            )
     return

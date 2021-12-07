@@ -21,7 +21,9 @@ def tweepy_api(consumer_key, consumer_secret, access_token, access_secret):
     return api
 
 
-def get_twitter_sentiment(stock_code, twitter_auth, start_date, twitter_accounts=None):
+def get_twitter_sentiment(
+    stock_code, twitter_auth, start_date, twitter_accounts=None
+):
     """
     This function scrapes twitter data based on stock code and twitter accounts specified
     Parameters
@@ -55,7 +57,10 @@ def get_twitter_sentiment(stock_code, twitter_auth, start_date, twitter_accounts
         for acc in twitter_accounts:
             print(f"Scraping ${stock_code} tweets from {acc}")
             cursor = tweepy.Cursor(
-                twitter_auth.user_timeline, id=acc, count=200, tweet_mode="extended"
+                twitter_auth.user_timeline,
+                id=acc,
+                count=200,
+                tweet_mode="extended",
             )
 
             item_counter = 1
@@ -100,12 +105,15 @@ def get_twitter_sentiment(stock_code, twitter_auth, start_date, twitter_accounts
                 lambda tweet: sia.polarity_scores(tweet)["compound"]
             )
 
-            tweet_avg_df = tweet_df.groupby("tweet_created_at", as_index=False).agg(
-                {"sentiment_score": "mean"}
-            )
+            tweet_avg_df = tweet_df.groupby(
+                "tweet_created_at", as_index=False
+            ).agg({"sentiment_score": "mean"})
 
             date_sentiment = dict(
-                zip(tweet_avg_df["tweet_created_at"], tweet_avg_df["sentiment_score"])
+                zip(
+                    tweet_avg_df["tweet_created_at"],
+                    tweet_avg_df["sentiment_score"],
+                )
             )
 
             return date_sentiment

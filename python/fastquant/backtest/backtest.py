@@ -160,7 +160,9 @@ def backtest(
         # Allow instance of BaseStrategy or from the predefined mapping
         if not isinstance(strategy, str) and issubclass(strategy, bt.Strategy):
             strat_name = (
-                strategy.__name__ if hasattr(strategy, "__name__") else str(strategy)
+                strategy.__name__
+                if hasattr(strategy, "__name__")
+                else str(strategy)
             )
         else:
             strat_name = strategy
@@ -247,7 +249,9 @@ def backtest(
                 **optim_params,
             )
         else:
-            fig = plot_results(cerebro, data_format_dict, figsize, **plot_kwargs)
+            fig = plot_results(
+                cerebro, data_format_dict, figsize, **plot_kwargs
+            )
 
     if return_history and return_plot:
         return sorted_combined_df, history_dict, fig
