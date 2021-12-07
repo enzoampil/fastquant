@@ -1,4 +1,4 @@
-from fastquant.python.fastquant.data.web.twitter import tweepy_api
+from fastquant.data.web.twitter import tweepy_api
 
 import os
 import sys
