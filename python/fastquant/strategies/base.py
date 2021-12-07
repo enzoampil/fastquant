@@ -264,7 +264,7 @@ class BaseStrategy(bt.Strategy):
     def next(self):
 
         # add dividend to cash
-        if self.invest_div and self.datadiv != None:
+        if self.invest_div and self.datadiv is not None:
             self.broker.add_cash(self.datadiv)
 
         if self.add_cash_amount:
@@ -368,7 +368,7 @@ class BaseStrategy(bt.Strategy):
 
                     if self.stop_trail:
                         # Create a stoploss trail order if None
-                        if self.stoploss_trail_order == None:
+                        if self.stoploss_trail_order is None:
                             if self.transaction_logging:
                                 self.log("Stop trail: {}".format(self.stop_trail))
                             self.stoploss_trail_order = self.sell(

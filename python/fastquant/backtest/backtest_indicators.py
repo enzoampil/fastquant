@@ -97,7 +97,7 @@ def get_indicators_as_dict(strat_run, multi_line_indicators):
     Returns the indicators used for the strategy run
     """
 
-    if multi_line_indicators != None:
+    if multi_line_indicators is not None:
         multi_line_ind = multi_line_indicators
     else:
         multi_line_ind = MULTI_LINE_INDICATORS
