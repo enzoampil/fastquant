@@ -12,7 +12,7 @@ Post backtest functionalities
 - Retrieval of hisotry of orders, indicators and perodic logs
 - Analysis of each strategy
 - Plotting
- 
+
 """
 
 
