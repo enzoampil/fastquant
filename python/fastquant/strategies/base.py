@@ -115,7 +115,7 @@ class BaseStrategy(bt.Strategy):
             self.strategy_position = 0
         else:
             self.strategy_position = None
-
+            
         # Longer term, we plan to add `freq` like notation, similar to pandas datetime
         # https://pandas.pydata.org/pandas-docs/stable/user_guide/timeseries.html
         # M means add cash at the first day of each month
@@ -338,12 +338,14 @@ class BaseStrategy(bt.Strategy):
         stock_value = self.value - self.cash
 
         # Only buy if there is enough cash for at least one stock
+
         if self.buy_signal() and (
             self.strategy_position == 0 or self.strategy_position is None
         ):
             self.strategy_position = 1 if self.strategy_position == 0 else None
 
             # Alternative for fractional condition based o  n min amount of significant value:
+
             # (self.fractional and self.cash >= self.dataclose[0] / 10000)
             if (self.fractional and self.cash >= 10) or (
                 not self.fractional and self.cash >= self.dataclose[0]
@@ -508,9 +510,7 @@ class BaseStrategy(bt.Strategy):
                 # "size" refers to the number of stocks to purchase
                 if self.execution_type == "close":
                     if SELL_PROP == 1:
-                        self.order = self.sell(
-                            size=self.position.size, exectype=bt.Order.Close
-                        )
+                        self.order = self.sell(size=self.position.size)
                     else:
                         # Sell based on the closing price of the previous closing day
                         self.order = self.sell(
@@ -518,7 +518,6 @@ class BaseStrategy(bt.Strategy):
                                 (stock_value / (self.dataclose[1]))
                                 * self.sell_prop
                             ),
-                            exectype=bt.Order.Close,
                         )
                 else:
                     # Sell based on the opening price of the next closing day (only works "open" data exists in the dataset)

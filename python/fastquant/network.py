@@ -93,8 +93,7 @@ class Network:
         return table
 
     def get_sector_of_symbol(self, symbol):
-        """get sector or subsector where symbol belongs
-        """
+        """get sector or subsector where symbol belongs"""
         info = self.company_table.copy()
         sector = info.loc[
             info["Stock Symbol"].isin([symbol]), "Sector"
@@ -102,8 +101,7 @@ class Network:
         return sector
 
     def get_symbols_of_a_sector(self, sector, subsector=False, verbose=False):
-        """get symbols of members in the sector
-        """
+        """get symbols of members in the sector"""
         info = self.company_table.copy()
         column = "Subsector" if subsector else "Sector"
         sectors_dict = info[["Stock Symbol", column]].groupby(column).groups
@@ -150,8 +148,7 @@ class Network:
             return df / df_rolling
 
     def remove_outliers(self, df=None, sigma=None):
-        """remove data sigma away from the mean of pct_change
-        """
+        """remove data sigma away from the mean of pct_change"""
         sigma = self.sigma if sigma is None else sigma
 
         if df is None:

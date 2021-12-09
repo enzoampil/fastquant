@@ -39,8 +39,10 @@ def slack_post(message, webhook_url):
 
 
 def slack_notif(symbol, action, date=None):
-    webhook_url = os.getenv('SLACK_URL')
-    assert webhook_url, "Please set your slack webhook url as an environment variable: SLACK_URL"
+    webhook_url = os.getenv("SLACK_URL")
+    assert (
+        webhook_url
+    ), "Please set your slack webhook url as an environment variable: SLACK_URL"
     # Set date to the current date (UTC + 0) if no date argument is passed
     date = date or datetime.utcnow().strftime("%Y-%m-%d")
     message = "Today is " + date + ": " + action + " " + symbol or ""
@@ -48,7 +50,14 @@ def slack_notif(symbol, action, date=None):
 
 
 def email_notif(
-    symbol, action, to_address, date=None, subject=None, message=None, host="smtp.gmail.com", port=587
+    symbol,
+    action,
+    to_address,
+    date=None,
+    subject=None,
+    message=None,
+    host="smtp.gmail.com",
+    port=587,
 ):
     """
     Send email w/ credentials saved as environment variables for security
@@ -56,8 +65,8 @@ def email_notif(
     If your credentials are correct and the email still doesn't work, refer to the link below:
     https://stackoverflow.com/questions/16512592/login-credentials-not-working-with-gmail-smtp
     """
-    my_address = os.getenv('EMAIL_ADDRESS')
-    password = os.getenv('EMAIL_PASSWORD')
+    my_address = os.getenv("EMAIL_ADDRESS")
+    password = os.getenv("EMAIL_PASSWORD")
     # set up the SMTP server
     s = smtplib.SMTP(host=host, port=port)
     s.starttls()
@@ -66,7 +75,9 @@ def email_notif(
     msg = MIMEMultipart()  # create a message
 
     date = date or datetime.utcnow().strftime("%Y-%m-%d")
-    message = message or "Today is " + date + ": " + action + " " + symbol or ""
+    message = (
+        message or "Today is " + date + ": " + action + " " + symbol or ""
+    )
 
     # setup the parameters of the message
     msg["From"] = my_address
@@ -87,9 +98,30 @@ def trigger_bot(symbol, action, date, channel=None, **kwargs):
         email_notif(symbol, action, date=date, **kwargs)
     else:
         if action == "buy":
-            print(">>> Notif bot: Today is", date, ":", action, symbol or "", "<<<")
+            print(
+                ">>> Notif bot: Today is",
+                date,
+                ":",
+                action,
+                symbol or "",
+                "<<<",
+            )
         elif action == "sell":
-            print(">>> Notif bot: Today is", date, ":", action, symbol or "", "<<<")
+            print(
+                ">>> Notif bot: Today is",
+                date,
+                ":",
+                action,
+                symbol or "",
+                "<<<",
+            )
         else:  # hold
-            print(">>> Notif bot: Today is", date, ":", action, symbol or "", "<<<")
+            print(
+                ">>> Notif bot: Today is",
+                date,
+                ":",
+                action,
+                symbol or "",
+                "<<<",
+            )
     return

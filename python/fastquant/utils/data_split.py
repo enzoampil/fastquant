@@ -12,14 +12,14 @@ def walk_forward_split(
     training_overlap_size=0,
 ):
     """
-    Split the time series data into multiple sets(or "splits") of training/optimization indices and testing indices. 
+    Split the time series data into multiple sets(or "splits") of training/optimization indices and testing indices.
     Each split contains training indices and test indices that are sequential.
     This is based on sckit-learn's `sklearn.model_selection.TimeSeriesSplit` module.
 
     Usage can be:
     - Fixed input size, fixed test size
     >>> walk_forward_split(X, train_size=20, test_size=20)
-   
+
     - Fized input size, fixed number of splits
     >>> for train_index, test_index in walk_forward_split(X, train_size=20, n_splits=3)
 
@@ -48,27 +48,27 @@ def walk_forward_split(
         indices of the training data and the testing data
 
     Example
-    
+
     >>> X = np.arange(100)
     >>> for train_index, test_index in walk_forward_split(X, train_size=20, test_size=20,mode='expanding'):
         print("\nTRAIN:",train_index.shape, train_index, "\nTEST: ", test_index.shape ,test_index)
     ```
-    TRAIN: (20,) [ 0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19] 
+    TRAIN: (20,) [ 0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19]
     TEST:  (20,) [20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39]
 
     TRAIN: (40,) [ 0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19 20 21 22 23
-    24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39] 
+    24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39]
     TEST:  (20,) [40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59]
 
     TRAIN: (60,) [ 0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19 20 21 22 23
     24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47
-    48 49 50 51 52 53 54 55 56 57 58 59] 
+    48 49 50 51 52 53 54 55 56 57 58 59]
     TEST:  (20,) [60 61 62 63 64 65 66 67 68 69 70 71 72 73 74 75 76 77 78 79]
 
     TRAIN: (80,) [ 0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19 20 21 22 23
     24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47
     48 49 50 51 52 53 54 55 56 57 58 59 60 61 62 63 64 65 66 67 68 69 70 71
-    72 73 74 75 76 77 78 79] 
+    72 73 74 75 76 77 78 79]
     TEST:  (20,) [80 81 82 83 84 85 86 87 88 89 90 91 92 93 94 95 96 97 98 99]
 
     """

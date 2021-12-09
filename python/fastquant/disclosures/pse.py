@@ -134,8 +134,7 @@ class DisclosuresPSE:
         self.page_count, self.results_count = None, None
 
     def __repr__(self):
-        """show class description after istantiation
-        """
+        """show class description after istantiation"""
         fields = signature(self.__init__).parameters
         values = ", ".join(repr(getattr(self, f)) for f in fields)
         return "{}({})".format(type(self).__name__, values)
@@ -431,8 +430,7 @@ class DisclosuresPSE:
         return df
 
     def load_disclosures(self):
-        """Loads disclosures data from disk and append older or newer if necessary
-        """
+        """Loads disclosures data from disk and append older or newer if necessary"""
         errmsg = "No cache file found."
         assert len(self.files) > 0, errmsg
         data = pd.read_csv(self.files[0])

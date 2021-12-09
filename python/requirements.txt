@@ -2,13 +2,13 @@ backtrader>=1.9.75.123
 beautifulsoup4>=4.8.2
 black>=19.10b0
 bs4>=0.0.1
-ccxt>=1.30.59
+ccxt>=1.31.1
 certifi>=2019.11.28
 chardet>=3.0.4
 croniter>=0.3.35
 idna>=2.8
 lxml>=4.6.2
-matplotlib>=3.1.2
+matplotlib==3.2.2
 networkx>=2.4
 numpy>=1.18.0
 oauthlib>=3.1.0
