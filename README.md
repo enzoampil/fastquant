@@ -9,6 +9,9 @@
 
 To do this type of analysis without coding, you can also try out [Hawksight](https://hawksight.co/), which was just recently launched! :smile:
 
+If you want to interact with us directly, you can also reach us on the [Hawksight discord](https://discord.gg/BHMCw2C6VP). Feel free to ask about fastquant in the #feedback-suggestions and #bug-report channels.
+
+
 ## Features
 1. Easily access historical stock data
 2. Backtest and optimize trading strategies with only 3 lines of code
@@ -271,9 +274,7 @@ View full list of fastquan API [here](API.md)
 
 Want to discuss more about fastquant with other users, and our team of developers?
 
-Join the fastquant Slack community through this [link](https://join.slack.com/t/fastquant/shared_invite/zt-sfoxaqq9-LU0Bha7jDvOVVAzu~B3PDA)!
-
-You can also [subscribe](https://forms.gle/HAPYdMp2YMu4qXPd7) to our monthly newsletter to receive updates on our latest tutorials, blog posts, and product features!
+You can reach us on the [Hawksight discord](https://discord.gg/BHMCw2C6VP). Feel free to ask about fastquant in the #feedback-suggestions and #bug-report channels.
 
 ## Run fastquant in a Docker Container
 
