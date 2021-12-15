@@ -3,7 +3,7 @@
 Downloads stock data of all symbols in company_names.csv
 """
 import argparse
-from fastquant import update_pse_data_cache
+from fastquant.data.stocks.pse import update_pse_data_cache
 
 parser = argparse.ArgumentParser(
     description="update pse stock data cache"
