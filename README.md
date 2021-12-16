@@ -226,15 +226,16 @@ res_opt.shape
 
 This powerful strategy allows you to backtest your own trading strategies using any type of model w/ as few as 3 lines of code after the forecast!
 
- Predictions based on any model can be used as a custom indicator to be backtested using fastquant. You just need to add a `custom` column in the input dataframe, and set values for `upper_limit` and `lower_limit`.
+Predictions based on any model can be used as a custom indicator to be backtested using fastquant. You just need to add a `custom` column in the input dataframe, and set values for `upper_limit` and `lower_limit`.
 
 The strategy is structured similar to `RSIStrategy` where you can set an `upper_limit`, above which the asset is sold (considered "overbought"), and a `lower_limit`, below which the asset is bought (considered "underbought). `upper_limit` is set to 95 by default, while `lower_limit` is set to 5 by default.
 
-In the example below, we show how to use the custom strategy to backtest a custom indicator based on in-sample time series forecasts. The forecasts were generated using Facebook's [Prophet](https://github.com/facebook/prophet) package on Bitcoin prices.
+In the example below, we show how to use the custom strategy to backtest a custom indicator based on out-of-sample time series forecasts. The forecasts were generated using Facebook's [Prophet](https://github.com/facebook/prophet) package on Bitcoin prices.
 
 ```
 from fastquant import get_crypto_data, backtest
 from fbprophet import Prophet
+import pandas as pd
 from matplotlib import pyplot as plt
 
 # Pull crypto data
