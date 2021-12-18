@@ -32,9 +32,7 @@ def test_backtest():
 
     for strategy in STRATEGY_MAPPING.keys():
         if strategy == "sentiment":
-            data = get_yahoo_data(
-                "TSLA", "2020-01-01", "2020-07-04", dividends=True
-            )
+            data = get_yahoo_data("TSLA", "2020-01-01", "2020-07-04", dividends=True)
             # use cached data instead of scraping for tests purposes.
             # sentiments = get_bt_news_sentiment(keyword="tesla", page_nums=2)
             with open(SENTI_PKL, "rb") as handle:
@@ -42,9 +40,7 @@ def test_backtest():
             cerebro = backtest(
                 strategy, data, sentiments=sentiments, senti=0.4, plot=False
             )
-            errmsg = "Backtest encountered error for strategy '{}'!".format(
-                strategy
-            )
+            errmsg = "Backtest encountered error for strategy '{}'!".format(strategy)
             assert cerebro is not None, errmsg
 
             data_disclosures = get_stock_data(
@@ -70,18 +66,14 @@ def test_backtest():
                 senti=0.2,
                 plot=False,
             )
-            errmsg_disclosures = (
-                "Backtest encountered error for strategy '{}'!".format(
-                    strategy
-                )
+            errmsg_disclosures = "Backtest encountered error for strategy '{}'!".format(
+                strategy
             )
             assert cerebro_disclosures is not None, errmsg_disclosures
 
         else:
             cerebro = backtest(strategy, sample, plot=False)
-            errmsg = "Backtest encountered error for strategy '{}'!".format(
-                strategy
-            )
+            errmsg = "Backtest encountered error for strategy '{}'!".format(strategy)
             assert cerebro is not None, errmsg
 
 
@@ -91,9 +83,7 @@ def test_multi_backtest():
     """
     sample = pd.read_csv(SAMPLE_CSV, parse_dates=["dt"])
     cerebro = backtest("multi", sample, strats=SAMPLE_STRAT_DICT, plot=False)
-    assert (
-        cerebro is not None
-    ), "Backtest encountered error for strategy 'multi'!"
+    assert cerebro is not None, "Backtest encountered error for strategy 'multi'!"
 
 
 def test_grid_backtest():
@@ -108,6 +98,4 @@ def test_grid_backtest():
         slow_period=range(40, 55, 3),
         plot=False,
     )
-    assert (
-        cerebro is not None
-    ), "Backtest encountered error doing grid search on SMAC!"
+    assert cerebro is not None, "Backtest encountered error doing grid search on SMAC!"

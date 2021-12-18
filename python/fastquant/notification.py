@@ -75,9 +75,7 @@ def email_notif(
     msg = MIMEMultipart()  # create a message
 
     date = date or datetime.utcnow().strftime("%Y-%m-%d")
-    message = (
-        message or "Today is " + date + ": " + action + " " + symbol or ""
-    )
+    message = message or "Today is " + date + ": " + action + " " + symbol or ""
 
     # setup the parameters of the message
     msg["From"] = my_address

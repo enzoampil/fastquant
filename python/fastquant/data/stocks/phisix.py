@@ -83,9 +83,7 @@ def get_phisix_data_by_date(symbol, date):
                 return None
 
 
-def get_phisix_data(
-    symbol, start_date, end_date, save=False, max_straight_nones=10
-):
+def get_phisix_data(symbol, start_date, end_date, save=False, max_straight_nones=10):
     """Returns pricing data for a PHISIX stock symbol.
 
     Parameters
@@ -103,10 +101,7 @@ def get_phisix_data(
         Stock data (in CV format) for the specified company and date range
     """
     date_range = (
-        pd.period_range(start_date, end_date, freq="D")
-        .to_series()
-        .astype(str)
-        .values
+        pd.period_range(start_date, end_date, freq="D").to_series().astype(str).values
     )
 
     max_straight_nones = min(max_straight_nones, len(date_range))
