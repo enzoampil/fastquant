@@ -185,13 +185,20 @@ class BaseStrategy(bt.Strategy):
         self.stoploss_trail_order = None
 
     def buy_signal(self):
-        return True
+        return False
 
     def sell_signal(self):
-        return True
+        return False
 
     def take_profit_signal(self):
-        return True
+        return False
+
+    # By default the exit will be the opposite signal
+    def exit_long_signal(self):
+        return self.sell_signal()
+
+    def exit_short_signal(self):
+        return self.buy_signal()
 
     def notify_order(self, order):
         if order.status in [order.Submitted, order.Accepted]:
@@ -549,6 +556,16 @@ class BaseStrategy(bt.Strategy):
                         price=price_limit,
                         size=self.position.size,
                     )
+
+        # allows the user to have an exit signal that is apart of the buy/sell signal
+        # note that this is a full exit as of now
+        elif self.exit_long_signal():
+            if self.order.isbuy():
+                self.order = self.sell(size=self.position.size)
+
+        elif self.exit_short_signal():
+            if self.order.issell():
+                self.order = self.buy(size=self.position.size)
 
         else:
             self.action = "neutral"
