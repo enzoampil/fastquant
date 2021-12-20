@@ -109,7 +109,7 @@ class BaseStrategy(bt.Strategy):
         self.broker.set_coc(True)
         add_cash_freq = self.params.add_cash_freq
 
-        # Sets wether to include the current position as a condition buying or selling
+        # Sets whether to include the current position as a condition buying or selling
         # It will only buy or sell as a single pair in each trade if this is not None
         if self.single_position is not None:
             self.strategy_position = 0
