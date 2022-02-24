@@ -560,11 +560,11 @@ class BaseStrategy(bt.Strategy):
         # allows the user to have an exit signal that is apart of the buy/sell signal
         # note that this is a full exit as of now
         elif self.exit_long_signal():
-            if self.order.isbuy():
+            if self.position.size > 0:
                 self.order = self.sell(size=self.position.size)
 
         elif self.exit_short_signal():
-            if self.order.issell():
+            if self.position.size < 0:
                 self.order = self.buy(size=self.position.size)
 
         else:
