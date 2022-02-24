@@ -109,7 +109,7 @@ class BaseStrategy(bt.Strategy):
         self.broker.set_coc(True)
         add_cash_freq = self.params.add_cash_freq
 
-        # Sets wether to include the current position as a condition buying or selling
+        # Sets whether to include the current position as a condition buying or selling
         # It will only buy or sell as a single pair in each trade if this is not None
         if self.single_position is not None:
             self.strategy_position = 0
@@ -185,13 +185,20 @@ class BaseStrategy(bt.Strategy):
         self.stoploss_trail_order = None
 
     def buy_signal(self):
-        return True
+        return False
 
     def sell_signal(self):
-        return True
+        return False
 
     def take_profit_signal(self):
-        return True
+        return False
+
+    # By default the exit will be the opposite signal
+    def exit_long_signal(self):
+        return self.sell_signal()
+
+    def exit_short_signal(self):
+        return self.buy_signal()
 
     def notify_order(self, order):
         if order.status in [order.Submitted, order.Accepted]:
@@ -335,6 +342,9 @@ class BaseStrategy(bt.Strategy):
             return
 
         # Only sell if you hold least one unit of the stock (and sell only that stock, so no short selling)
+        # TODO: This needs to be changed. Assuming partials at 50 value - 50 cash
+        # and then if the value of the stock goes down 10% then we have 45 value - 50 cash
+        # This would mean that the trigger in sell will not happen
         stock_value = self.value - self.cash
 
         # Only buy if there is enough cash for at least one stock
@@ -549,6 +559,16 @@ class BaseStrategy(bt.Strategy):
                         price=price_limit,
                         size=self.position.size,
                     )
+
+        # allows the user to have an exit signal that is apart of the buy/sell signal
+        # note that this is a full exit as of now
+        elif self.exit_long_signal():
+            if self.position.size > 0:
+                self.order = self.sell(size=self.position.size)
+
+        elif self.exit_short_signal():
+            if self.position.size < 0:
+                self.order = self.buy(size=self.position.size)
 
         else:
             self.action = "neutral"
