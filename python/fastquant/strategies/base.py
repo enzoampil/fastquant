@@ -342,6 +342,9 @@ class BaseStrategy(bt.Strategy):
             return
 
         # Only sell if you hold least one unit of the stock (and sell only that stock, so no short selling)
+        # TODO: This needs to be changed. Assuming partials at 50 value - 50 cash
+        # and then if the value of the stock goes down 10% then we have 45 value - 50 cash
+        # This would mean that the trigger in sell will not happen
         stock_value = self.value - self.cash
 
         # Only buy if there is enough cash for at least one stock
