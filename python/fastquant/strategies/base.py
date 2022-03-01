@@ -112,7 +112,9 @@ class BaseStrategy(bt.Strategy):
         # Sets whether to include the current position as a condition buying or selling
         # It will only buy or sell as a single pair in each trade if this is not None
         if self.single_position is not None:
-            self.strategy_position = 0
+            # We turn it to -1 so that it can trigger either a buy or a sell (if short is allowed)
+            # -1 is thus a neutral position
+            self.strategy_position = -1
         else:
             self.strategy_position = None
             
@@ -350,9 +352,9 @@ class BaseStrategy(bt.Strategy):
         # Only buy if there is enough cash for at least one stock
 
         if self.buy_signal() and (
-            self.strategy_position == 0 or self.strategy_position is None
+            self.strategy_position in [0, -1, None]
         ):
-            self.strategy_position = 1 if self.strategy_position == 0 else None
+            self.strategy_position = 1 if self.strategy_position in [0, -1] else None
 
             # Alternative for fractional condition based o  n min amount of significant value:
 
@@ -458,9 +460,9 @@ class BaseStrategy(bt.Strategy):
                         )
 
         elif self.sell_signal() and (
-            self.strategy_position == 1 or self.strategy_position is None
+            self.strategy_position in [1, -1, None]
         ):
-            self.strategy_position = 0 if self.strategy_position == 1 else None
+            self.strategy_position = 0 if self.strategy_position in [1, -1] else None
 
             if self.allow_short:
 
@@ -554,6 +556,7 @@ class BaseStrategy(bt.Strategy):
             # TODO: Make take profit (and stop loss) supported for both net long and short positions
             if self.take_profit and self.position.size > 0:
                 if self.data.close[0] >= price_limit:
+                    self.strategy_position = None if self.strategy_position is None else -1
                     self.sell(
                         exectype=bt.Order.Close,
                         price=price_limit,
@@ -564,10 +567,12 @@ class BaseStrategy(bt.Strategy):
         # note that this is a full exit as of now
         elif self.exit_long_signal():
             if self.position.size > 0:
+                self.strategy_position = None if self.strategy_position is None else -1
                 self.order = self.sell(size=self.position.size)
 
         elif self.exit_short_signal():
             if self.position.size < 0:
+                self.strategy_position = None if self.strategy_position is None else -1
                 self.order = self.buy(size=self.position.size)
 
         else:
