@@ -77,7 +77,8 @@ class BaseStrategy(bt.Strategy):
         self.order_history["type"].append("buy" if order.isbuy() else "sell")
         self.order_history["price"].append(order.executed.price)
         self.order_history["size"].append(order.executed.size)
-        self.order_history["value"].append(order.executed.value)
+        self.order_history["order_value"].append(order.executed.value)
+        self.order_history["portfolio_value"].append(self.broker.getvalue())
         self.order_history["commission"].append(order.executed.comm)
         self.order_history["pnl"].append(order.executed.pnl)
 
@@ -85,6 +86,7 @@ class BaseStrategy(bt.Strategy):
         self.periodic_history["dt"].append(self.datas[0].datetime.datetime(0))
         self.periodic_history["portfolio_value"].append(self.broker.getvalue())
         self.periodic_history["cash"].append(self.broker.getcash())
+        self.periodic_history["size"].append(self.position.size)
 
     def __init__(self):
         # Global variables
@@ -143,13 +145,15 @@ class BaseStrategy(bt.Strategy):
             self.log("stop_loss : {}".format(self.stop_loss))
             self.log("stop_trail : {}".format(self.stop_trail))
             self.log("take_profit : {}".format(self.take_profit))
+            self.log("allow_short : {}".format(self.allow_short))
 
         self.order_history = {
             "dt": [],
             "type": [],
             "price": [],
             "size": [],
-            "value": [],
+            "order_value": [],
+            "portfolio_value": [],
             "commission": [],
             "pnl": [],
         }
@@ -158,6 +162,7 @@ class BaseStrategy(bt.Strategy):
             "dt": [],
             "portfolio_value": [],
             "cash": [],
+            "size": [],
         }
         self.order_history_df = None
         self.periodic_history_df = None
