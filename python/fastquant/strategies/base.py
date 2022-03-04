@@ -375,11 +375,17 @@ class BaseStrategy(bt.Strategy):
                 # Afforded size is based on closing price for the current trading day
                 # Margin is required for buy commission
                 # Add allowance to commission per transaction (avoid margin)
-                afforded_size = self.cash / (
+                afforded_size = (self.cash) / (
                     (self.dataclose[0] * (1 + self.slippage))
                     * (1 + self.commission)
                 )
-                buy_prop_size = afforded_size * self.buy_prop
+                
+                position_size = abs(self.position.size)
+                
+                # in case short is allowed, we first want to account for the shorted position which is position_size
+                # Afterwards we subtract position_size from afforded_size 
+                # and multiply that with the buy prop to get the final size
+                buy_prop_size = position_size  + ((afforded_size-position_size) * self.buy_prop)
 
                 # Used for take profit method
                 self.price_bought = self.data.close[0]
@@ -435,6 +441,9 @@ class BaseStrategy(bt.Strategy):
                         self.cash
                         / (self.dataopen[1] * (1 + self.commission + 0.001))
                     )
+                    
+                    buy_prop_size = position_size  + ((afforded_size-position_size) * self.buy_prop)
+                    
                     final_size = min(buy_prop_size, afforded_size)
                     if self.transaction_logging:
                         self.log("Buy prop size: {}".format(buy_prop_size))
