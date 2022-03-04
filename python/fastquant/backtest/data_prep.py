@@ -107,9 +107,7 @@ def include_sentiment_score(data, sentiments):
     senti_series = pd.Series(sentiments, name="sentiment_score", dtype=float)
 
     # join and reset the index for dt to become the first column
-    data = data.merge(
-        senti_series, left_index=True, right_index=True, how="left"
-    )
+    data = data.merge(senti_series, left_index=True, right_index=True, how="left")
     data = data.reset_index()
 
     return data

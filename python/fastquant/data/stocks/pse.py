@@ -73,9 +73,7 @@ def get_stock_table(stock_table_fp=None):
             pd.concat(
                 [
                     pd.read_html(r.text)[0],
-                    pd.DataFrame(
-                        {"attr": table.xpath("//tr/td/a/@onclick")[::2]}
-                    ),
+                    pd.DataFrame({"attr": table.xpath("//tr/td/a/@onclick")[::2]}),
                 ],
                 axis=1,
             )
@@ -112,9 +110,7 @@ def get_pse_all_stocks():
     return df
 
 
-def get_pse_data_old(
-    symbol, start_date, end_date, stock_table_fp=None, verbose=True
-):
+def get_pse_data_old(symbol, start_date, end_date, stock_table_fp=None, verbose=True):
     """Returns pricing data for a specified stock.
 
     Parameters
@@ -145,26 +141,18 @@ def get_pse_data_old(
 
     data = {
         "cmpy_id": int(
-            stock_table["company_id"][
-                stock_table["Stock Symbol"] == symbol
-            ].values[0]
+            stock_table["company_id"][stock_table["Stock Symbol"] == symbol].values[0]
         ),
         "security_id": int(
-            stock_table["security_id"][
-                stock_table["Stock Symbol"] == symbol
-            ].values[0]
+            stock_table["security_id"][stock_table["Stock Symbol"] == symbol].values[0]
         ),
         "startDate": datetime.strptime(start_date, CALENDAR_FORMAT).strftime(
             "%m-%d-%Y"
         ),
-        "endDate": datetime.strptime(end_date, CALENDAR_FORMAT).strftime(
-            "%m-%d-%Y"
-        ),
+        "endDate": datetime.strptime(end_date, CALENDAR_FORMAT).strftime("%m-%d-%Y"),
     }
 
-    r = requests.post(
-        url="https://edge.pse.com.ph/common/DisclosureCht.ax", json=data
-    )
+    r = requests.post(url="https://edge.pse.com.ph/common/DisclosureCht.ax", json=data)
     df = pd.DataFrame(r.json()["chartData"])
     rename_dict = {
         "CHART_DATE": "dt",
@@ -181,9 +169,7 @@ def get_pse_data_old(
     return df
 
 
-def get_pse_data_cache(
-    symbol=None, cache_fp=None, update=False, verbose=False
-):
+def get_pse_data_cache(symbol=None, cache_fp=None, update=False, verbose=False):
     """
     Loads cached historical data
     Returns all if symbol is None
@@ -198,22 +184,14 @@ def get_pse_data_cache(
         df.index = pd.to_datetime(df.index)
         if verbose:
             print("Loaded: ", cache_fp)
-        return (
-            df
-            if symbol is None
-            else df[symbol]
-            if symbol in df.columns
-            else None
-        )
+        return df if symbol is None else df[symbol] if symbol in df.columns else None
     else:
         errmsg = "Cache does not exist! Try update=True"
         print(errmsg)
         return None
 
 
-def update_pse_data_cache(
-    start_date="2010-01-01", verbose=True, cache_fp=None
-):
+def update_pse_data_cache(start_date="2010-01-01", verbose=True, cache_fp=None):
     """
     Downloads DOHLC data of all PSE comapnies using get_pse_old
     and saves as .zip in /data to be used as cache
@@ -229,9 +207,7 @@ def update_pse_data_cache(
     data, unavailable = {}, []
     for symbol in tqdm(names["Stock Symbol"].values):
         try:
-            df = get_pse_data_old(
-                symbol, start_date, date_today, verbose=False
-            )
+            df = get_pse_data_old(symbol, start_date, date_today, verbose=False)
             data[symbol] = df
         except Exception as e:
             unavailable.append(symbol)
@@ -281,9 +257,7 @@ def get_pse_data(
     start = datestring_to_datetime(start_date)
     end = datestring_to_datetime(end_date)
 
-    fp = Path(
-        DATA_PATH, "{}_stock_{}_{}.csv".format(symbol, start_date, end_date)
-    )
+    fp = Path(DATA_PATH, "{}_stock_{}_{}.csv".format(symbol, start_date, end_date))
 
     if "v" in format:
         if fp.exists():
@@ -309,9 +283,7 @@ def get_pse_data(
                 symbol, start_date, end_date, save=False, max_straight_nones=10
             )
             if not pse_data_df.empty:
-                pse_data_df = pd.concat(
-                    [cache, pse_data_df], ignore_index=True
-                )
+                pse_data_df = pd.concat([cache, pse_data_df], ignore_index=True)
         else:
             pse_data_df = cache.copy()
 
@@ -339,9 +311,7 @@ def pse_data_to_csv(symbol, start_date, end_date, pse_dir=DATA_PATH):
     pse = get_pse_data(symbol, start_date, end_date)
     fp = Path(
         pse_dir,
-        "{}_{}_{}_OHLCV.csCRYPTO_EXCHANGESv".format(
-            symbol, start_date, end_date
-        ),
+        "{}_{}_{}_OHLCV.csCRYPTO_EXCHANGESv".format(symbol, start_date, end_date),
     )
     if isinstance(pse, pd.DataFrame):
         pse.to_csv(fp)
@@ -349,12 +319,8 @@ def pse_data_to_csv(symbol, start_date, end_date, pse_dir=DATA_PATH):
         pse[0].to_csv(fp)
         performance_dict = pse[1]
         performance_dict["D"].to_csv(
-            Path(
-                pse_dir, "{}_{}_{}_D.csv".format(symbol, start_date, end_date)
-            )
+            Path(pse_dir, "{}_{}_{}_D.csv".format(symbol, start_date, end_date))
         )
         performance_dict["E"].to_csv(
-            Path(
-                pse_dir, "{}_{}_{}_E.csv".format(symbol, start_date, end_date)
-            )
+            Path(pse_dir, "{}_{}_{}_E.csv".format(symbol, start_date, end_date))
         )

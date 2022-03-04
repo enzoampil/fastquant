@@ -69,6 +69,7 @@ def backtest(
     return_plot=False,
     channel="",
     symbol="",
+    max_cpus=1,
     allow_short=False,
     short_max=1.5,
     figsize=(30, 15),
@@ -109,6 +110,8 @@ def backtest(
         Channel to be used for notifications - e.g. "slack" (default=None)
     symbol : str
         Symbol to be referenced in the channel notification if not None (default=None)
+    max_cpus : int
+        Determines how many cores will be used. Value of None means that the max cores will be used. This is 1 by default
     allow_short : bool
         Whether to allow short selling, with max set as `short_max` times the portfolio value (default=False)
     short_max : float
@@ -125,7 +128,7 @@ def backtest(
     """
     # Setting initial support for 1 cpu
     # Return the full strategy object to get all run information
-    cerebro = bt.Cerebro(stdstats=False, maxcpus=1, optreturn=False)
+    cerebro = bt.Cerebro(stdstats=False, maxcpus=max_cpus, optreturn=False)
     cerebro.addobserver(bt.observers.Broker)
     cerebro.addobserver(bt.observers.Trades)
     cerebro.addobserver(bt.observers.BuySell)
@@ -164,9 +167,7 @@ def backtest(
         # Allow instance of BaseStrategy or from the predefined mapping
         if not isinstance(strategy, str) and issubclass(strategy, bt.Strategy):
             strat_name = (
-                strategy.__name__
-                if hasattr(strategy, "__name__")
-                else str(strategy)
+                strategy.__name__ if hasattr(strategy, "__name__") else str(strategy)
             )
         else:
             strat_name = strategy
@@ -255,9 +256,7 @@ def backtest(
                 **optim_params,
             )
         else:
-            fig = plot_results(
-                cerebro, data_format_dict, figsize, **plot_kwargs
-            )
+            fig = plot_results(cerebro, data_format_dict, figsize, **plot_kwargs)
 
     if return_history and return_plot:
         return sorted_combined_df, history_dict, fig

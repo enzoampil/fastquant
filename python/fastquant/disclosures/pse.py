@@ -103,9 +103,7 @@ class DisclosuresPSE:
         )
         self.company_disclosures = self.get_company_disclosures()
         self.disclosure_types = (
-            self.company_disclosures["Template Name"]
-            .apply(_remove_amend)
-            .unique()
+            self.company_disclosures["Template Name"].apply(_remove_amend).unique()
         )
         if self.verbose:
             print(
@@ -201,9 +199,7 @@ class DisclosuresPSE:
             data=data,
         )
         if hasattr(response, "text"):
-            assert (
-                len(response.text) > 10
-            ), "Empty response from edge.pse.com.ph"
+            assert len(response.text) > 10, "Empty response from edge.pse.com.ph"
 
         html = response.text
         # Indicating the parser (e.g.  lxml) removes the bs warning
@@ -228,13 +224,9 @@ class DisclosuresPSE:
             td = tr.find_all("td")
             row = [tr.text for tr in td]
             onclicks_raw = [
-                tr.a["onclick"]
-                for tr in td
-                if tr.a and "onclick" in tr.a.attrs.keys()
+                tr.a["onclick"] for tr in td if tr.a and "onclick" in tr.a.attrs.keys()
             ]
-            onclicks = [
-                s[s.find("('") + 2 : s.find("')")] for s in onclicks_raw
-            ]
+            onclicks = [s[s.find("('") + 2 : s.find("')")] for s in onclicks_raw]
             lines.append(row)
             if onclicks:
                 edge_nos.append(onclicks[0])
@@ -251,12 +243,8 @@ class DisclosuresPSE:
         # Filter to rows where not all columns are null
         df = df[df.isna().mean(axis=1) < 1]
         df["edge_no"] = edge_nos
-        df["url"] = (
-            "https://edge.pse.com.ph/openDiscViewer.do?edge_no=" + df.edge_no
-        )
-        df["Announce Date and Time"] = pd.to_datetime(
-            df["Announce Date and Time"]
-        )
+        df["url"] = "https://edge.pse.com.ph/openDiscViewer.do?edge_no=" + df.edge_no
+        df["Announce Date and Time"] = pd.to_datetime(df["Announce Date and Time"])
         # ensure index starts at 0
         return df.reset_index(drop=True)
 
@@ -364,9 +352,7 @@ class DisclosuresPSE:
 
         keys = []
         values = []
-        for dt, dd in zip(
-            parsed_html.find_all("dt"), parsed_html.find_all("dd")
-        ):
+        for dt, dd in zip(parsed_html.find_all("dt"), parsed_html.find_all("dd")):
             # Take out first token (number followed by a period)
             key = " ".join(dt.text.strip().split()[1:])
             value = dd.text.strip()
@@ -440,9 +426,7 @@ class DisclosuresPSE:
         disclosure_details = {}
 
         # append older disclosures
-        older = (
-            oldest_date > self.company_disclosures["Announce Date and Time"]
-        )
+        older = oldest_date > self.company_disclosures["Announce Date and Time"]
         idxs1 = np.flatnonzero(older)
         if older.sum() > 0:
             for idx in tqdm(idxs1):
@@ -463,9 +447,7 @@ class DisclosuresPSE:
                 print(e)
 
         # append newer disclosures
-        newer = (
-            newest_date < self.company_disclosures["Announce Date and Time"]
-        )
+        newer = newest_date < self.company_disclosures["Announce Date and Time"]
         idxs2 = np.flatnonzero(newer)
         # append newer disclosures
         if newer.sum() > 0:
@@ -510,9 +492,7 @@ class DisclosuresPSE:
             values.append(json.dumps(df_dict))
         return pd.DataFrame(values, columns=["disclosure_table"])
 
-    def get_disclosure_details(
-        self, key="Background/Description of the Disclosure"
-    ):
+    def get_disclosure_details(self, key="Background/Description of the Disclosure"):
         """
         Returns a dataframe of specific data from disclosure_tables
         """
@@ -555,9 +535,7 @@ class DisclosuresPSE:
         df = self.disclosures_combined.copy()
         df.dropna(subset=["Announce Date and Time"], inplace=True)
 
-        disclosure_dates = df["Announce Date and Time"].apply(
-            lambda x: x.date()
-        )
+        disclosure_dates = df["Announce Date and Time"].apply(lambda x: x.date())
 
         if self.stock_data is None:
             _ = self.get_stock_data()
@@ -589,9 +567,7 @@ class DisclosuresPSE:
         Returns a figure instance
         """
         disclosure_type = (
-            self.disclosure_type
-            if disclosure_type is None
-            else disclosure_type
+            self.disclosure_type if disclosure_type is None else disclosure_type
         )
 
         fig = pl.figure(figsize=(15, 10))

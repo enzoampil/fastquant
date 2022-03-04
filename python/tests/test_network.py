@@ -2,9 +2,7 @@ from matplotlib.figure import Figure
 import pandas as pd
 from fastquant import Network
 
-nw = Network(
-    symbol="JFC", start_date="2020-01-01", end_date="2020-04-01", metric="b"
-)
+nw = Network(symbol="JFC", start_date="2020-01-01", end_date="2020-04-01", metric="b")
 
 
 def test_network_init():
