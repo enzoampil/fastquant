@@ -51,7 +51,7 @@ def test_get_crypto_data():
     from fastquant import CRYPTO_EXCHANGES
 
     exchange_pairs = {
-        "binance": "BTC/BUSD",
+        # "binance": "BTC/BUSD",
         "coinbasepro": "BTC/USD",
         "bithumb": "XRP/KRW",
         "kraken": "BTC/USD",
