@@ -51,7 +51,7 @@ def test_get_crypto_data():
     from fastquant import CRYPTO_EXCHANGES
 
     exchange_pairs = {
-        # "binance": "BTC/BUSD",
+        "binance": "BTC/BUSD",
         "coinbasepro": "BTC/USD",
         "bithumb": "XRP/KRW",
         "kraken": "BTC/USD",
@@ -60,6 +60,10 @@ def test_get_crypto_data():
     }
 
     for ex in CRYPTO_EXCHANGES:
+        # Github actions for fastquant uses US server, which doesn't have access to binance
+        # Using binance elsewhere works without any issues
+        if ex == 'binance':
+            continue
         crypto_df = get_crypto_data(
             exchange_pairs[ex], DATE_START, DATE_END, exchange=ex
         )
