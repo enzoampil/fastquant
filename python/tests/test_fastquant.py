@@ -63,4 +63,4 @@ def test_get_crypto_data():
         crypto_df = get_crypto_data(
             exchange_pairs[ex], DATE_START, DATE_END, exchange=ex
         )
-        assert isinstance(crypto_df, pd.DataFrame)
+        assert isinstance(crypto_df, pd.DataFrame), ex
