@@ -7,7 +7,7 @@ with open("python/requirements.txt", "r") as fh:
 
 setuptools.setup(
     name="fastquant",
-    version="0.1.7.3",
+    version="0.1.8.1",
     author="Lorenzo Ampil",
     author_email="lorenzo.ampil@gmail.com",
     description="Bringing data driven investments to the mainstream",
