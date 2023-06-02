@@ -21,7 +21,7 @@ import numpy as np
 import pandas as pd
 from tqdm import tqdm
 from bs4 import BeautifulSoup
-from pandas.io.json import json_normalize
+from pandas import json_normalize
 import matplotlib.pyplot as pl
 import matplotlib as mpl
 
