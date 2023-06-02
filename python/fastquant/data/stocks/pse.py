@@ -13,7 +13,7 @@ from pathlib import Path
 
 # Import modules
 import pandas as pd
-from pandas.io.json import json_normalize
+from pandas import json_normalize
 import numpy as np
 import lxml.html as LH
 from tqdm import tqdm
