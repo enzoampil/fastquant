@@ -17,11 +17,13 @@ def periodic_fetch(file_dir, symbol, today, next_period_dummy=False):
     # Retrieve saved historical data on disk and append new data
     # TODO: add checks if daily updates were broken
     df = pd.read_csv(file_dir, parse_dates=["dt"]).set_index("dt")
-    df = df.append(today_df)
+    # df = df.append(today_df)
+    df = pd.concat([df, today_df], ignore_index=True)
     if next_period_dummy:
         tomorrow_dummy = today_df.iloc[-1:].copy()
         tomorrow_dummy.index = tomorrow_dummy.index + timedelta(days=1)
-        df = df.append(tomorrow_dummy)
+        # df = df.append(tomorrow_dummy)
+        df = pd.concat([df, tomorrow_dummy], ignore_index=True)
 
     df.to_csv(file_dir)
 
