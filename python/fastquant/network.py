@@ -281,7 +281,7 @@ class Network:
         """"""
         dist = self.dist if dist is None else dist
 
-        G = nx.from_numpy_matrix(dist.values)
+        G = nx.from_numpy_array(dist.values)
         MST = nx.minimum_spanning_tree(G)
         return MST
 
