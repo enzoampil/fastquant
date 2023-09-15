@@ -90,7 +90,8 @@ def get_stock_table(stock_table_fp=None):
             .drop(["attr"], axis=1)
         )
 
-        stock_table = stock_table.append(page_df)
+        # stock_table = stock_table.append(page_df)
+        stock_table = pd.concat([stock_table, page_df], ignore_index=True)
     stock_table.to_csv(stock_table_fp, index=False)
     return stock_table
 
