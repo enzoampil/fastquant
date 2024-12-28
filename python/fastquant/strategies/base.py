@@ -186,10 +186,10 @@ class BaseStrategy(bt.Strategy):
         self.price_bought = 0
 
         # Initialize stoploss order
-        self.stoploss_order = None
+        self.stoploss_orders = []
 
         # Initialize stoploss trail order
-        self.stoploss_trail_order = None
+        self.stoploss_trail_orders = []
 
     def buy_signal(self):
         return False
@@ -289,8 +289,8 @@ class BaseStrategy(bt.Strategy):
     def next(self):
 
         # add dividend to cash
-        if self.invest_div and self.datadiv is not None:
-            self.broker.add_cash(self.datadiv)
+        if self.invest_div and self.datadiv is not None and self.datadiv.get()[0] != 0:
+            self.broker.add_cash(self.datadiv.get()[0])
 
         if self.add_cash_amount:
             if self.first_timepoint:
@@ -400,25 +400,21 @@ class BaseStrategy(bt.Strategy):
                         stop_price = self.data.close[0] * (1.0 - self.stop_loss)
                         if self.transaction_logging:
                             self.log("Stop price: {}".format(stop_price))
-                        self.stoploss_order = self.sell(
+                        self.stoploss_orders.append(self.sell(
                             exectype=bt.Order.Stop,
                             price=stop_price,
                             size=final_size,
-                        )
+                        ))
 
                     if self.stop_trail:
                         # Create a stoploss trail order if None
-                        if self.stoploss_trail_order is None:
-                            if self.transaction_logging:
-                                self.log("Stop trail: {}".format(self.stop_trail))
-                            self.stoploss_trail_order = self.sell(
-                                exectype=bt.Order.StopTrail,
-                                trailpercent=self.stop_trail,
-                                size=final_size,
-                            )
-                        # Cancel existing stoploss trail order
-                        else:
-                            self.cancel(self.stoploss_trail_order)
+                        if self.transaction_logging:
+                            self.log("Stop trail: {}".format(self.stop_trail))
+                        self.stoploss_trail_orders.append(self.sell(
+                            exectype=bt.Order.StopTrail,
+                            trailpercent=self.stop_trail,
+                            size=final_size,
+                        ))
 
                 # Buy based on the opening price of the next closing day (only works "open" data exists in the dataset)
                 else:
@@ -443,20 +439,20 @@ class BaseStrategy(bt.Strategy):
                         stop_price = self.data.close[0] * (1.0 - self.stop_loss)
                         if self.transaction_logging:
                             self.log("Stop price: {}".format(stop_price))
-                        self.stoploss_order = self.sell(
+                        self.stoploss_orders.append(self.sell(
                             exectype=bt.Order.Stop,
                             price=stop_price,
                             size=final_size,
-                        )
+                        ))
 
                     if self.stop_trail:
                         if self.transaction_logging:
                             self.log("Stop trail: {}".format(self.stop_trail))
-                        self.stoploss_trail_order = self.sell(
+                        self.stoploss_trail_orders.append(self.sell(
                             exectype=bt.Order.StopTrail,
                             trailpercent=self.stop_trail,
                             size=final_size,
-                        )
+                        ))
 
         elif self.sell_signal() and (self.strategy_position in [1, -1, None]):
             self.strategy_position = 0 if self.strategy_position in [1, -1] else None
@@ -531,13 +527,10 @@ class BaseStrategy(bt.Strategy):
                         size=int((self.init_cash / self.dataopen[1]) * self.sell_prop)
                     )
 
-            # Explicitly cancel stoploss order
-            if self.stoploss_order:
-                self.cancel(self.stoploss_order)
-
-            # Explicitly cancel stoploss trail order
-            if self.stoploss_trail_order:
-                self.cancel(self.stoploss_trail_order)
+            # Explicitly cancel active stop-loss (trail) orders
+            for order in self.stoploss_orders + self.stoploss_trail_orders:
+                if order.status not in ["Completed", "Canceled", "Expired", "Rejected"]:
+                    self.cancel(order)
 
         elif self.take_profit_signal():
             # Take profit

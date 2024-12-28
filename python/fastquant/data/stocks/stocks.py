@@ -52,16 +52,15 @@ def get_stock_data(
     if source == "yahoo":
         # The query is run on 'yahoo', but if the symbol isn't found, the same query is run on 'phisix'.
         df = get_yahoo_data(symbol, start_date, end_date, dividends)
-        if df is None or symbol == "JFC":
-            format = "c"
-            df = get_pse_data(symbol, start_date, end_date, format=format)
+        if df is None:
+            raise Exception(f"{symbol} could not be found on Yahoo")
 
     elif source == "phisix":
         # The query is run on 'phisix', but if the symbol isn't found, the same query is run on 'yahoo'.
         format = "c"
         df = get_pse_data(symbol, start_date, end_date, format=format)
         if df is None:
-            df = get_yahoo_data(symbol, start_date, end_date, dividends)
+            raise Exception(f"{symbol} could not be found on Phisix")
 
     else:
         raise Exception("Source must be either 'phisix' or 'yahoo'")
