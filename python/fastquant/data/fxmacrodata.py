@@ -4,7 +4,7 @@ import pandas as pd
 import requests
 
 
-FXMACRODATA_API_ROOT = "https://fxmacrodata.com/api/v1"
+FXMACRODATA_API_ROOT = "https://api.fxmacrodata.com/v1"
 
 
 def _split_pair(pair):
