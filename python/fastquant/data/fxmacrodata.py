@@ -5,12 +5,17 @@ import requests
 
 
 FXMACRODATA_API_ROOT = "https://api.fxmacrodata.com/v1"
+# The API returns at most 100 rows per request, newest first.
+FXMACRODATA_PAGE_SIZE = 100
+FXMACRODATA_MAX_PAGES = 1000
 
 
 def _split_pair(pair):
     pair = pair.upper().replace("/", "").replace("-", "").replace("_", "")
     if len(pair) != 6:
-        raise ValueError("FX pair must be formatted like 'EURUSD' or 'EUR/USD'")
+        raise ValueError(
+            "FX pair must be formatted like 'EURUSD' or 'EUR/USD'"
+        )
     return pair[:3], pair[3:]
 
 
@@ -30,16 +35,28 @@ def get_fxmacrodata_data(
     base, quote = _split_pair(pair)
     api_key = api_key or os.environ.get("FXMACRODATA_API_KEY")
     headers = {"X-API-Key": api_key} if api_key else {}
-    params = {
-        "start_date": start_date,
-        "end_date": end_date,
-        "limit": 5000,
-    }
     url = "{}/forex/{}/{}".format(api_root.rstrip("/"), base, quote)
-    response = requests.get(url, params=params, headers=headers, timeout=30)
-    response.raise_for_status()
-    payload = response.json()
-    rows = payload.get("data", [])
+
+    rows = []
+    offset = 0
+    for _ in range(FXMACRODATA_MAX_PAGES):
+        params = {
+            "start_date": start_date,
+            "end_date": end_date,
+            "limit": FXMACRODATA_PAGE_SIZE,
+            "offset": offset,
+        }
+        response = requests.get(
+            url, params=params, headers=headers, timeout=30
+        )
+        response.raise_for_status()
+        payload = response.json()
+        page = payload.get("data", [])
+        rows.extend(page)
+        pagination = payload.get("pagination") or {}
+        if not page or not pagination.get("has_more"):
+            break
+        offset = pagination.get("next_offset") or offset + len(page)
 
     records = []
     for row in rows:
@@ -59,7 +76,7 @@ def get_fxmacrodata_data(
     if df.empty:
         return df
 
-    df = df.sort_values("dt").set_index("dt")
+    df = df.drop_duplicates("dt").sort_values("dt").set_index("dt")
     df.start_date = start_date
     df.end_date = end_date
     df.symbol = "{}/{}".format(base, quote)
