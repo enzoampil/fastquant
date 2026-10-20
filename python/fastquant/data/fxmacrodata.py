@@ -33,7 +33,9 @@ def get_fxmacrodata_data(
     the result can be passed directly to fastquant's backtesting helpers.
     """
     base, quote = _split_pair(pair)
-    api_key = api_key or os.environ.get("FXMACRODATA_API_KEY")
+    api_key = (api_key or os.environ.get("FXMACRODATA_API_KEY") or "").strip()
+    if any(ch.isspace() or not ch.isprintable() for ch in api_key):
+        raise ValueError("FXMacroData API key contains whitespace or control characters")
     headers = {"X-API-Key": api_key} if api_key else {}
     url = "{}/forex/{}/{}".format(api_root.rstrip("/"), base, quote)
 
@@ -46,17 +48,39 @@ def get_fxmacrodata_data(
             "limit": FXMACRODATA_PAGE_SIZE,
             "offset": offset,
         }
-        response = requests.get(
-            url, params=params, headers=headers, timeout=30
-        )
+        try:
+            response = requests.get(
+                url, params=params, headers=headers, timeout=30, allow_redirects=False
+            )
+        except requests.RequestException:
+            raise requests.RequestException("FXMacroData request failed") from None
+        if 300 <= response.status_code < 400:
+            raise requests.HTTPError("FXMacroData redirect rejected", response=response)
         response.raise_for_status()
         payload = response.json()
-        page = payload.get("data", [])
+        if not isinstance(payload, dict) or "detail" in payload or "error" in payload:
+            raise ValueError("FXMacroData returned an error or invalid response")
+        page = payload.get("data")
+        if not isinstance(page, list):
+            raise ValueError("FXMacroData response data must be a list")
         rows.extend(page)
-        pagination = payload.get("pagination") or {}
-        if not page or not pagination.get("has_more"):
+        pagination = payload.get("pagination")
+        if pagination is None:
+            pagination = {}
+        if not isinstance(pagination, dict) or not isinstance(pagination.get("has_more", False), bool):
+            raise ValueError("FXMacroData returned invalid pagination metadata")
+        if not pagination.get("has_more"):
             break
-        offset = pagination.get("next_offset") or offset + len(page)
+        if not page:
+            raise ValueError("FXMacroData returned an inconsistent empty page")
+        next_offset = pagination.get("next_offset")
+        if next_offset is None:
+            next_offset = offset + len(page)
+        if isinstance(next_offset, bool) or not isinstance(next_offset, int) or next_offset <= offset:
+            raise ValueError("FXMacroData returned a non-advancing offset")
+        offset = next_offset
+    else:
+        raise ValueError("FXMacroData page limit reached before history was complete")
 
     records = []
     for row in rows:
